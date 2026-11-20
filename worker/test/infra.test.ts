@@ -8,9 +8,9 @@ import { MemoryCounter, RateLimiter } from '../src/infra/ratelimit';
 
 async function keys() {
   const kp = (await crypto.subtle.generateKey({ name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['sign', 'verify'])) as CryptoKeyPair;
-  const pkcs8 = new Uint8Array(await crypto.subtle.exportKey('pkcs8', kp.privateKey));
+  const pkcs8 = new Uint8Array((await crypto.subtle.exportKey('pkcs8', kp.privateKey)) as ArrayBuffer);
   const pem = `-----BEGIN PRIVATE KEY-----\n${btoa(String.fromCharCode(...pkcs8))}\n-----END PRIVATE KEY-----\n`;
-  const jwk = { ...(await crypto.subtle.exportKey('jwk', kp.publicKey)), kid: 'k1', alg: 'RS256', use: 'sig' };
+  const jwk = { ...((await crypto.subtle.exportKey('jwk', kp.publicKey)) as JsonWebKey), kid: 'k1', alg: 'RS256', use: 'sig' };
   return { pem, jwk };
 }
 
@@ -27,7 +27,7 @@ describe('Google JWT', () => {
     const t = Math.floor(now / 1000);
     const f = vi.fn(async () => res({ keys: [jwk] }, 200, { 'cache-control': 'public, max-age=600' }));
     const good = { iss: 'https://securetoken.google.com/mawred', aud: 'mawred', sub: 'u1', iat: t - 10, exp: t + 3000, auth_time: t - 10 };
-    const tok = (p: object, kid = 'k1') => signJwt(p, pem, kid);
+    const tok = (p: Record<string, unknown>, kid = 'k1') => signJwt(p, pem, kid);
     expect(await verifyIdToken(await tok(good), 'mawred', f as never, now)).toMatchObject({ sub: 'u1' });
     expect(f).toHaveBeenCalledTimes(1);
     expect(await verifyIdToken(await tok(good), 'mawred', f as never, now)).not.toBeNull();

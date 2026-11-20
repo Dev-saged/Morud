@@ -14,10 +14,10 @@
 ## M1 نواة المنطق — مغلقة
 - `worker/src/domain/` 13 وحدة نقية، 58 اختباراً، تغطية أسطر 100%. CI `worker.yml`.
 
+## M2 أساس الخادم — مغلقة
+- 97 اختباراً (vitest)، تغطية أسطر 99.9%، `npm run check` يشمل typecheck والتحزيم.
+
 ## الخطوة التالية بالضبط
-M2 — أساس الـWorker (`worker/src/`):
-1. `infra/firestore.ts`: عميل Firestore REST (get/query/commit/beginTransaction) بتوقيع JWT لحساب الخدمة عبر WebCrypto.
-2. `infra/auth.ts`: تحقق Firebase ID token (مفاتيح Google العامة، aud/iss/exp/auth_time مقابل sessionsRevokedAt) + custom token.
-3. `api/auth.ts`: POST /auth/login (معرّف ← بريد الدخول، حد المحاولات في KV، Identity Toolkit، فحص الحالة/الانتهاء) و/auth/logout و/auth/me.
-4. `api/middleware.ts`: سياق المستخدم (وثيقته + الصلاحيات الفعلية + المحلات) لكل طلب، RBAC، تدقيق، idempotency بمعاملة Firestore (create-if-absent)، نموذج أخطاء JSON موحد، CORS.
-5. اختبارات بـvitest مع محاكاة fetch لـGoogle APIs.
+M3 — `firebase/firestore.rules` + `firestore.indexes.json` + اختبارات بمحاكي Firestore (`@firebase/rules-unit-testing`):
+- كل كتابة من العميل ممنوعة. القراءة: عضو المحل لمحله (claims.sh)، `sa` لكل طلبات المحل وإلا createdBy، المندوب للطلبات المسندة (agentId == uid)، الموظف حسب rp.
+- الحالات السالبة من SRS 19.2 كلها.

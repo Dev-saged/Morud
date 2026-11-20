@@ -22,6 +22,16 @@
 | لوحة العرض للعميل | `brand/logo/v2/build_board.py` ← `board.html`، `slides/*.png`، `mawred-logo-presentation.png/jpg` | خطوط Amiri/El Messiri/Alexandria/Aref Ruqaa من الدماغ |
 | نواة المنطق (بلا I/O) | `worker/src/domain/*.ts` | money، quantity، catalog، pricing، promotions، fsm، permissions، ledger، sla، search، numbering، idempotency، result |
 | اختبارات النواة + سيناريوهات SRS 19.3 | `worker/test/*.test.ts` | `cd worker && npm run coverage` (عتبة 95%) |
+| واجهة قاعدة البيانات + تنفيذ ذاكرة للاختبار | `worker/src/infra/db.ts`، `memory-db.ts` | كل منطق الخادم يعتمد الواجهة لا Firestore مباشرة |
+| عميل Firestore REST (معاملات، استعلامات، ترميز القيم) | `worker/src/infra/firestore.ts` | إعادة محاولة عند ABORTED |
+| JWT حساب الخدمة، رمز OAuth، custom token، تحقق ID token | `worker/src/infra/google.ts` | WebCrypto بلا مكتبات |
+| Firebase Auth REST | `worker/src/infra/identity.ts` | |
+| حد المحاولات (KV) | `worker/src/infra/ratelimit.ts` | 5/15د لكل معرّف، 30/15د لكل IP |
+| أخطاء HTTP، موجّه، تنظيف المدخلات | `worker/src/api/http.ts` | |
+| سياق الطلب، RBAC، الوصول للمحل، التدقيق، idempotency | `worker/src/api/context.ts` | |
+| الدخول الموحد وما يتبعه | `worker/src/api/auth.ts` | /auth/login، me، change-password، logout-all، forgot |
+| معالج الطلبات (CORS، الجلسة، كلمة المرور المؤقتة، إخفاء الأخطاء) | `worker/src/api/app.ts` | |
+| نقطة دخول Worker وإعداده | `worker/src/index.ts`، `worker/wrangler.toml` | الأسرار عبر wrangler secret؛ `npm run check` = typecheck + coverage + bundle |
 | CI الخادم | `.github/workflows/worker.yml` | typecheck + coverage |
 | CI للمواصفات | `.github/workflows/spec.yml` | |
 
@@ -46,6 +56,11 @@
 - 2026-11-20 — إلغاء طلب مفوتر: إشعار دائن بكامل الفاتورة، والمدفوع يبقى رصيداً دائناً أو يُردّ (`refund`) بقرار الموظف.
 - 2026-11-20 — المهلة تُحسب على ساعات استقبال الطلبات (06:00–23:00) بتوقيت Asia/Gaza مع التوقيت الصيفي عبر Intl بلا مكتبات.
 
+- 2026-11-20 — الدخول: فهرس `logins/{e:|p:|u:}` يحوّل المعرّف إلى بريد دخول داخلي، ثم Identity Toolkit، ثم custom token بـclaims مختصرة للقواعد (rp، k، sh).
+- 2026-11-20 — الصلاحيات تُحسب من وثيقة المستخدم في كل طلب (لا ثقة بالـclaims في الخادم)؛ الـclaims للقواعد فقط.
+- 2026-11-20 — كلمة المرور المؤقتة تغلق كل المسارات عدا me/change-password/logout-all.
+- 2026-11-20 — idempotency: وثيقة `idempotency/{uid}_{key}` تُنشأ داخل نفس معاملة العملية، مع expireAt لـTTL سبعة أيام.
+
 ## أخطاء محلولة
 - `node --test tests/` يفشل على Node 22 (يعامل المجلد كملف) ← استخدم `node --test tests/*.test.mjs`.
 
@@ -56,6 +71,8 @@
 - أعلام أقواس Android vector كانت تُكتب «1.000» فتختفي الدوائر ← تُكتب 0/1 صحيحة، واختبار يمنع العودة.
 
 - npm 10 يفشل بـ`edgesOut` مع vitest 4 ← `legacy-peer-deps=true` في `worker/.npmrc`.
+
+- CI فشل في M2 لأن typecheck لم يُشغَّل محلياً على ملفات الاختبار ← `npm run check` قبل كل commit.
 
 ## قضايا مفتوحة
 - MFA الإداري يحتاج ترقية Identity Platform (D7) — قبل الإطلاق.
