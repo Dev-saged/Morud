@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "note": "بيانات أولية حقيقية للتشغيل (SRS 3.1 و3.4 و13). معاملات التحويل لكل منتج على حدة، لا في الوحدة العامة.",
+  "categories": [
+    {"id": "frozen", "name": "المجمدات", "order": 1},
+    {"id": "staples", "name": "المواد التموينية والأساسية", "order": 2},
+    {"id": "dairy", "name": "الألبان والأجبان", "order": 3},
+    {"id": "snacks", "name": "المكسرات والمسليات والحلويات", "order": 4},
+    {"id": "beverages", "name": "المشروبات والعصائر", "order": 5},
+    {"id": "cleaning", "name": "المنظفات ومواد التنظيف", "order": 6},
+    {"id": "baby", "name": "مستلزمات الأطفال", "order": 7},
+    {"id": "personal_care", "name": "العناية الشخصية", "order": 8},
+    {"id": "produce", "name": "الخضروات والفواكه والبيض", "order": 9},
+    {"id": "household", "name": "الأدوات المنزلية والاستهلاكية", "order": 10},
+    {"id": "canned", "name": "المعلبات", "order": 11},
+    {"id": "spices", "name": "البهارات والمواد الإضافية", "order": 12}
+  ],
+  "units": [
+    {"id": "piece", "name": "حبة", "kind": "count", "allowFraction": false},
+    {"id": "kg", "name": "كيلوغرام", "kind": "weight", "allowFraction": true},
+    {"id": "g", "name": "غرام", "kind": "weight", "allowFraction": false},
+    {"id": "half_kg", "name": "نصف كيلو", "kind": "weight", "allowFraction": false},
+    {"id": "quarter_kg", "name": "ربع كيلو", "kind": "weight", "allowFraction": false},
+    {"id": "liter", "name": "لتر", "kind": "volume", "allowFraction": true},
+    {"id": "ml", "name": "ملليلتر", "kind": "volume", "allowFraction": false},
+    {"id": "pack", "name": "عبوة", "kind": "count", "allowFraction": false},
+    {"id": "box", "name": "علبة", "kind": "count", "allowFraction": false},
+    {"id": "bag", "name": "كيس", "kind": "count", "allowFraction": false},
+    {"id": "sack", "name": "شوال", "kind": "count", "allowFraction": false},
+    {"id": "carton", "name": "كرتونة", "kind": "count", "allowFraction": false},
+    {"id": "dozen", "name": "دستة", "kind": "count", "allowFraction": false},
+    {"id": "gallon", "name": "جالون", "kind": "volume", "allowFraction": false}
+  ],
+  "settings": {
+    "platformName": "مورد",
+    "currency": "ILS",
+    "currencyDecimals": 2,
+    "timezone": "Asia/Gaza",
+    "workDays": [0, 1, 2, 3, 4, 5, 6],
+    "orderIntakeStart": "06:00",
+    "orderIntakeEnd": "23:00",
+    "deliveryStart": "06:00",
+    "deliveryEnd": "23:00",
+    "slaWorkingHours": 6,
+    "defaultPrepMinutes": 90,
+    "holidays": [],
+    "paymentMethods": [
+      {"id": "cash", "label": "نقداً", "enabled": true},
+      {"id": "bank_transfer", "label": "تحويل بنكي", "enabled": false}
+    ],
+    "creditBlocksDeferredOrders": true,
+    "creditWarnPercent": 80,
+    "shopCancelStates": ["new", "under_review", "awaiting_shop_approval"],
+    "newOrderSound": true,
+    "backupRetentionDays": 30
+  }
+}

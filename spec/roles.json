@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "note": "أدوار افتراضية قابلة للتعديل من وحدة المستخدمين والصلاحيات. super_admin محمي ويملك كل الصلاحيات تلقائياً بما فيها المضافة لاحقاً. home = الواجهة التي يُوجَّه إليها بعد الدخول.",
+  "roles": [
+    {"id": "super_admin", "label": "مالك النظام", "kind": "staff", "protected": true, "home": "admin.dashboard", "permissions": ["*"]},
+    {"id": "admin_manager", "label": "مدير الإدارة", "kind": "staff", "home": "admin.dashboard", "permissions": [
+      "products.view", "promotions.view", "shops.view", "shops.create", "shops.update", "shops.suspend",
+      "orders.view", "orders.review", "orders.confirm", "orders.reject", "orders.cancel", "orders.edit", "orders.prepare", "orders.dispatch", "orders.return", "orders.notes",
+      "delivery.view", "delivery.assign", "delivery.track.view", "invoices.view", "accounts.view",
+      "users.manage", "reports.view", "audit.view", "support.manage", "support.create"]},
+    {"id": "orders_employee", "label": "موظف الطلبات", "kind": "staff", "home": "admin.orders", "permissions": [
+      "products.view", "promotions.view", "shops.view", "orders.view", "orders.review", "orders.confirm", "orders.reject", "orders.edit", "orders.prepare", "orders.notes", "support.create"]},
+    {"id": "catalog_employee", "label": "موظف المنتجات والمخزون", "kind": "staff", "home": "admin.products", "permissions": [
+      "products.view", "products.create", "products.update", "products.delete", "products.availability.update",
+      "categories.manage", "units.manage", "promotions.view", "orders.view", "orders.prepare", "support.create"]},
+    {"id": "accountant", "label": "الموظف المالي", "kind": "staff", "home": "admin.finance", "permissions": [
+      "products.view", "shops.view", "orders.view", "invoices.view", "invoices.create", "payments.create", "payments.reverse",
+      "accounts.view", "accounts.adjust", "reports.view", "reports.finance", "support.create"]},
+    {"id": "delivery_manager", "label": "مسؤول التوصيل", "kind": "staff", "home": "admin.delivery", "permissions": [
+      "products.view", "shops.view", "orders.view", "orders.dispatch", "delivery.view", "delivery.assign", "delivery.track.view", "reports.view", "support.create"]},
+    {"id": "delivery_agent", "label": "مندوب التوصيل", "kind": "agent", "home": "agent.tasks", "permissions": [
+      "delivery.update", "delivery.collect", "support.create"]},
+    {"id": "shop_owner", "label": "صاحب المحل", "kind": "shop", "home": "shop.home", "permissions": [
+      "products.view", "promotions.view", "shop.orders.draft", "shop.orders.submit", "shop.orders.view_all", "shop.orders.cancel", "shop.orders.approve",
+      "shop.invoices.view", "shop.statement.view", "shop.members.manage", "shop.profile.update", "support.create"]},
+    {"id": "shop_employee", "label": "موظف المحل", "kind": "shop", "home": "shop.home", "permissions": [
+      "products.view", "promotions.view", "shop.orders.draft", "support.create"]}
+  ]
+}

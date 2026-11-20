@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "note": "آلة حالات الطلب الرسمية (SRS 5.1). أي انتقال غير مدرج هنا يرفضه الخادم. actor: staff | shop | agent | system. guards تُفحص في الخادم قبل الانتقال.",
+  "initial": "new",
+  "states": [
+    {"id": "new", "label": "جديد", "tone": "info"},
+    {"id": "under_review", "label": "قيد المراجعة", "tone": "progress"},
+    {"id": "awaiting_shop_approval", "label": "بانتظار موافقة المحل", "tone": "warning"},
+    {"id": "confirmed", "label": "تم التأكيد", "tone": "progress"},
+    {"id": "preparing", "label": "قيد التجهيز", "tone": "progress"},
+    {"id": "ready_for_pickup", "label": "جاهز للتسليم للمندوب", "tone": "progress"},
+    {"id": "out_for_delivery", "label": "خرج للتوصيل", "tone": "progress"},
+    {"id": "on_the_way", "label": "في الطريق", "tone": "progress"},
+    {"id": "delivered", "label": "تم التسليم", "tone": "success"},
+    {"id": "financially_completed", "label": "مكتمل مالياً", "tone": "success", "terminal": true},
+    {"id": "cancelled", "label": "ملغي", "tone": "danger", "terminal": true},
+    {"id": "rejected", "label": "مرفوض", "tone": "danger", "terminal": true},
+    {"id": "delivery_failed", "label": "متعذر التسليم", "tone": "danger"},
+    {"id": "returned", "label": "مرتجع", "tone": "warning"}
+  ],
+  "transitions": [
+    {"from": "new", "to": "under_review", "actor": "staff", "permission": "orders.review"},
+    {"from": "new", "to": "rejected", "actor": "staff", "permission": "orders.reject", "reason": true},
+    {"from": "new", "to": "cancelled", "actor": "staff", "permission": "orders.cancel", "reason": true},
+    {"from": "new", "to": "cancelled", "actor": "shop", "permission": "shop.orders.cancel", "reason": true},
+
+    {"from": "under_review", "to": "confirmed", "actor": "staff", "permission": "orders.confirm", "guards": ["items_available", "credit_limit_ok"], "effects": ["issue_invoice", "post_ledger_if_credit", "start_sla"]},
+    {"from": "under_review", "to": "awaiting_shop_approval", "actor": "staff", "permission": "orders.edit", "reason": true, "effects": ["create_change_request"]},
+    {"from": "under_review", "to": "rejected", "actor": "staff", "permission": "orders.reject", "reason": true},
+    {"from": "under_review", "to": "cancelled", "actor": "staff", "permission": "orders.cancel", "reason": true},
+    {"from": "under_review", "to": "cancelled", "actor": "shop", "permission": "shop.orders.cancel", "reason": true},
+
+    {"from": "awaiting_shop_approval", "to": "confirmed", "actor": "shop", "permission": "shop.orders.approve", "guards": ["change_request_pending", "items_available", "credit_limit_ok"], "effects": ["apply_change_request", "issue_invoice", "post_ledger_if_credit", "start_sla"]},
+    {"from": "awaiting_shop_approval", "to": "under_review", "actor": "shop", "permission": "shop.orders.approve", "reason": true, "effects": ["decline_change_request"]},
+    {"from": "awaiting_shop_approval", "to": "cancelled", "actor": "shop", "permission": "shop.orders.cancel", "reason": true, "effects": ["reverse_financials"]},
+    {"from": "awaiting_shop_approval", "to": "cancelled", "actor": "staff", "permission": "orders.cancel", "reason": true, "effects": ["reverse_financials"]},
+
+    {"from": "confirmed", "to": "preparing", "actor": "staff", "permission": "orders.prepare"},
+    {"from": "confirmed", "to": "cancelled", "actor": "staff", "permission": "orders.cancel", "reason": true, "effects": ["reverse_financials"]},
+
+    {"from": "preparing", "to": "ready_for_pickup", "actor": "staff", "permission": "orders.prepare"},
+    {"from": "preparing", "to": "awaiting_shop_approval", "actor": "staff", "permission": "orders.edit", "reason": true, "effects": ["create_change_request"]},
+    {"from": "preparing", "to": "cancelled", "actor": "staff", "permission": "orders.cancel", "reason": true, "effects": ["reverse_financials"]},
+
+    {"from": "ready_for_pickup", "to": "out_for_delivery", "actor": "staff", "permission": "orders.dispatch", "guards": ["agent_assigned"]},
+    {"from": "ready_for_pickup", "to": "cancelled", "actor": "staff", "permission": "orders.cancel", "reason": true, "effects": ["reverse_financials"]},
+
+    {"from": "out_for_delivery", "to": "on_the_way", "actor": "agent", "permission": "delivery.update", "guards": ["assigned_to_actor"], "effects": ["start_tracking"]},
+    {"from": "out_for_delivery", "to": "delivered", "actor": "agent", "permission": "delivery.update", "guards": ["assigned_to_actor", "proof_present"], "effects": ["stop_tracking", "record_collection"]},
+    {"from": "out_for_delivery", "to": "delivery_failed", "actor": "agent", "permission": "delivery.update", "reason": true, "guards": ["assigned_to_actor"], "effects": ["stop_tracking"]},
+    {"from": "on_the_way", "to": "delivered", "actor": "agent", "permission": "delivery.update", "guards": ["assigned_to_actor", "proof_present"], "effects": ["stop_tracking", "record_collection"]},
+    {"from": "on_the_way", "to": "delivery_failed", "actor": "agent", "permission": "delivery.update", "reason": true, "guards": ["assigned_to_actor"], "effects": ["stop_tracking"]},
+
+    {"from": "delivery_failed", "to": "ready_for_pickup", "actor": "staff", "permission": "delivery.assign", "reason": true},
+    {"from": "delivery_failed", "to": "cancelled", "actor": "staff", "permission": "orders.cancel", "reason": true, "effects": ["reverse_financials"]},
+
+    {"from": "delivered", "to": "financially_completed", "actor": "system", "guards": ["invoice_settled"]},
+    {"from": "delivered", "to": "returned", "actor": "staff", "permission": "orders.return", "reason": true, "effects": ["issue_credit_note"]},
+    {"from": "returned", "to": "financially_completed", "actor": "system", "guards": ["invoice_settled"]}
+  ]
+}
