@@ -10,7 +10,7 @@
 | خارطة الوحدات وشروط إغلاقها | `docs/roadmap.md` | |
 | كتالوج الصلاحيات (56) | `spec/permissions.json` | scope: staff/shop/agent/any |
 | الأدوار التسعة والتوجيه بعد الدخول | `spec/roles.json` | super_admin محمي `*` |
-| آلة حالات الطلب (14 حالة، 31 انتقالاً) | `spec/order-states.json` | guards + effects ينفذها الخادم |
+| آلة حالات الطلب (14 حالة، 30 انتقالاً) | `spec/order-states.json` | guards + effects ينفذها الخادم |
 | التصنيفات والوحدات والإعدادات الأولية | `spec/seed.json` | |
 | اختبارات اتساق المواصفات | `tests/spec.test.mjs` | 18 اختباراً |
 | CI للمواصفات | `.github/workflows/spec.yml` | |
