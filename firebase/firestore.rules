@@ -1,0 +1,68 @@
+rules_version = '2';
+// قواعد مورد: لا كتابة من أي عميل إطلاقاً — كل كتابة عبر الخادم (حساب خدمة يتجاوز القواعد).
+// القراءة مقيّدة بـ custom claims يضعها الخادم: rp = رموز صلاحيات، k = أنواع الأدوار، sh = محلات المستخدم.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function claims() { return request.auth.token; }
+    function rp(code) { return signedIn() && code in claims().get('rp', []); }
+    function kind(k) { return signedIn() && k in claims().get('k', []); }
+    function memberOf(shopId) { return signedIn() && shopId in claims().get('sh', []); }
+    function me() { return request.auth.uid; }
+    function orderReadable(o) {
+      return rp('ov')
+        || (memberOf(o.shopId) && (rp('sa') || o.createdBy == me()))
+        || (kind('agent') && o.get('agentId', '') == me());
+    }
+
+    match /{document=**} { allow read, write: if false; }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (uid == me() || rp('um'));
+      match /devices/{deviceId} { allow read: if signedIn() && uid == me(); }
+    }
+    match /roles/{roleId} { allow read: if kind('staff'); }
+    match /system/permissions { allow read: if kind('staff'); }
+    match /settings/system { allow read: if signedIn(); }
+
+    match /shops/{shopId} {
+      allow read: if memberOf(shopId) || rp('sv');
+      match /members/{uid} { allow read: if memberOf(shopId) || rp('sv'); }
+      match /private/{docId} { allow read: if rp('sv'); }
+    }
+
+    match /categories/{id} { allow read: if signedIn(); }
+    match /units/{id} { allow read: if signedIn(); }
+    match /products/{id} {
+      allow read: if signedIn() && (resource.data.visible == true || kind('staff'));
+      match /private/{docId} { allow read: if rp('pc'); }
+    }
+    match /promotions/{id} { allow read: if signedIn() && (resource.data.active == true || kind('staff')); }
+
+    match /orders/{orderId} {
+      allow read: if signedIn() && orderReadable(resource.data);
+      match /history/{h} { allow read: if signedIn() && orderReadable(get(/databases/$(database)/documents/orders/$(orderId)).data); }
+      match /changes/{c} { allow read: if signedIn() && orderReadable(get(/databases/$(database)/documents/orders/$(orderId)).data); }
+      match /internal/{n} { allow read: if rp('ov'); }
+    }
+
+    match /invoices/{id} {
+      allow read: if rp('iv') || (memberOf(resource.data.shopId) && rp('si'));
+      match /adjustments/{a} {
+        allow read: if rp('iv') || (memberOf(get(/databases/$(database)/documents/invoices/$(id)).data.shopId) && rp('si'));
+      }
+    }
+    match /ledger/{id} { allow read: if rp('av') || (memberOf(resource.data.shopId) && rp('ss')); }
+    match /payments/{id} { allow read: if rp('av') || (memberOf(resource.data.shopId) && rp('ss')); }
+
+    match /deliveryTracks/{orderId} { allow read: if rp('dt') || (signedIn() && resource.data.agentId == me()); }
+    match /deliveryProofs/{orderId} {
+      allow read: if rp('dv') || memberOf(resource.data.shopId) || (signedIn() && resource.data.agentId == me());
+    }
+
+    match /notifications/{id} { allow read: if signedIn() && resource.data.userId == me(); }
+    match /auditLogs/{id} { allow read: if rp('au'); }
+    match /backupLogs/{id} { allow read: if rp('bm'); }
+    match /supportTickets/{id} { allow read: if signedIn() && (resource.data.by == me() || rp('sm')); }
+  }
+}

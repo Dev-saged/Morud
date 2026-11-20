@@ -32,6 +32,10 @@
 | الدخول الموحد وما يتبعه | `worker/src/api/auth.ts` | /auth/login، me، change-password، logout-all، forgot |
 | معالج الطلبات (CORS، الجلسة، كلمة المرور المؤقتة، إخفاء الأخطاء) | `worker/src/api/app.ts` | |
 | نقطة دخول Worker وإعداده | `worker/src/index.ts`، `worker/wrangler.toml` | الأسرار عبر wrangler secret؛ `npm run check` = typecheck + coverage + bundle |
+| قواعد Firestore | `firebase/firestore.rules` | لا كتابة لأي عميل؛ القراءة بـclaims (rp/k/sh) |
+| الفهارس المركّبة + TTL للـidempotency | `firebase/firestore.indexes.json` | |
+| اختبارات القواعد بالمحاكي | `firebase/test/rules.test.ts` | `cd firebase && npm test` (يحتاج Java 21) |
+| CI القواعد | `.github/workflows/firebase.yml` | |
 | CI الخادم | `.github/workflows/worker.yml` | typecheck + coverage |
 | CI للمواصفات | `.github/workflows/spec.yml` | |
 
@@ -60,6 +64,8 @@
 - 2026-11-20 — الصلاحيات تُحسب من وثيقة المستخدم في كل طلب (لا ثقة بالـclaims في الخادم)؛ الـclaims للقواعد فقط.
 - 2026-11-20 — كلمة المرور المؤقتة تغلق كل المسارات عدا me/change-password/logout-all.
 - 2026-11-20 — idempotency: وثيقة `idempotency/{uid}_{key}` تُنشأ داخل نفس معاملة العملية، مع expireAt لـTTL سبعة أيام.
+
+- 2026-11-20 — حساب موقوف يحتفظ بقراءة Firestore حتى ساعة (عمر ID token) لأن القواعد تعتمد claims؛ كل الكتابات عبر الخادم الذي يفحص الحالة فوراً، والإيقاف يعطّل حساب Firebase فيفشل التجديد.
 
 ## أخطاء محلولة
 - `node --test tests/` يفشل على Node 22 (يعامل المجلد كملف) ← استخدم `node --test tests/*.test.mjs`.

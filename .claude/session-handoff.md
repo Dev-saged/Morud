@@ -17,7 +17,13 @@
 ## M2 أساس الخادم — مغلقة
 - 97 اختباراً (vitest)، تغطية أسطر 99.9%، `npm run check` يشمل typecheck والتحزيم.
 
+## M3 قواعد Firestore — مغلقة
+- 13 اختباراً على المحاكي، CI `firebase.yml`.
+
 ## الخطوة التالية بالضبط
-M3 — `firebase/firestore.rules` + `firestore.indexes.json` + اختبارات بمحاكي Firestore (`@firebase/rules-unit-testing`):
-- كل كتابة من العميل ممنوعة. القراءة: عضو المحل لمحله (claims.sh)، `sa` لكل طلبات المحل وإلا createdBy، المندوب للطلبات المسندة (agentId == uid)، الموظف حسب rp.
-- الحالات السالبة من SRS 19.2 كلها.
+M4 — endpoints الإدارة في `worker/src/api/admin/`:
+- المستخدمون (إنشاء بحساب Firebase + فهارس الدخول، تعديل، أدوار، منح/حجب، إيقاف/تفعيل، إعادة كلمة المرور المؤقتة، إلغاء الجلسات، تحديث claims)، حماية super_admin.
+- الأدوار والصلاحيات المضافة وقت التشغيل.
+- المحلات والأعضاء (صلاحيات أعضاء المحل، allowMemberManagement)، شروط الدفع والائتمان.
+- التصنيفات والوحدات والمنتجات (validateProduct + searchKeys)، الصور إلى R2 مع فحص الشفافية.
+- الإعدادات، سكربت البذر وإنشاء مالك النظام (`worker/scripts/bootstrap.ts`).
