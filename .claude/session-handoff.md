@@ -8,7 +8,8 @@
 - Kotlin + Compose، Firebase + Cloudflare Workers + R2، React + TS للويب (تفاصيل D1–D10 في architecture.md).
 
 ## M9a الشعار — بانتظار اختيار ساجد
-- المفاهيم في `brand/logo/concepts/` واللوحة `brand/logo/concepts.png`: A «منبع» (ميم رأسها قطرة، مُرشَّح)، B «M بالنقطة»، C كتابة «مورد» الكوفية.
+- المفاهيم v2 في `brand/logo/v2/`: 01 خاتم مورد (مُرشَّح)، 02 بوابة مورد، 03 M بالنقطة. لوحة العرض `mawred-logo-presentation.png` لصاحب المشروع ليختار.
+- إعادة توليد اللوحة: `cd brand/logo/v2 && python3 build_board.py` ثم render_png.py على `board.html` (1600×8510).
 - بعد الاختيار: تنقيح هندسي + نسخة صغيرة + ألوان (أزرق ثقة) + lockups أفقي/عمودي + `export_variants.py --web-icons` + أيقونة أندرويد adaptive + لوحة عرض + دليل استخدام، ثم M1.
 
 ## الخطوة التالية بعد الشعار
@@ -23,4 +24,4 @@ M1 — نواة المنطق في `worker/src/domain` (TypeScript، اختبار
 شرط الإغلاق: سيناريوهات SRS 19.3 الخمسة + حالات حدية، تغطية ≥ 95%.
 
 ## أسئلة لساجد
-- أي مفهوم شعار يعتمد؟
+- أي مفهوم شعار يعتمد صاحب المشروع؟
