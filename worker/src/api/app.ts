@@ -52,7 +52,7 @@ export function createApp(modules: RouteModule[] = []) {
         if (ctx.user.mustChangePassword && !PASSWORD_CHANGE_ALLOWED.has(url.pathname)) {
           throw new ApiError(403, 'PASSWORD_CHANGE_REQUIRED', 'يجب تغيير كلمة المرور المؤقتة أولاً');
         }
-      } else if (!PRE_AUTH.has(url.pathname)) {
+      } else if (!PRE_AUTH.has(url.pathname) && !url.pathname.startsWith('/files/products/')) {
         throw new ApiError(401, 'UNAUTHENTICATED', 'سجّل الدخول أولاً');
       }
       return withHeaders(await m.handler(ctx, m.params));

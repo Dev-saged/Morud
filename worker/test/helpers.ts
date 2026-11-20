@@ -2,6 +2,7 @@ import { createApp, type RouteModule } from '../src/api/app';
 import type { Services } from '../src/api/context';
 import type { IdClaims } from '../src/infra/google';
 import type { Identity, SignInResult } from '../src/infra/identity';
+import { MemoryFiles } from '../src/infra/files';
 import { MemoryDb } from '../src/infra/memory-db';
 import { MemoryCounter, RateLimiter } from '../src/infra/ratelimit';
 
@@ -21,6 +22,7 @@ export class FakeIdentity implements Identity {
     return { ok: true, uid: a.uid };
   }
   async createUser(uid: string, email: string, password: string) {
+    if (this.failCreate) throw new Error('identity down');
     this.created.push(uid);
     this.passwords.set(email, { uid, pw: password });
   }
@@ -33,6 +35,12 @@ export class FakeIdentity implements Identity {
   }
   async sendPasswordReset(email: string) {
     this.resets.push(email);
+  }
+  deleted: string[] = [];
+  failCreate = false;
+  async deleteUser(uid: string) {
+    this.deleted.push(uid);
+    for (const [k, v] of this.passwords) if (v.uid === uid) this.passwords.delete(k);
   }
 }
 
@@ -54,7 +62,7 @@ export function world(modules: RouteModule[] = []): World {
   const tokens = new Map<string, IdClaims>();
   let seq = 0;
   const s: Services = {
-    db, identity,
+    db, identity, files: new MemoryFiles(),
     verifyToken: async (t) => tokens.get(t) ?? null,
     customToken: async (uid, claims) => `custom:${uid}:${JSON.stringify(claims)}`,
     loginLimiter: new RateLimiter(new MemoryCounter(), 5, 900, 'login'),
@@ -68,9 +76,9 @@ export function world(modules: RouteModule[] = []): World {
     async call(method, path, opts = {}) {
       const headers: Record<string, string> = { 'content-type': 'application/json', 'cf-connecting-ip': '10.0.0.1', ...(opts.headers ?? {}) };
       if (opts.token) headers.authorization = `Bearer ${opts.token}`;
-      const res = await handle(new Request(`https://api.test${path}`, { method, headers, ...(opts.body !== undefined ? { body: typeof opts.body === 'string' ? opts.body : JSON.stringify(opts.body) } : {}) }), s, { allowedOrigins: ['https://app.test'] });
+      const res = await handle(new Request(`https://api.test${path}`, { method, headers, ...(opts.body !== undefined ? { body: typeof opts.body === 'string' || opts.body instanceof Uint8Array ? (opts.body as BodyInit) : JSON.stringify(opts.body) } : {}) }), s, { allowedOrigins: ['https://app.test'] });
       const text = await res.text();
-      return { status: res.status, body: text ? JSON.parse(text) : null, headers: res.headers };
+      return { status: res.status, body: text && (res.headers.get('content-type') ?? '').includes('json') ? JSON.parse(text) : text || null, headers: res.headers };
     },
     tokenFor(uid, authTimeMs = clock.now) {
       const t = `tok-${uid}-${authTimeMs}`;

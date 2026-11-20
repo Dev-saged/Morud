@@ -9,6 +9,7 @@ export interface Identity {
   createUser(uid: string, email: string, password: string, displayName: string): Promise<void>;
   updateUser(uid: string, patch: { password?: string; disabled?: boolean; email?: string; displayName?: string; revokeSessions?: boolean; claims?: Record<string, unknown> }): Promise<void>;
   sendPasswordReset(email: string): Promise<void>;
+  deleteUser(uid: string): Promise<void>;
 }
 
 export class IdentityToolkit implements Identity {
@@ -53,6 +54,10 @@ export class IdentityToolkit implements Identity {
       ...(p.revokeSessions ? { validSince: String(Math.floor(this.clock() / 1000)) } : {}),
       ...(p.claims ? { customAttributes: JSON.stringify(p.claims) } : {}),
     });
+  }
+
+  deleteUser(uid: string) {
+    return this.admin('accounts:delete', { localId: uid });
   }
 
   async sendPasswordReset(email: string) {

@@ -1,7 +1,9 @@
 import { createApp } from './api/app';
 import type { Services } from './api/context';
+import { ALL_ROUTES } from './api/routes';
 import { FirestoreDb } from './infra/firestore';
 import { accessToken, customToken, verifyIdToken, type ServiceAccount } from './infra/google';
+import { R2Files } from './infra/files';
 import { IdentityToolkit } from './infra/identity';
 import { RateLimiter } from './infra/ratelimit';
 
@@ -22,6 +24,7 @@ export function services(env: Env): Services {
   return {
     db: new FirestoreDb(env.FIREBASE_PROJECT_ID, token),
     identity: new IdentityToolkit(env.FIREBASE_PROJECT_ID, env.FIREBASE_API_KEY, token),
+    files: new R2Files(env.FILES),
     verifyToken: (t) => verifyIdToken(t, env.FIREBASE_PROJECT_ID),
     customToken: (uid, claims) => customToken(sa, uid, claims),
     loginLimiter: new RateLimiter(env.KV, 5, 900, 'login'),
@@ -31,7 +34,7 @@ export function services(env: Env): Services {
   };
 }
 
-const handle = createApp();
+const handle = createApp(ALL_ROUTES);
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {

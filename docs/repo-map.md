@@ -36,6 +36,15 @@
 | الفهارس المركّبة + TTL للـidempotency | `firebase/firestore.indexes.json` | |
 | اختبارات القواعد بالمحاكي | `firebase/test/rules.test.ts` | `cd firebase && npm test` (يحتاج Java 21) |
 | CI القواعد | `.github/workflows/firebase.yml` | |
+| إنشاء الحسابات وقواعد المنح ومنع آخر مالك وclaims | `worker/src/api/admin/accounts.ts` | `createAccountOnce` = منع تكرار بلا إعادة كشف كلمة المرور |
+| المستخدمون: قائمة، إنشاء، تعديل، إيقاف، إعادة كلمة المرور، إلغاء الجلسات | `worker/src/api/admin/users.ts` | |
+| الأدوار المخصصة والصلاحيات المضافة وقت التشغيل | `worker/src/api/admin/roles.ts` | super_admin والأدوار الأساسية لا تُحذف |
+| المحلات وصاحبها، الائتمان، الإيقاف، ملف المحل الذاتي، موظفو المحل | `worker/src/api/admin/shops.ts` | MEMBER_PERMS |
+| التصنيفات، الوحدات، المنتجات (SKU فريد في `skus/`)، رفع الصور المفرّغة وخدمتها | `worker/src/api/admin/catalog.ts` | فصل صلاحية السعر والتوفر |
+| الإعدادات العامة بتحقق صارم | `worker/src/api/admin/settings.ts` | |
+| تخزين الملفات وفحص صور PNG/WebP بالشفافية | `worker/src/infra/files.ts` | R2 |
+| تجميع المسارات | `worker/src/api/routes.ts` | |
+| التهيئة الأولى (بذر + مالك النظام مرة واحدة) | `worker/src/admin/bootstrap.ts`، `worker/scripts/bootstrap.ts` | `npm run bootstrap` |
 | CI الخادم | `.github/workflows/worker.yml` | typecheck + coverage |
 | CI للمواصفات | `.github/workflows/spec.yml` | |
 
@@ -67,6 +76,11 @@
 
 - 2026-11-20 — حساب موقوف يحتفظ بقراءة Firestore حتى ساعة (عمر ID token) لأن القواعد تعتمد claims؛ كل الكتابات عبر الخادم الذي يفحص الحالة فوراً، والإيقاف يعطّل حساب Firebase فيفشل التجديد.
 
+- 2026-11-20 — لا أحد يمنح صلاحية لا يملكها؛ دور super_admin يمنحه مالك النظام فقط؛ تعديل الأدوار/الصلاحيات/المحلات يلغي الجلسات ويحدّث claims.
+- 2026-11-20 — إعادة طلب إنشاء حساب بنفس المفتاح تعيد المعرّف بلا كلمة المرور (لا تُخزَّن كلمة مرور في سجلات منع التكرار)؛ عند ضياعها تُعاد بإعادة التعيين.
+- 2026-11-20 — صاحب المحل يعدّل الهاتف البديل والعنوان والموقع فقط؛ الباقي للإدارة.
+- 2026-11-20 — صور المنتجات: رفع خام ← فحص بايتات (PNG بقناة ألفا/tRNS أو WebP VP8X/VP8L بألفا) ← R2 ← ربط بالمنتج؛ عرضها عام ومخزّن سنة.
+
 ## أخطاء محلولة
 - `node --test tests/` يفشل على Node 22 (يعامل المجلد كملف) ← استخدم `node --test tests/*.test.mjs`.
 
@@ -79,6 +93,8 @@
 - npm 10 يفشل بـ`edgesOut` مع vitest 4 ← `legacy-peer-deps=true` في `worker/.npmrc`.
 
 - CI فشل في M2 لأن typecheck لم يُشغَّل محلياً على ملفات الاختبار ← `npm run check` قبل كل commit.
+
+- معاملة داخل معاملة (idempotent يلف createAccount) علّقت MemoryDb ← `createAccountOnce` يكتب وثيقة المفتاح داخل معاملة الإنشاء نفسها.
 
 ## قضايا مفتوحة
 - MFA الإداري يحتاج ترقية Identity Platform (D7) — قبل الإطلاق.

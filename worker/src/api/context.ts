@@ -1,6 +1,7 @@
 import { effectivePermissions, resolveHome, roleMap, type RoleDef } from '../domain/permissions';
 import type { Data, Db, Doc, Tx, Write } from '../infra/db';
 import type { IdClaims } from '../infra/google';
+import type { FileStore } from '../infra/files';
 import type { Identity } from '../infra/identity';
 import type { RateLimiter } from '../infra/ratelimit';
 import { fail } from './http';
@@ -8,6 +9,7 @@ import { fail } from './http';
 export interface Services {
   db: Db;
   identity: Identity;
+  files: FileStore;
   verifyToken(token: string): Promise<IdClaims | null>;
   customToken(uid: string, claims: Record<string, unknown>): Promise<string>;
   loginLimiter: RateLimiter;
@@ -119,6 +121,24 @@ export function auditWrite(ctx: Ctx, a: AuditInput, actorId = ctx.user?.uid ?? '
 }
 
 const KEY_RE = /^[A-Za-z0-9_-]{16,80}$/;
+
+/**
+ * منع التكرار لعمليات تدير معاملتها بنفسها (مثل إنشاء حساب): يُفحص المفتاح قبل التنفيذ،
+ * وتُكتب وثيقة المفتاح داخل معاملة العملية نفسها (create يمنع التنفيذ المزدوج المتزامن).
+ */
+export async function idempotencySlot(ctx: Ctx, route: string): Promise<{ prev: Data | null; write: (result: Data) => Write; path: string }> {
+  const u = requireUser(ctx);
+  const key = ctx.req.headers.get('idempotency-key');
+  if (!key || !KEY_RE.test(key)) throw fail('IDEMPOTENCY_KEY_REQUIRED', 'مفتاح منع التكرار مفقود أو غير صالح');
+  const path = `idempotency/${u.uid}_${key}`;
+  const prev = await ctx.s.db.get(path);
+  if (prev && prev.data.route !== route) throw fail('IDEMPOTENCY_KEY_REUSED', 'المفتاح مستخدم لعملية أخرى');
+  return {
+    path,
+    prev: prev ? (prev.data.result as Data) : null,
+    write: (result) => ({ kind: 'create', path, data: { uid: u.uid, route, result, createdAt: ctx.s.now(), expireAt: new Date(ctx.s.now() + 7 * 86_400_000) } }),
+  };
+}
 
 /** تنفيذ عملية حساسة مرة واحدة لكل مفتاح داخل نفس المعاملة (create-if-absent يمنع السباق). */
 export async function idempotent<T>(ctx: Ctx, route: string, fn: (tx: Tx) => Promise<T>): Promise<{ value: T; replayed: boolean }> {

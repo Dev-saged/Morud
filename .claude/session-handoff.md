@@ -20,10 +20,13 @@
 ## M3 قواعد Firestore — مغلقة
 - 13 اختباراً على المحاكي، CI `firebase.yml`.
 
+## M4 إدارة النظام — مغلقة
+- 117 اختباراً، تغطية أسطر 99%.
+
 ## الخطوة التالية بالضبط
-M4 — endpoints الإدارة في `worker/src/api/admin/`:
-- المستخدمون (إنشاء بحساب Firebase + فهارس الدخول، تعديل، أدوار، منح/حجب، إيقاف/تفعيل، إعادة كلمة المرور المؤقتة، إلغاء الجلسات، تحديث claims)، حماية super_admin.
-- الأدوار والصلاحيات المضافة وقت التشغيل.
-- المحلات والأعضاء (صلاحيات أعضاء المحل، allowMemberManagement)، شروط الدفع والائتمان.
-- التصنيفات والوحدات والمنتجات (validateProduct + searchKeys)، الصور إلى R2 مع فحص الشفافية.
-- الإعدادات، سكربت البذر وإنشاء مالك النظام (`worker/scripts/bootstrap.ts`).
+M5 — الطلبات والإشعارات (`worker/src/api/orders.ts`، `worker/src/api/notify.ts`، `worker/src/infra/fcm.ts`):
+1. POST /orders (shop.orders.submit أو مسودة shop.orders.draft): المحل من claims/وثيقة المستخدم لا من الجسم، فحص حالة المحل، priceCart + detectPriceChange، creditCheck، ترقيم counters/orders، SLA تقديري، idempotent، إشعار الإدارة.
+2. POST /orders/:id/transition: checkTransition + guards محسوبة + effects (فاتورة عند التأكيد تُنجز في M7؛ هنا سجل الحالة وتعيين الموظف).
+3. طلبات التعديل والموافقة (changes) بنسخة سابقة.
+4. GET قوائم الطلبات للإدارة بالفلاتر الثمانية وللمحل.
+5. الإشعارات: صندوق داخلي + notificationJobs + FCM HTTP v1، إزالة الرموز التالفة، dedupe، إعادة المحاولة؛ تسجيل الأجهزة POST /devices.

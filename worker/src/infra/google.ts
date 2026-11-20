@@ -14,9 +14,9 @@ export function b64url(data: ArrayBuffer | Uint8Array | string): string {
   return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-export function b64urlDecode(s: string): Uint8Array {
+export function b64urlDecode(s: string): Uint8Array<ArrayBuffer> {
   const b = atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4));
-  return Uint8Array.from(b, (c) => c.charCodeAt(0));
+  return Uint8Array.from(b, (c) => c.charCodeAt(0)) as Uint8Array<ArrayBuffer>;
 }
 
 const keyCache = new Map<string, Promise<CryptoKey>>();
