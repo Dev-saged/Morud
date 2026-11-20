@@ -1,7 +1,7 @@
 name: spec
 on:
   push:
-    paths: ['spec/**', 'tests/**', 'package.json', '.github/workflows/spec.yml']
+    paths: ['spec/**', 'tests/**', 'brand/**', 'package.json', '.github/workflows/spec.yml']
   pull_request:
     paths: ['spec/**', 'tests/**', 'package.json']
 permissions:

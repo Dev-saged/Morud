@@ -7,12 +7,11 @@
 ## القرارات
 - Kotlin + Compose، Firebase + Cloudflare Workers + R2، React + TS للويب (تفاصيل D1–D10 في architecture.md).
 
-## M9a الشعار — بانتظار اختيار ساجد
-- المفاهيم v2 في `brand/logo/v2/`: 01 خاتم مورد (مُرشَّح)، 02 بوابة مورد، 03 M بالنقطة. لوحة العرض `mawred-logo-presentation.png` لصاحب المشروع ليختار.
-- إعادة توليد اللوحة: `cd brand/logo/v2 && python3 build_board.py` ثم render_png.py على `board.html` (1600×8510).
-- بعد الاختيار: تنقيح هندسي + نسخة صغيرة + ألوان (أزرق ثقة) + lockups أفقي/عمودي + `export_variants.py --web-icons` + أيقونة أندرويد adaptive + لوحة عرض + دليل استخدام، ثم M1.
+## M9a الشعار — مغلقة
+- معتمد: «M بالنقطة». الحزمة في `brand/logo/final/` (إعادة التوليد: `python3 brand/logo/final/kit.py` ثم `sheet.py`)، الرموز `spec/brand.json`، الدليل `brand/guidelines.md`.
+- 24 اختباراً خضراء (`npm test`).
 
-## الخطوة التالية بعد الشعار
+## الخطوة التالية بالضبط
 M1 — نواة المنطق في `worker/src/domain` (TypeScript، اختبارات بـvitest أو node:test):
 1. `money.ts`: أغورة int، `lineTotal(qtyMilli, unitPrice)` بتقريب half-up، تنسيق ILS.
 2. `units.ts`: التحقق من الكمية (لا صفر/سالب، كسور حسب allowFraction، minQty/step).
@@ -23,5 +22,3 @@ M1 — نواة المنطق في `worker/src/domain` (TypeScript، اختبار
 7. `search.ts`: تطبيع عربي (همزات، تاء مربوطة، ألف مقصورة، تشكيل، أرقام).
 شرط الإغلاق: سيناريوهات SRS 19.3 الخمسة + حالات حدية، تغطية ≥ 95%.
 
-## أسئلة لساجد
-- أي مفهوم شعار يعتمد صاحب المشروع؟

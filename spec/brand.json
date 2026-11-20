@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "note": "ألوان هوية مورد المعتمدة (الشعار «M بالنقطة»، 2026-11-20). مصدر BrandConfig.kt ومتغيرات الويب.",
+  "logo": "M بالنقطة",
+  "colors": {
+    "blue": {
+      "hex": "#1D4ED8",
+      "oklch": "oklch(48.8% 0.217 264.4)",
+      "label": "أزرق مورد"
+    },
+    "orange": {
+      "hex": "#F08A24",
+      "oklch": "oklch(72.9% 0.162 58.8)",
+      "label": "برتقالي الطلب"
+    },
+    "navy": {
+      "hex": "#0B1533",
+      "oklch": "oklch(20.7% 0.061 267.1)",
+      "label": "كحلي داكن"
+    },
+    "white": {
+      "hex": "#FFFFFF",
+      "oklch": "oklch(100.0% 0.000 89.9)",
+      "label": "أبيض"
+    },
+    "paper": {
+      "hex": "#F7F5F0",
+      "oklch": "oklch(97.0% 0.007 88.6)",
+      "label": "ورقي"
+    }
+  },
+  "contrast": {
+    "blue_on_white": 6.7,
+    "white_on_blue": 6.7,
+    "orange_on_white": 2.51,
+    "navy_on_paper": 16.48,
+    "orange_on_navy": 7.15
+  },
+  "fonts": {
+    "wordmark": "Alexandria 800 (محوّل لمسار)",
+    "latin": "Alexandria 600, تتبّع واسع"
+  },
+  "clearSpace": "قطر النقطة البرتقالية من كل الجهات",
+  "minSize": {
+    "horizontal_px": 120,
+    "symbol_px": 16,
+    "horizontal_mm": 30,
+    "symbol_mm": 6
+  }
+}
