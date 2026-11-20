@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "آلة حالات الطلب الرسمية (SRS 5.1). أي انتقال غير مدرج هنا يرفضه الخادم. actor: staff | shop | agent | system. guards تُفحص في الخادم قبل الانتقال. كل فاتورة تُقيَّد في الدفتر نقدية كانت أو آجلة (post_ledger)، والتحصيل عند التسليم يُقيَّد دفعة.",
+  "note": "آلة حالات الطلب الرسمية (SRS 5.1). أي انتقال غير مدرج هنا يرفضه الخادم. actor: staff | shop | agent | system. guards تُفحص في الخادم قبل الانتقال. كل فاتورة تُقيَّد في الدفتر نقدية كانت أو آجلة (post_ledger)، والتحصيل عند التسليم يُقيَّد دفعة. «مكتمل مالياً» حالة تسوية (settled) يعود منها النظام آلياً إلى «تم التسليم» فقط عند عكس دفعة موثق.",
   "initial": "new",
   "states": [
     {
@@ -52,7 +52,7 @@
       "id": "financially_completed",
       "label": "مكتمل مالياً",
       "tone": "success",
-      "terminal": true
+      "settled": true
     },
     {
       "id": "cancelled",
@@ -366,6 +366,14 @@
       "actor": "system",
       "guards": [
         "invoice_settled"
+      ]
+    },
+    {
+      "from": "financially_completed",
+      "to": "delivered",
+      "actor": "system",
+      "guards": [
+        "payment_reversed"
       ]
     }
   ]

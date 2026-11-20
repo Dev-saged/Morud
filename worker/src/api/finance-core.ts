@@ -112,7 +112,7 @@ export interface PaymentInput {
 }
 
 /** تسجيل دفعة: توزيع على الفواتير المفتوحة من الأقدم، والزائد رصيد دائن (SRS 9.3–9.4). */
-export async function postPayment(tx: Tx, ctx: Ctx, p: PaymentInput): Promise<{ id: string; number: string; allocations: Array<{ invoiceId: string; amount: number }>; unallocated: number }> {
+export async function postPayment(tx: Tx, ctx: Ctx, p: PaymentInput): Promise<{ id: string; number: string; allocations: Array<{ invoiceId: string; amount: number }>; unallocated: number; settled: Array<{ invoiceId: string; orderId: string }> }> {
   if (!Number.isSafeInteger(p.amount) || p.amount <= 0) throw fail('VALIDATION', 'قيمة الدفعة بالأغورة وأكبر من صفر');
   const open = (await tx.query({ collection: 'invoices', where: [['shopId', '==', p.shopId], ['status', 'in', ['open', 'partial']]], limit: 200 }))
     .map((d) => ({ id: d.id, remaining: d.data.remaining as number, issuedAt: d.data.issuedAt as number, doc: d }));
@@ -120,6 +120,7 @@ export async function postPayment(tx: Tx, ctx: Ctx, p: PaymentInput): Promise<{ 
   if (!a.ok) throw fail(a.code, a.message);
   const id = ctx.s.id();
   const number = await nextNumber(tx, ctx, 'P');
+  const settled: Array<{ invoiceId: string; orderId: string }> = [];
   for (const al of a.value.allocations) {
     const inv = open.find((x) => x.id === al.invoiceId)!.doc;
     const paid = (inv.data.paid as number) + al.amount;
@@ -127,6 +128,7 @@ export async function postPayment(tx: Tx, ctx: Ctx, p: PaymentInput): Promise<{ 
     const credited = (inv.data.credited as number) ?? 0;
     const remaining = Math.max(0, total - paid - credited);
     tx.write({ kind: 'update', path: inv.path, data: { paid, remaining, status: remaining === 0 ? 'paid' : 'partial' } });
+    if (remaining === 0) settled.push({ invoiceId: inv.id, orderId: String(inv.data.orderId) });
   }
   tx.write({
     kind: 'create', path: `payments/${id}`,
@@ -134,5 +136,5 @@ export async function postPayment(tx: Tx, ctx: Ctx, p: PaymentInput): Promise<{ 
   });
   postLedger(tx, ctx, [{ id: ctx.s.id(), shopId: p.shopId, type: 'payment', amount: -p.amount, ref: { kind: 'payment', id }, at: ctx.s.now() }]);
   tx.write(auditWrite(ctx, { action: 'payments.create', entity: { kind: 'payment', id }, after: { number, amount: p.amount, method: p.method, allocations: a.value.allocations } }));
-  return { id, number, ...a.value };
+  return { id, number, ...a.value, settled };
 }

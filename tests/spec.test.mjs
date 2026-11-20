@@ -83,6 +83,11 @@ test('لا انتقال مكرر لنفس الفاعل', () => {
   assert.equal(new Set(keys).size, keys.length);
 });
 
+test('حالة التسوية لا يخرج منها إلا النظام عند عكس دفعة', () => {
+  const out = fsm.transitions.filter((t) => t.from === 'financially_completed');
+  assert.deepEqual(out.map((t) => [t.to, t.actor, t.guards]), [['delivered', 'system', ['payment_reversed']]]);
+});
+
 test('الحالات النهائية بلا مخارج', () => {
   for (const s of fsm.states.filter((x) => x.terminal)) {
     assert.ok(!fsm.transitions.some((t) => t.from === s.id), s.id);
@@ -95,7 +100,7 @@ test('كل حالة قابلة للوصول من «جديد» وكل حالة غ
   const q = [fsm.initial];
   while (q.length) for (const n of out(q.shift())) if (!seen.has(n)) { seen.add(n); q.push(n); }
   assert.deepEqual([...stateIds].filter((s) => !seen.has(s)), []);
-  const terminals = new Set(fsm.states.filter((s) => s.terminal).map((s) => s.id));
+  const terminals = new Set(fsm.states.filter((s) => s.terminal || s.settled).map((s) => s.id));
   for (const s of stateIds) {
     if (terminals.has(s)) continue;
     const v = new Set([s]); const st = [s]; let ok = false;

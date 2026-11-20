@@ -28,12 +28,11 @@
 
 ## M6 التوصيل والمهلة — مغلقة (141 اختباراً)
 
+## M7 المالية — مغلقة (153 اختباراً)
+
 ## الخطوة التالية بالضبط
-M7 — المالية (`worker/src/api/finance.ts`):
-1. POST /payments (payments.create، idempotent) عبر postPayment + إشعار المحل «تم تسجيل دفعة».
-2. POST /payments/:id/reverse (payments.reverse، سبب) بحركة عكسية + إعادة فتح التخصيصات.
-3. POST /ledger/adjustments (accounts.adjust) تسوية مدينة/دائنة بسبب.
-4. GET /shops/:id/statement?from&to (accounts.view أو عضو بـshop.statement.view) عبر statement().
-5. GET /invoices، /invoices/:id، /shops/:id/invoices؛ كشف وفاتورة HTML للطباعة/PDF.
-6. Cron: الطلبات المسلّمة ذات الفواتير المسددة ← financially_completed (system).
-7. سيناريوهات SRS 19.3 الخمسة على الخادم بالكامل.
+M8 — العروض والتقارير والنسخ:
+1. `worker/src/api/promotions.ts`: CRUD العروض (promotions.manage) بتحقق الأنواع الخمسة، صورة، إشعار «عرض جديد» للمحلات.
+2. `worker/src/api/reports.ts`: التقارير الـ17 بالفلاتر (تاريخ/محل/تصنيف/حالة) + تصدير CSV (Excel) + صفحة طباعة؛ الأرباح فقط مع التكلفة.
+3. `worker/src/api/backup.ts`: Cron يومي يصدّر المجموعات JSON مضغوطاً مشفراً AES-GCM إلى R2 BACKUPS + backupLogs + تنبيه الفشل + حذف الأقدم من الاحتفاظ؛ أداة استعادة مختبرة.
+4. الدعم والشكاوى: POST /support (support.create)، إدارة (support.manage)، إشعار الإدارة.

@@ -1,5 +1,6 @@
 import type { Services } from './context';
 import { markOverdue } from './delivery';
+import { settleSweep } from './finance';
 import { processDueJobs } from './notify';
 
 export interface CronDeps {
@@ -11,4 +12,5 @@ export interface CronDeps {
 export async function runScheduled(s: Services, cron: string, _deps: CronDeps): Promise<void> {
   if (cron === '* * * * *') await processDueJobs(s, s.pusher);
   if (cron === '*/5 * * * *') await markOverdue(s);
+  if (cron === '0 1 * * *') await settleSweep(s);
 }
