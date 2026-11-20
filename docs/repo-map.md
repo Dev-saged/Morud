@@ -131,3 +131,14 @@
 ## قضايا مفتوحة
 - MFA الإداري يحتاج ترقية Identity Platform (D7) — قبل الإطلاق.
 - اسم المورد وبياناته ورقم التواصل للفاتورة — تُدخل من الإعدادات عند التشغيل.
+
+## الويب (web/) — M13a
+- الدخول والتوجيه: `web/src/App.tsx` (admin.* / agent.* / shop.* + فرض تغيير كلمة المرور المؤقتة)، `src/Login.tsx`، `src/lib/session.tsx` (AuthBackend مجرّد، `/auth/login` ← custom token).
+- العميل: `src/lib/api.ts` (Bearer + x-work-context + idempotency-key، أخطاء عربية، NETWORK).
+- المحل: `src/shop/ShopApp.tsx` (كتالوج من `useCatalog` بكاش offline، السلة `lib/cart.ts` بمفتاح محاولة ثابت، PRICE_CHANGED ← seenTotal، تتبع ومؤقت SLA، كشف الحساب والطباعة عبر `openPrintable`).
+- الإدارة: `src/admin/AdminApp.tsx` (Dashboard + Sparkline SVG، Orders + AdminOrder، Delivery board، Reports + CSV). الأقسام تظهر حسب الصلاحية فقط.
+- المندوب: `src/agent/AgentApp.tsx` (مهمة حالية، اتصال/ملاحة، تسليم بإثبات ومبلغ، تعذّر).
+- PWA: `public/sw.js` (هيكل مخزّن، صور المنتجات cache-first، لا تخزين لـ POST ولا للبيانات المالية)، `src/ui/InstallPrompt.tsx`.
+- التصميم: `scripts/tokens.mjs` يولّد `src/tokens.css` من `spec/design-tokens.json`؛ `src/styles.css`.
+- قرار: `@vitejs/plugin-react@5` لأن v6 تتطلب vite 8 (خطأ `./internal` غير مُصدَّر).
+- قرار: التفاعل التوقيعي يتحقق من `Element.prototype.animate` قبل الاستخدام.

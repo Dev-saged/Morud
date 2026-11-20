@@ -18,5 +18,5 @@
 | M10 | أساس Android | من android-template: BrandConfig، الثيم، Icons.kt، التنقل، Room، محرك schema، الدخول الموحد والتوجيه بالدور، المسودات offline، #test، build.yml | build + unit tests خضراء، APK موقّع | |
 | M11 | Android — المحل | الرئيسية، البحث، بطاقة المنتج والوحدات، السلة، التأكيد، تتبع الطلب والمؤقت، الفواتير والكشف، الموظفون | اختبارات ViewModel + UI للمسار الأساسي | |
 | M12 | Android — الإدارة والمندوب | لوحات الطلبات والتجهيز والتوصيل والمالية، شاشات المندوب والملاحة والإثبات | اختبارات لكل دور | |
-| M13 | Web + PWA | React + TS: لوحة الإدارة الكاملة + واجهة المحل، PWA ونافذة تثبيت آيفون، Web Push | Vitest + Playwright على Chrome/Firefox/WebKit | |
+| M13 | Web + PWA | React + TS: لوحة الإدارة الكاملة + واجهة المحل، PWA ونافذة تثبيت آيفون، Web Push | Vitest + Playwright على Chrome/Firefox/WebKit | M13a مغلقة (10 اختبارات + build)؛ M13b قيد العمل |
 | M14 | الجودة والإطلاق | الدورة الكاملة E2E، التقرير الأمني، الأداء، الأدلة الستة، v1.0.0 | كل بنود `requirements-checklist.md` معلَّمة أو موثقة السبب | |
