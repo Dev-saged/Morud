@@ -16,6 +16,7 @@
 | مفاهيم الشعار v2 (خاتم، بوابة، M بالنقطة) | `brand/logo/v2/marks.py` (مولّد الرموز بالألوان)، `textpath.py` (نص ← مسار بـharfbuzz) | الكلمات مسارات لا خطوط حية |
 | حزمة الشعار النهائية «M بالنقطة» | `brand/logo/final/kit.py` (يولّد svg/ web/ android/)، `png/`، `sheet.py` ← `mawred-identity-sheet.png` | نسخة صغيرة ≤32px بخط أسمك ونقطة أبعد |
 | رموز ألوان الهوية (HEX + OKLCH + تباين) | `spec/brand.json` | مصدر BrandConfig.kt |
+| رموز نظام التصميم (ألوان فاتح/داكن، خطوط، مسافات، حركة) | `spec/design-tokens.json`، `docs/design-system.md` | تباين مختبر في `tests/design.test.mjs` |
 | دليل استخدام الشعار | `brand/guidelines.md` | |
 | أيقونة أندرويد التكيفية | `brand/logo/final/android/` | تُنسخ إلى `android/app/src/main/res/` في M10 |
 | اختبارات حزمة الشعار | `tests/brand.test.mjs` | 6 اختبارات |
@@ -107,6 +108,8 @@
 
 - 2026-11-20 — النسخ: `dump` بـcollectionGroup (allDescendants) مرتب بالمسار، JSONL بتواريخ مرمّزة، gzip، AES-GCM بمفتاح سري 32 بايت، صيغة `MWB1|iv|ct`.
 - 2026-11-20 — CSV يبدأ بـBOM لفتحه عربياً في Excel، والخلايا التي تبدأ بـ= + - @ تُسبق بفاصلة عليا لمنع حقن الصيغ.
+
+- 2026-11-20 — M9 بلا توقف لاختيار اتجاه: الاتجاه محسوم بالشعار المعتمد وبطلب ساجد الاستمرار دون توقف؛ خطوط Alexandria للعناوين وIBM Plex Sans Arabic للنصوص.
 
 ## أخطاء محلولة
 - `node --test tests/` يفشل على Node 22 (يعامل المجلد كملف) ← استخدم `node --test tests/*.test.mjs`.

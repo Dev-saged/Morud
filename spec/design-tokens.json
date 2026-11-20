@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "note": "رموز نظام تصميم مورد. كل لون [فاتح، داكن] بصيغة OKLCH؛ الويب يستهلكها عبر light-dark() وأندرويد عبر BrandConfig.kt. مشتقة من الشعار المعتمد «M بالنقطة».",
+  "color": {
+    "primary":   ["oklch(48.8% 0.217 264.4)", "oklch(70% 0.15 264)"],
+    "onPrimary": ["oklch(100% 0 0)", "oklch(18% 0.05 266)"],
+    "surface":   ["oklch(98.6% 0.004 90)", "oklch(17% 0.025 265)"],
+    "raised":    ["oklch(100% 0 0)", "oklch(22% 0.03 265)"],
+    "ink":       ["oklch(20.7% 0.061 267.1)", "oklch(95% 0.01 265)"],
+    "mute":      ["oklch(47% 0.03 265)", "oklch(74% 0.03 265)"],
+    "line":      ["oklch(91% 0.008 90)", "oklch(31% 0.03 265)"],
+    "accent":    ["oklch(72.9% 0.162 58.8)", "oklch(76% 0.15 60)"],
+    "accentInk": ["oklch(50% 0.14 50)", "oklch(80% 0.13 62)"],
+    "ok":        ["oklch(50% 0.13 150)", "oklch(76% 0.15 150)"],
+    "danger":    ["oklch(52% 0.19 27)", "oklch(72% 0.16 25)"]
+  },
+  "statusTone": {
+    "info": "primary", "progress": "accentInk", "warning": "accentInk", "success": "ok", "danger": "danger"
+  },
+  "type": {
+    "display": "Alexandria",
+    "body": "IBM Plex Sans Arabic",
+    "latin": "IBM Plex Sans",
+    "numbers": "tabular-nums",
+    "scale": { "xs": "clamp(12px, 0.7rem + 0.2vw, 13px)", "sm": "clamp(13px, 0.78rem + 0.25vw, 15px)", "md": "clamp(15px, 0.9rem + 0.3vw, 17px)", "lg": "clamp(18px, 1rem + 0.6vw, 22px)", "xl": "clamp(22px, 1.2rem + 1vw, 30px)", "xxl": "clamp(28px, 1.5rem + 1.8vw, 42px)" }
+  },
+  "space": [0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64],
+  "radius": { "sm": 10, "md": 16, "lg": 24, "pill": 999 },
+  "motion": { "fast": 140, "base": 240, "slow": 420, "spring": "cubic-bezier(0.22, 1.2, 0.36, 1)", "out": "cubic-bezier(0.2, 0.8, 0.2, 1)" },
+  "touchTarget": 48,
+  "signature": "النقطة البرتقالية من الشعار تقفز من بطاقة المنتج إلى أيقونة السلة عند الإضافة، وتصير عدّاد السلة"
+}
