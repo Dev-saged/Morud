@@ -49,3 +49,40 @@ export function resolveHome(roleIds: readonly string[], roleDefs: ReadonlyMap<st
 export function roleMap(roles: readonly RoleDef[] = DEFAULT_ROLES): Map<string, RoleDef> {
   return new Map(roles.map((r) => [r.id, r]));
 }
+
+// رموز مختصرة تُوضع في custom claims لتستخدمها Firestore Rules (حد الحجم 1000 بايت)
+export const RULE_CLAIMS: Readonly<Record<string, string>> = {
+  'orders.view': 'ov', 'shops.view': 'sv', 'invoices.view': 'iv', 'accounts.view': 'av', 'audit.view': 'au',
+  'delivery.view': 'dv', 'delivery.track.view': 'dt', 'users.manage': 'um', 'roles.manage': 'rm', 'reports.view': 'rv',
+  'products.cost.view': 'pc', 'backups.manage': 'bm', 'support.manage': 'sm', 'settings.manage': 'st',
+  'shop.orders.view_all': 'sa', 'shop.invoices.view': 'si', 'shop.statement.view': 'ss',
+};
+
+export function ruleClaims(perms: ReadonlySet<string>, kinds: ReadonlySet<string>, shopIds: readonly string[]) {
+  return {
+    rp: Object.entries(RULE_CLAIMS).filter(([p]) => perms.has(p)).map(([, c]) => c),
+    k: [...kinds].sort(),
+    sh: shopIds.slice(0, 20),
+  };
+}
+
+// سياسة كلمة المرور: 8 أحرف على الأقل، حرف ورقم، بحد أقصى 128
+export function passwordProblem(pw: string): string | null {
+  if (pw.length < 8) return 'PASSWORD_TOO_SHORT';
+  if (pw.length > 128) return 'PASSWORD_TOO_LONG';
+  if (!/\p{L}/u.test(pw) || !/\d/.test(pw)) return 'PASSWORD_WEAK';
+  return null;
+}
+
+/** توحيد معرّف الدخول: بريد، هاتف (059… أو +970/972)، أو اسم مستخدم. */
+export function loginKey(identifier: string): string | null {
+  const s = identifier.trim().toLowerCase().replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660));
+  if (!s || s.length > 120) return null;
+  if (s.includes('@')) return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) ? `e:${s}` : null;
+  const digits = s.replace(/[\s()+-]/g, '');
+  if (/^\d{9,15}$/.test(digits)) {
+    const local = digits.replace(/^(00)?(970|972)/, '0');
+    return /^0\d{8,9}$/.test(local) ? `p:${local}` : null;
+  }
+  return /^[a-z0-9._-]{3,32}$/.test(s) ? `u:${s}` : null;
+}
