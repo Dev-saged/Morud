@@ -58,6 +58,7 @@ beforeAll(async () => {
       ['deliveryTracks/o1', { agentId: 'agent1', active: true }],
       ['deliveryProofs/o1', { agentId: 'agent1', shopId: 's1' }],
       ['notifications/n1', { userId: 'owner1', title: 'تم استلام طلبك' }],
+      ['drafts/d1', { shopId: 's1', createdBy: 'emp1', items: [] }],
       ['auditLogs/a1', { action: 'auth.login' }],
       ['backupLogs/b1', { status: 'ok' }],
       ['supportTickets/t1', { by: 'owner1', status: 'open' }],
@@ -170,6 +171,9 @@ describe('قراءات مسموحة بدقة', () => {
     await assertSucceeds(read(as('owner1'), 'supportTickets/t1'));
     await assertFails(read(as('owner2'), 'supportTickets/t1'));
     await assertSucceeds(read(as('owner1'), 'shops/s1/members/emp1'));
+    await assertSucceeds(read(as('emp1'), 'drafts/d1'));
+    await assertFails(read(as('owner2'), 'drafts/d1'));
+    await assertFails(read(as('accountant'), 'drafts/d1'));
   });
   it('المدير يرى التدقيق والمستخدمين والتتبع والنسخ', async () => {
     for (const p of ['auditLogs/a1', 'users/owner2', 'deliveryTracks/o1', 'backupLogs/b1', 'supportTickets/t1', 'shops/s2/private/admin', 'products/p1/private/cost', 'roles/accountant']) {

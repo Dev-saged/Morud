@@ -23,10 +23,14 @@
 ## M4 إدارة النظام — مغلقة
 - 117 اختباراً، تغطية أسطر 99%.
 
+## M5 الطلبات والإشعارات — مغلقة
+- 136 اختباراً للخادم + 13 للقواعد.
+
 ## الخطوة التالية بالضبط
-M5 — الطلبات والإشعارات (`worker/src/api/orders.ts`، `worker/src/api/notify.ts`، `worker/src/infra/fcm.ts`):
-1. POST /orders (shop.orders.submit أو مسودة shop.orders.draft): المحل من claims/وثيقة المستخدم لا من الجسم، فحص حالة المحل، priceCart + detectPriceChange، creditCheck، ترقيم counters/orders، SLA تقديري، idempotent، إشعار الإدارة.
-2. POST /orders/:id/transition: checkTransition + guards محسوبة + effects (فاتورة عند التأكيد تُنجز في M7؛ هنا سجل الحالة وتعيين الموظف).
-3. طلبات التعديل والموافقة (changes) بنسخة سابقة.
-4. GET قوائم الطلبات للإدارة بالفلاتر الثمانية وللمحل.
-5. الإشعارات: صندوق داخلي + notificationJobs + FCM HTTP v1، إزالة الرموز التالفة، dedupe، إعادة المحاولة؛ تسجيل الأجهزة POST /devices.
+M6 — التوصيل والمهلة (`worker/src/api/delivery.ts`):
+1. POST /orders/:id/assign-agent (delivery.assign) + ترتيب التوصيل + GET /delivery/board بحسب المنطقة والمتأخر.
+2. GET /agent/tasks (المندوب: المسند إليه فقط).
+3. POST /orders/:id/track (المندوب أثناء on_the_way فقط، آخر 200 نقطة).
+4. رفع صورة الإثبات والتوقيع إلى R2 (`proofs/`) بروابط خاصة.
+5. Cron كل 5 دقائق: وسم المتأخر، تنبيه مسؤول الطلبات والمحل، تحديث الموعد.
+6. PATCH /orders/:id/due (موعد مؤكد يدوياً).

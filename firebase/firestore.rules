@@ -60,6 +60,7 @@ service cloud.firestore {
       allow read: if rp('dv') || memberOf(resource.data.shopId) || (signedIn() && resource.data.agentId == me());
     }
 
+    match /drafts/{id} { allow read: if memberOf(resource.data.shopId); }
     match /notifications/{id} { allow read: if signedIn() && resource.data.userId == me(); }
     match /auditLogs/{id} { allow read: if rp('au'); }
     match /backupLogs/{id} { allow read: if rp('bm'); }

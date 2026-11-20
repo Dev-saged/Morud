@@ -2,6 +2,7 @@ import { createApp, type RouteModule } from '../src/api/app';
 import type { Services } from '../src/api/context';
 import type { IdClaims } from '../src/infra/google';
 import type { Identity, SignInResult } from '../src/infra/identity';
+import { MemoryPusher } from '../src/infra/fcm';
 import { MemoryFiles } from '../src/infra/files';
 import { MemoryDb } from '../src/infra/memory-db';
 import { MemoryCounter, RateLimiter } from '../src/infra/ratelimit';
@@ -50,6 +51,8 @@ export interface World {
   s: Services;
   clock: { now: number };
   tokens: Map<string, IdClaims>;
+  deferred: Array<Promise<unknown>>;
+  flush(): Promise<void>;
   call(method: string, path: string, opts?: { body?: unknown; token?: string; headers?: Record<string, string> }): Promise<{ status: number; body: any; headers: Headers }>;
   tokenFor(uid: string, authTimeMs?: number): string;
 }
@@ -60,9 +63,10 @@ export function world(modules: RouteModule[] = []): World {
   const clock = { now: T0 };
   db.now = () => clock.now;
   const tokens = new Map<string, IdClaims>();
+  const deferred: Array<Promise<unknown>> = [];
   let seq = 0;
   const s: Services = {
-    db, identity, files: new MemoryFiles(),
+    db, identity, files: new MemoryFiles(), pusher: new MemoryPusher(), defer: (p) => void deferred.push(p),
     verifyToken: async (t) => tokens.get(t) ?? null,
     customToken: async (uid, claims) => `custom:${uid}:${JSON.stringify(claims)}`,
     loginLimiter: new RateLimiter(new MemoryCounter(), 5, 900, 'login'),
@@ -72,7 +76,8 @@ export function world(modules: RouteModule[] = []): World {
   };
   const handle = createApp(modules);
   const w: World = {
-    db, identity, s, clock, tokens,
+    db, identity, s, clock, tokens, deferred,
+    async flush() { await Promise.all(deferred.splice(0)); },
     async call(method, path, opts = {}) {
       const headers: Record<string, string> = { 'content-type': 'application/json', 'cf-connecting-ip': '10.0.0.1', ...(opts.headers ?? {}) };
       if (opts.token) headers.authorization = `Bearer ${opts.token}`;

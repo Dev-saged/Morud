@@ -15,8 +15,15 @@ id = "REPLACE_WITH_KV_ID"
 binding = "FILES"
 bucket_name = "mawred-staging-files"
 
+[[r2_buckets]]
+binding = "BACKUPS"
+bucket_name = "mawred-staging-backups"
+
 [env.production]
 name = "mawred-api-prod"
 vars = { FIREBASE_PROJECT_ID = "mawred-prod", ALLOWED_ORIGINS = "https://mawred.pages.dev" }
 kv_namespaces = [{ binding = "KV", id = "REPLACE_WITH_PROD_KV_ID" }]
-r2_buckets = [{ binding = "FILES", bucket_name = "mawred-prod-files" }]
+r2_buckets = [{ binding = "FILES", bucket_name = "mawred-prod-files" }, { binding = "BACKUPS", bucket_name = "mawred-prod-backups" }]
+
+[triggers]
+crons = ["* * * * *", "*/5 * * * *", "0 1 * * *"]

@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { bootstrap } from '../src/admin/bootstrap';
 import type { Services } from '../src/api/context';
+import { MemoryPusher } from '../src/infra/fcm';
 import { MemoryFiles } from '../src/infra/files';
 import { FirestoreDb } from '../src/infra/firestore';
 import { accessToken, customToken, type ServiceAccount } from '../src/infra/google';
@@ -15,6 +16,8 @@ const s: Services = {
   db: new FirestoreDb(sa.project_id, token),
   identity: new IdentityToolkit(sa.project_id, need('FIREBASE_API_KEY'), token),
   files: new MemoryFiles(),
+  pusher: new MemoryPusher(),
+  defer: () => undefined,
   verifyToken: async () => null,
   customToken: (uid, c) => customToken(sa, uid, c),
   loginLimiter: new RateLimiter(new MemoryCounter(), 5, 900, 'login'),
