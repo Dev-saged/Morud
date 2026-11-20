@@ -7,7 +7,11 @@
 ## القرارات
 - Kotlin + Compose، Firebase + Cloudflare Workers + R2، React + TS للويب (تفاصيل D1–D10 في architecture.md).
 
-## الخطوة التالية بالضبط
+## M9a الشعار — بانتظار اختيار ساجد
+- المفاهيم في `brand/logo/concepts/` واللوحة `brand/logo/concepts.png`: A «منبع» (ميم رأسها قطرة، مُرشَّح)، B «M بالنقطة»، C كتابة «مورد» الكوفية.
+- بعد الاختيار: تنقيح هندسي + نسخة صغيرة + ألوان (أزرق ثقة) + lockups أفقي/عمودي + `export_variants.py --web-icons` + أيقونة أندرويد adaptive + لوحة عرض + دليل استخدام، ثم M1.
+
+## الخطوة التالية بعد الشعار
 M1 — نواة المنطق في `worker/src/domain` (TypeScript، اختبارات بـvitest أو node:test):
 1. `money.ts`: أغورة int، `lineTotal(qtyMilli, unitPrice)` بتقريب half-up، تنسيق ILS.
 2. `units.ts`: التحقق من الكمية (لا صفر/سالب، كسور حسب allowFraction، minQty/step).
@@ -18,5 +22,5 @@ M1 — نواة المنطق في `worker/src/domain` (TypeScript، اختبار
 7. `search.ts`: تطبيع عربي (همزات، تاء مربوطة، ألف مقصورة، تشكيل، أرقام).
 شرط الإغلاق: سيناريوهات SRS 19.3 الخمسة + حالات حدية، تغطية ≥ 95%.
 
-## أسئلة لساجد (غير معطِّلة)
-- العطلة الأسبوعية الافتراضية.
+## أسئلة لساجد
+- أي مفهوم شعار يعتمد؟
