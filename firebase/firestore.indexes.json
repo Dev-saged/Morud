@@ -1,22 +1,270 @@
 {
   "indexes": [
-    {"collectionGroup": "orders", "queryScope": "COLLECTION", "fields": [{"fieldPath": "shopId", "order": "ASCENDING"}, {"fieldPath": "createdAt", "order": "DESCENDING"}]},
-    {"collectionGroup": "orders", "queryScope": "COLLECTION", "fields": [{"fieldPath": "shopId", "order": "ASCENDING"}, {"fieldPath": "createdBy", "order": "ASCENDING"}, {"fieldPath": "createdAt", "order": "DESCENDING"}]},
-    {"collectionGroup": "orders", "queryScope": "COLLECTION", "fields": [{"fieldPath": "status", "order": "ASCENDING"}, {"fieldPath": "createdAt", "order": "DESCENDING"}]},
-    {"collectionGroup": "orders", "queryScope": "COLLECTION", "fields": [{"fieldPath": "agentId", "order": "ASCENDING"}, {"fieldPath": "status", "order": "ASCENDING"}, {"fieldPath": "deliveryOrder", "order": "ASCENDING"}]},
-    {"collectionGroup": "orders", "queryScope": "COLLECTION", "fields": [{"fieldPath": "sla.overdue", "order": "ASCENDING"}, {"fieldPath": "status", "order": "ASCENDING"}]},
-    {"collectionGroup": "ledger", "queryScope": "COLLECTION", "fields": [{"fieldPath": "shopId", "order": "ASCENDING"}, {"fieldPath": "at", "order": "ASCENDING"}]},
-    {"collectionGroup": "invoices", "queryScope": "COLLECTION", "fields": [{"fieldPath": "shopId", "order": "ASCENDING"}, {"fieldPath": "issuedAt", "order": "DESCENDING"}]},
-    {"collectionGroup": "invoices", "queryScope": "COLLECTION", "fields": [{"fieldPath": "status", "order": "ASCENDING"}, {"fieldPath": "issuedAt", "order": "DESCENDING"}]},
-    {"collectionGroup": "payments", "queryScope": "COLLECTION", "fields": [{"fieldPath": "shopId", "order": "ASCENDING"}, {"fieldPath": "at", "order": "DESCENDING"}]},
-    {"collectionGroup": "products", "queryScope": "COLLECTION", "fields": [{"fieldPath": "visible", "order": "ASCENDING"}, {"fieldPath": "categoryId", "order": "ASCENDING"}, {"fieldPath": "order", "order": "ASCENDING"}]},
-    {"collectionGroup": "products", "queryScope": "COLLECTION", "fields": [{"fieldPath": "visible", "order": "ASCENDING"}, {"fieldPath": "featured", "order": "ASCENDING"}, {"fieldPath": "order", "order": "ASCENDING"}]},
-    {"collectionGroup": "products", "queryScope": "COLLECTION", "fields": [{"fieldPath": "visible", "order": "ASCENDING"}, {"fieldPath": "searchKeys", "arrayConfig": "CONTAINS"}]},
-    {"collectionGroup": "notifications", "queryScope": "COLLECTION", "fields": [{"fieldPath": "userId", "order": "ASCENDING"}, {"fieldPath": "createdAt", "order": "DESCENDING"}]},
-    {"collectionGroup": "auditLogs", "queryScope": "COLLECTION", "fields": [{"fieldPath": "entity.kind", "order": "ASCENDING"}, {"fieldPath": "entity.id", "order": "ASCENDING"}, {"fieldPath": "at", "order": "DESCENDING"}]},
-    {"collectionGroup": "auditLogs", "queryScope": "COLLECTION", "fields": [{"fieldPath": "actorId", "order": "ASCENDING"}, {"fieldPath": "at", "order": "DESCENDING"}]}
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "shopId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "shopId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdBy",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "agentId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "deliveryOrder",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "sla.overdue",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "ledger",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "shopId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "at",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "invoices",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "shopId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "issuedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "invoices",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "issuedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "payments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "shopId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "at",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "products",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "visible",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "categoryId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "order",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "products",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "visible",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "featured",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "order",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "products",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "visible",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "searchKeys",
+          "arrayConfig": "CONTAINS"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "auditLogs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "entity.kind",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "entity.id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "at",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "auditLogs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "actorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "at",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "sla.overdue",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "sla.dueAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "agentId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        }
+      ]
+    }
   ],
   "fieldOverrides": [
-    {"collectionGroup": "idempotency", "fieldPath": "expireAt", "ttl": true, "indexes": []}
+    {
+      "collectionGroup": "idempotency",
+      "fieldPath": "expireAt",
+      "ttl": true,
+      "indexes": []
+    }
   ]
 }

@@ -26,11 +26,14 @@
 ## M5 الطلبات والإشعارات — مغلقة
 - 136 اختباراً للخادم + 13 للقواعد.
 
+## M6 التوصيل والمهلة — مغلقة (141 اختباراً)
+
 ## الخطوة التالية بالضبط
-M6 — التوصيل والمهلة (`worker/src/api/delivery.ts`):
-1. POST /orders/:id/assign-agent (delivery.assign) + ترتيب التوصيل + GET /delivery/board بحسب المنطقة والمتأخر.
-2. GET /agent/tasks (المندوب: المسند إليه فقط).
-3. POST /orders/:id/track (المندوب أثناء on_the_way فقط، آخر 200 نقطة).
-4. رفع صورة الإثبات والتوقيع إلى R2 (`proofs/`) بروابط خاصة.
-5. Cron كل 5 دقائق: وسم المتأخر، تنبيه مسؤول الطلبات والمحل، تحديث الموعد.
-6. PATCH /orders/:id/due (موعد مؤكد يدوياً).
+M7 — المالية (`worker/src/api/finance.ts`):
+1. POST /payments (payments.create، idempotent) عبر postPayment + إشعار المحل «تم تسجيل دفعة».
+2. POST /payments/:id/reverse (payments.reverse، سبب) بحركة عكسية + إعادة فتح التخصيصات.
+3. POST /ledger/adjustments (accounts.adjust) تسوية مدينة/دائنة بسبب.
+4. GET /shops/:id/statement?from&to (accounts.view أو عضو بـshop.statement.view) عبر statement().
+5. GET /invoices، /invoices/:id، /shops/:id/invoices؛ كشف وفاتورة HTML للطباعة/PDF.
+6. Cron: الطلبات المسلّمة ذات الفواتير المسددة ← financially_completed (system).
+7. سيناريوهات SRS 19.3 الخمسة على الخادم بالكامل.

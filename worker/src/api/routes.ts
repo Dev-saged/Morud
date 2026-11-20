@@ -4,7 +4,8 @@ import { roleRoutes } from './admin/roles';
 import { settingsRoutes } from './admin/settings';
 import { shopRoutes } from './admin/shops';
 import { userRoutes } from './admin/users';
+import { deliveryRoutes } from './delivery';
 import { notifyRoutes } from './notify';
 import { orderRoutes } from './orders';
 
-export const ALL_ROUTES: RouteModule[] = [userRoutes, roleRoutes, shopRoutes, catalogRoutes, settingsRoutes, orderRoutes, notifyRoutes];
+export const ALL_ROUTES: RouteModule[] = [userRoutes, roleRoutes, shopRoutes, catalogRoutes, settingsRoutes, orderRoutes, notifyRoutes, deliveryRoutes];
