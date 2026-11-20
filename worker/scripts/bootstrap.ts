@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { bootstrap } from '../src/admin/bootstrap';
 import type { Services } from '../src/api/context';
+import { MemoryBlobs } from '../src/infra/blobs';
 import { MemoryPusher } from '../src/infra/fcm';
 import { MemoryFiles } from '../src/infra/files';
 import { FirestoreDb } from '../src/infra/firestore';
@@ -17,6 +18,8 @@ const s: Services = {
   identity: new IdentityToolkit(sa.project_id, need('FIREBASE_API_KEY'), token),
   files: new MemoryFiles(),
   pusher: new MemoryPusher(),
+  backupStore: new MemoryBlobs(),
+  backupKey: '',
   defer: () => undefined,
   verifyToken: async () => null,
   customToken: (uid, c) => customToken(sa, uid, c),

@@ -105,7 +105,7 @@ describe('المهلة والتأخير (SRS 7.3)', () => {
     await move(w, 'so1', done, 'cancelled', { reason: 'لا حاجة له' });
     expect(await markOverdue(w.s)).toBe(0);
     w.clock.now = zonedToUtc(2026, 11, 20, 15, 30, 'Asia/Gaza');
-    await runScheduled(w.s, '*/5 * * * *', {} as never);
+    await runScheduled(w.s, '*/5 * * * *');
     const o = (await w.db.get(`orders/${id}`))!.data;
     expect(o.sla).toMatchObject({ overdue: true, revisedDueAt: zonedToUtc(2026, 11, 20, 17, 30, 'Asia/Gaza') });
     expect(((await w.db.get(`orders/${done}`))!.data.sla as { overdue: boolean }).overdue).toBe(false);
@@ -130,9 +130,9 @@ describe('المهلة والتأخير (SRS 7.3)', () => {
     await w.flush();
     pusher.failing.clear();
     w.clock.now += 3_600_000;
-    await runScheduled(w.s, '* * * * *', {} as never);
+    await runScheduled(w.s, '* * * * *');
     expect(pusher.sent.some((x) => x.token === 'tok-oe-aaaaaaaaaaaaaaaaaaaaaa')).toBe(true);
-    await runScheduled(w.s, '0 1 * * *', {} as never);
+    await runScheduled(w.s, '0 1 * * *');
     expect(H()).toHaveProperty('idempotency-key');
   });
 });

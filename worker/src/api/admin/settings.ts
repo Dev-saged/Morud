@@ -1,5 +1,5 @@
 import seed from '../../../../spec/seed.json';
-import type { Data } from '../../infra/db';
+import type { Data, Db } from '../../infra/db';
 import { auditWrite, requirePerm, requireUser, type Ctx } from '../context';
 import { cleanText, fail, json, readJson, type Router } from '../http';
 
@@ -7,8 +7,12 @@ export const DEFAULT_SETTINGS = seed.settings as Data;
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-export async function getSettings(ctx: Ctx): Promise<Data> {
-  return { ...DEFAULT_SETTINGS, ...((await ctx.s.db.get('settings/system'))?.data ?? {}) };
+export async function loadSettings(db: Db): Promise<Data> {
+  return { ...DEFAULT_SETTINGS, ...((await db.get('settings/system'))?.data ?? {}) };
+}
+
+export function getSettings(ctx: Ctx): Promise<Data> {
+  return loadSettings(ctx.s.db);
 }
 
 /** تحقق صارم من الإعدادات العامة (SRS 7.1 و13). */

@@ -36,6 +36,8 @@ export interface Db {
   query(q: Query): Promise<Doc[]>;
   commit(writes: Write[]): Promise<void>;
   runTransaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T>;
+  /** كل الوثائق في مجموعات بهذا الاسم على أي عمق، مرتبة بالمسار (للنسخ الاحتياطي). */
+  dump(collectionId: string, afterPath: string | null, limit: number): Promise<Doc[]>;
 }
 
 export class ConflictError extends Error {

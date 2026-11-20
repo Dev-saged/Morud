@@ -2,6 +2,7 @@ import { createApp } from './api/app';
 import type { Services } from './api/context';
 import { runScheduled } from './api/cron';
 import { ALL_ROUTES } from './api/routes';
+import { R2Blobs } from './infra/blobs';
 import { Fcm } from './infra/fcm';
 import { R2Files } from './infra/files';
 import { FirestoreDb } from './infra/firestore';
@@ -30,6 +31,8 @@ export function services(env: Env, ec: { waitUntil(p: Promise<unknown>): void })
     identity: new IdentityToolkit(env.FIREBASE_PROJECT_ID, env.FIREBASE_API_KEY, token),
     files: new R2Files(env.FILES),
     pusher: new Fcm(env.FIREBASE_PROJECT_ID, token),
+    backupStore: new R2Blobs(env.BACKUPS),
+    backupKey: env.BACKUP_KEY,
     defer: (p) => ec.waitUntil(p),
     verifyToken: (t) => verifyIdToken(t, env.FIREBASE_PROJECT_ID),
     customToken: (uid, claims) => customToken(sa, uid, claims),
@@ -47,6 +50,6 @@ export default {
     return handle(req, services(env, ec), { allowedOrigins: env.ALLOWED_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean) });
   },
   async scheduled(event: ScheduledController, env: Env, ec: ExecutionContext): Promise<void> {
-    ec.waitUntil(runScheduled(services(env, ec), event.cron, { backups: env.BACKUPS, backupKey: env.BACKUP_KEY }));
+    ec.waitUntil(runScheduled(services(env, ec), event.cron));
   },
 } satisfies ExportedHandler<Env>;

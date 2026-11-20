@@ -92,6 +92,15 @@ export class MemoryDb implements Db {
     this.apply(writes);
   }
 
+  async dump(collectionId: string, afterPath: string | null, limit: number): Promise<Doc[]> {
+    return [...this.docs.keys()]
+      .filter((p) => { const seg = p.split('/'); return seg.length % 2 === 0 && seg[seg.length - 2] === collectionId; })
+      .sort()
+      .filter((p) => afterPath === null || p > afterPath)
+      .slice(0, limit)
+      .map((path) => ({ id: path.split('/').pop()!, path, data: clone(this.docs.get(path)!) }));
+  }
+
   private chain: Promise<unknown> = Promise.resolve();
 
   async runTransaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {

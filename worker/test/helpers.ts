@@ -2,6 +2,7 @@ import { createApp, type RouteModule } from '../src/api/app';
 import type { Services } from '../src/api/context';
 import type { IdClaims } from '../src/infra/google';
 import type { Identity, SignInResult } from '../src/infra/identity';
+import { MemoryBlobs } from '../src/infra/blobs';
 import { MemoryPusher } from '../src/infra/fcm';
 import { MemoryFiles } from '../src/infra/files';
 import { MemoryDb } from '../src/infra/memory-db';
@@ -66,7 +67,7 @@ export function world(modules: RouteModule[] = []): World {
   const deferred: Array<Promise<unknown>> = [];
   let seq = 0;
   const s: Services = {
-    db, identity, files: new MemoryFiles(), pusher: new MemoryPusher(), defer: (p) => void deferred.push(p),
+    db, identity, files: new MemoryFiles(), pusher: new MemoryPusher(), backupStore: new MemoryBlobs(), backupKey: btoa(String.fromCharCode(...new Uint8Array(32).map((_, i) => i + 1))), defer: (p) => void deferred.push(p),
     verifyToken: async (t) => tokens.get(t) ?? null,
     customToken: async (uid, claims) => `custom:${uid}:${JSON.stringify(claims)}`,
     loginLimiter: new RateLimiter(new MemoryCounter(), 5, 900, 'login'),

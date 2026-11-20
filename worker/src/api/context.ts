@@ -1,6 +1,7 @@
 import { effectivePermissions, resolveHome, roleMap, type RoleDef } from '../domain/permissions';
 import type { Data, Db, Doc, Tx, Write } from '../infra/db';
 import type { IdClaims } from '../infra/google';
+import type { BlobStore } from '../infra/blobs';
 import type { Pusher } from '../infra/fcm';
 import type { FileStore } from '../infra/files';
 import type { Identity } from '../infra/identity';
@@ -12,6 +13,8 @@ export interface Services {
   identity: Identity;
   files: FileStore;
   pusher: Pusher;
+  backupStore: BlobStore;
+  backupKey: string; // مفتاح AES-256 بصيغة base64 (سر)
   defer(p: Promise<unknown>): void; // ExecutionContext.waitUntil في الإنتاج
   verifyToken(token: string): Promise<IdClaims | null>;
   customToken(uid: string, claims: Record<string, unknown>): Promise<string>;

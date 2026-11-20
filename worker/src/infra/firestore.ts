@@ -117,6 +117,15 @@ export class FirestoreDb implements Db {
     return this.queryIn(q);
   }
 
+  async dump(collectionId: string, afterPath: string | null, limit: number): Promise<Doc[]> {
+    const sq: Record<string, unknown> = { from: [{ collectionId, allDescendants: true }], orderBy: [{ field: { fieldPath: '__name__' }, direction: 'ASCENDING' }], limit };
+    if (afterPath) sq.startAt = { values: [{ referenceValue: `${this.root}/${afterPath}` }], before: false };
+    const res = await this.call(`${this.root}:runQuery`, { method: 'POST', body: JSON.stringify({ structuredQuery: sq }) });
+    if (!res.ok) throw await this.error(res);
+    const rows = (await res.json()) as Array<{ document?: never }>;
+    return rows.filter((r) => r.document).map((r) => this.toDoc(r.document!));
+  }
+
   toWrites(writes: Write[]): unknown[] {
     const now = this.clock();
     return writes.map((w) => {
