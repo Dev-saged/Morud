@@ -1,0 +1,8 @@
+-keepattributes *Annotation*, InnerClasses, Signature
+-keepclassmembers class kotlinx.serialization.json.** { *** Companion; }
+-keepclasseswithmembers class com.mawred.app.** { kotlinx.serialization.KSerializer serializer(...); }
+-keep,includedescriptorclasses class com.mawred.app.**$$serializer { *; }
+-dontwarn okhttp3.internal.platform.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**

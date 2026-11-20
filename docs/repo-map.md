@@ -152,3 +152,13 @@
 - `admin/Finance.tsx`: دفعة بمفتاح idempotency يتجدد بعد النجاح، عكس بسبب، تسوية مدين/دائن/افتتاحي، الفواتير وطباعتها.
 - `admin/More.tsx`: العروض، الإعدادات (أيام العمل/العطلات/طرق الدفع)، النسخ الاحتياطي، الدعم.
 - إصلاح: CORS كان لا يسمح بـ PUT (الوحدات والأدوار) — أضيف مع اختبار.
+
+## Android (android/) — M10
+- البناء: `android/app/build.gradle.kts` (مهمة `generateTokens` تولّد `DesignTokens` من spec/design-tokens.json؛ `copySpec` تنسخ order-states/roles/permissions إلى assets؛ versionCode = GITHUB_RUN_NUMBER؛ API_URL وFIREBASE_API_KEY من متغيرات CI).
+- الهوية: `BrandConfig.kt`، `ui/theme/Oklch.kt` (تحويل OKLCH→sRGB + تباين WCAG)، `Theme.kt` (RTL إجباري)، `Type.kt` (Alexandria متغير + IBM Plex Sans Arabic)، `ui/Icons.kt` (نفس مسارات الويب، الاتجاهية autoMirror) و`LogoMark`.
+- الجلسة: `data/auth/AuthRepository.kt` (login → customToken → IdentityRest.exchange، تحديث قبل الانتهاء بدقيقة، 401 ← خروج، بلا نت ← جلسة محفوظة)، `KeystoreCipher` + `DataStoreSessionStore`.
+- البيانات: `data/api/Api.kt`، `data/Catalog.kt` (شبكة أولاً ثم كاش Room)، `data/local/Database.kt` (cache، cart_lines، outbox؛ Migrations.ALL إلحاقي)، `CartRepository`.
+- محرك schema: `schema/Schema.kt` (validate بأنواع MONEY/QTY/PHONE/SELECT/DATE وصلاحيات الحقول، filter بتطبيع عربي، display).
+- الواجهات: `ui/MawredRoot.kt` (توجيه بالجلسة والدور)، `screens/AuthScreens.kt`، `shop/ShopScreens.kt` (كتالوج + سلة)، `admin/AdminScreens.kt` (مؤشرات + sparkline)، `agent/AgentScreens.kt`، `screens/TestScreen.kt` (7 نقرات على الشعار).
+- التحديث: `update/UpdateChecker.kt` (آخر Release، مقارنة رقم البناء، تنزيل في مجلد التطبيق، حذف بعد التثبيت).
+- قرار: النص فوق البرتقالي لون ثابت `ON_ACCENT_HEX` (accentInk مخصص للنص على السطح فقط) — كشفه اختبار التباين.

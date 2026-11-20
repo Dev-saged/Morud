@@ -44,3 +44,8 @@ M8 — العروض والتقارير والنسخ:
 
 ## تحديث — M13b
 - أُغلقت M13b: لوحة الإدارة الشاملة (19 اختبار ويب، 168 خادم). التالي: M10 Android من android-template ثم M11/M12، ثم M13c (Playwright + Web Push) وM14.
+
+## تحديث — M10
+- أُغلقت M10 (android/): 15 اختبار وحدة، assembleRelease بـ R8 ناجح محلياً (SDK في /opt/android-sdk). CI android.yml.
+- لتشغيل فعلي: ضبط متغيرات المستودع MAWRED_API_URL وMAWRED_FIREBASE_API_KEY وأسرار التوقيع.
+- التالي: M11 — إرسال الطلب عبر outbox (مفتاح idempotency ثابت، إعادة المحاولة عند عودة الشبكة بـ WorkManager)، قائمة الطلبات وتفاصيلها مع مؤقت SLA، كشف الحساب، FCM.
