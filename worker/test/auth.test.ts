@@ -219,6 +219,7 @@ describe('سلوك HTTP العام', () => {
     const pre = await w.call('OPTIONS', '/auth/login', { headers: { origin: 'https://app.test' } });
     expect(pre.status).toBe(204);
     expect(pre.headers.get('access-control-allow-origin')).toBe('https://app.test');
+    expect(pre.headers.get('access-control-allow-methods')).toContain('PUT');
     expect((await w.call('OPTIONS', '/auth/login', { headers: { origin: 'https://evil.test' } })).status).toBe(403);
     expect((await w.call('GET', '/health', { headers: { origin: 'https://evil.test' } })).headers.get('access-control-allow-origin')).toBeNull();
   });

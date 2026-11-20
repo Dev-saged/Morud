@@ -3,19 +3,33 @@ import { formatDate, formatMoney, formatQty, STATUS } from '../lib/format';
 import { useSession } from '../lib/session';
 import { openPrintable } from '../shop/ShopApp';
 import { Icon, LogoMark, type IconName } from '../ui/Icons';
+import { Finance } from './Finance';
+import { Backups, Promotions, Settings, Support } from './More';
+import { Products } from './Products';
+import { Shops } from './Shops';
+import { Users } from './Users';
 
-type Section = 'dashboard' | 'orders' | 'delivery' | 'reports';
-const SECTIONS: Array<[Section, IconName, string, string]> = [
-  ['dashboard', 'chart', 'لوحة المعلومات', 'orders.view'],
-  ['orders', 'orders', 'الطلبات', 'orders.view'],
-  ['delivery', 'truck', 'التوصيل', 'delivery.view'],
-  ['reports', 'chart', 'التقارير', 'reports.view'],
+type Section = 'dashboard' | 'orders' | 'products' | 'shops' | 'delivery' | 'finance' | 'promotions' | 'reports' | 'users' | 'support' | 'settings' | 'backups';
+const SECTIONS: Array<[Section, IconName, string, string[]]> = [
+  ['dashboard', 'chart', 'لوحة المعلومات', ['orders.view']],
+  ['orders', 'orders', 'الطلبات', ['orders.view']],
+  ['products', 'box', 'المنتجات', ['products.create', 'products.update', 'products.availability.update', 'categories.manage']],
+  ['shops', 'store', 'المحلات', ['shops.view']],
+  ['delivery', 'truck', 'التوصيل', ['delivery.view']],
+  ['finance', 'wallet', 'المالية', ['invoices.view', 'payments.create']],
+  ['promotions', 'tag', 'العروض', ['promotions.manage']],
+  ['reports', 'chart', 'التقارير', ['reports.view']],
+  ['users', 'users', 'المستخدمون', ['users.manage']],
+  ['support', 'chat', 'الدعم', ['support.manage']],
+  ['settings', 'gear', 'الإعدادات', ['settings.manage']],
+  ['backups', 'shield', 'النسخ الاحتياطي', ['backups.manage']],
 ];
 
 export function AdminApp() {
   const { user, can, logout } = useSession();
-  const allowed = SECTIONS.filter(([, , , p]) => can(p));
-  const [sec, setSec] = useState<Section>(allowed[0]?.[0] ?? 'dashboard');
+  const allowed = SECTIONS.filter(([, , , p]) => p.some(can));
+  const home = user!.home.split('.')[1] as Section;
+  const [sec, setSec] = useState<Section>(allowed.some(([id]) => id === home) ? home : allowed[0]?.[0] ?? 'dashboard');
   return (
     <div className="admin">
       <aside className="side">
@@ -28,6 +42,14 @@ export function AdminApp() {
         {sec === 'orders' && <Orders />}
         {sec === 'delivery' && <Delivery />}
         {sec === 'reports' && <Reports />}
+        {sec === 'products' && <Products />}
+        {sec === 'shops' && <Shops />}
+        {sec === 'finance' && <Finance />}
+        {sec === 'promotions' && <Promotions />}
+        {sec === 'users' && <Users />}
+        {sec === 'support' && <Support />}
+        {sec === 'settings' && <Settings />}
+        {sec === 'backups' && <Backups />}
       </main>
     </div>
   );

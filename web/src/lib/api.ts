@@ -13,7 +13,7 @@ export function newKey(): string {
 
 export class Api {
   workContext: string | null = null;
-  constructor(private readonly base: string, private readonly token: TokenProvider, private readonly f: typeof fetch = (...a) => fetch(...a)) {}
+  constructor(readonly base: string, private readonly token: TokenProvider, private readonly f: typeof fetch = (...a) => fetch(...a)) {}
 
   async request<T = any>(method: string, path: string, body?: unknown, opts: { idem?: string; raw?: boolean } = {}): Promise<T> {
     const headers: Record<string, string> = { 'content-type': 'application/json', 'x-device': 'web' };
@@ -47,5 +47,26 @@ export class Api {
   }
   put<T = any>(path: string, body: unknown) {
     return this.request<T>('PUT', path, body);
+  }
+  del<T = any>(path: string) {
+    return this.request<T>('DELETE', path);
+  }
+  /** رفع ملف ثنائي (صور المنتجات المفرّغة). */
+  async upload<T = any>(path: string, blob: Blob): Promise<T> {
+    const headers: Record<string, string> = { 'content-type': blob.type || 'application/octet-stream', 'x-device': 'web' };
+    const t = await this.token();
+    if (t) headers.authorization = `Bearer ${t}`;
+    let res: Response;
+    try {
+      res = await this.f(`${this.base}${path}`, { method: 'POST', headers, body: blob });
+    } catch {
+      throw new ApiError(0, 'NETWORK', 'لا يوجد اتصال بالإنترنت، سنحاول مجدداً عند عودته');
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const e = (data as { error?: { code?: string; message?: string } }).error ?? {};
+      throw new ApiError(res.status, e.code ?? 'ERROR', e.message ?? 'تعذّر رفع الملف');
+    }
+    return data as T;
   }
 }

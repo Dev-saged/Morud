@@ -22,7 +22,7 @@ export function createApp(modules: RouteModule[] = []) {
     const url = new URL(req.url);
     const origin = req.headers.get('origin');
     const cors: Record<string, string> = origin && cfg.allowedOrigins.includes(origin)
-      ? { 'access-control-allow-origin': origin, vary: 'origin', 'access-control-allow-headers': 'authorization, content-type, idempotency-key, x-work-context, x-device', 'access-control-allow-methods': 'GET, POST, PATCH, DELETE', 'access-control-max-age': '600' }
+      ? { 'access-control-allow-origin': origin, vary: 'origin', 'access-control-allow-headers': 'authorization, content-type, idempotency-key, x-work-context, x-device', 'access-control-allow-methods': 'GET, POST, PUT, PATCH, DELETE', 'access-control-max-age': '600' }
       : {};
     if (req.method === 'OPTIONS') return new Response(null, { status: origin && cors['access-control-allow-origin'] ? 204 : 403, headers: cors });
     const requestId = s.id();
