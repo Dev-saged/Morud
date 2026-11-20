@@ -11,14 +11,13 @@
 - معتمد: «M بالنقطة». الحزمة في `brand/logo/final/` (إعادة التوليد: `python3 brand/logo/final/kit.py` ثم `sheet.py`)، الرموز `spec/brand.json`، الدليل `brand/guidelines.md`.
 - 24 اختباراً خضراء (`npm test`).
 
-## الخطوة التالية بالضبط
-M1 — نواة المنطق في `worker/src/domain` (TypeScript، اختبارات بـvitest أو node:test):
-1. `money.ts`: أغورة int، `lineTotal(qtyMilli, unitPrice)` بتقريب half-up، تنسيق ILS.
-2. `units.ts`: التحقق من الكمية (لا صفر/سالب، كسور حسب allowFraction، minQty/step).
-3. `fsm.ts`: يقرأ `spec/order-states.json` ويعيد الانتقال المسموح أو سبب الرفض.
-4. `sla.ts`: `computeDueAt` عبر ساعات العمل والعطل بتوقيت Asia/Gaza.
-5. `ledger.ts`: رصيد، تخصيص دفعة للأقدم، رصيد دائن، عكس.
-6. `pricing.ts` + `promotions.ts`: إعادة حساب السلة والعروض الخمسة بلا تكرار خصم.
-7. `search.ts`: تطبيع عربي (همزات، تاء مربوطة، ألف مقصورة، تشكيل، أرقام).
-شرط الإغلاق: سيناريوهات SRS 19.3 الخمسة + حالات حدية، تغطية ≥ 95%.
+## M1 نواة المنطق — مغلقة
+- `worker/src/domain/` 13 وحدة نقية، 58 اختباراً، تغطية أسطر 100%. CI `worker.yml`.
 
+## الخطوة التالية بالضبط
+M2 — أساس الـWorker (`worker/src/`):
+1. `infra/firestore.ts`: عميل Firestore REST (get/query/commit/beginTransaction) بتوقيع JWT لحساب الخدمة عبر WebCrypto.
+2. `infra/auth.ts`: تحقق Firebase ID token (مفاتيح Google العامة، aud/iss/exp/auth_time مقابل sessionsRevokedAt) + custom token.
+3. `api/auth.ts`: POST /auth/login (معرّف ← بريد الدخول، حد المحاولات في KV، Identity Toolkit، فحص الحالة/الانتهاء) و/auth/logout و/auth/me.
+4. `api/middleware.ts`: سياق المستخدم (وثيقته + الصلاحيات الفعلية + المحلات) لكل طلب، RBAC، تدقيق، idempotency بمعاملة Firestore (create-if-absent)، نموذج أخطاء JSON موحد، CORS.
+5. اختبارات بـvitest مع محاكاة fetch لـGoogle APIs.

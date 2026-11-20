@@ -20,6 +20,9 @@
 | أيقونة أندرويد التكيفية | `brand/logo/final/android/` | تُنسخ إلى `android/app/src/main/res/` في M10 |
 | اختبارات حزمة الشعار | `tests/brand.test.mjs` | 6 اختبارات |
 | لوحة العرض للعميل | `brand/logo/v2/build_board.py` ← `board.html`، `slides/*.png`، `mawred-logo-presentation.png/jpg` | خطوط Amiri/El Messiri/Alexandria/Aref Ruqaa من الدماغ |
+| نواة المنطق (بلا I/O) | `worker/src/domain/*.ts` | money، quantity، catalog، pricing، promotions، fsm، permissions، ledger، sla، search، numbering، idempotency، result |
+| اختبارات النواة + سيناريوهات SRS 19.3 | `worker/test/*.test.ts` | `cd worker && npm run coverage` (عتبة 95%) |
+| CI الخادم | `.github/workflows/worker.yml` | typecheck + coverage |
 | CI للمواصفات | `.github/workflows/spec.yml` | |
 
 ## القرارات وأسبابها
@@ -39,6 +42,10 @@
 - 2026-11-20 — اعتمد ساجد «M بالنقطة» (أزرق #1D4ED8 + برتقالي #F08A24). البرتقالي على الأبيض تباينه 2.5 فقط ← لا يُستخدم لنصوص الواجهة على خلفية فاتحة.
 - 2026-11-20 — الشعار مقدَّم كخطوة أولى (M9a) قبل M1 بطلب ساجد؛ لا يخالف SRS 22-1 لأنه ليس واجهة.
 
+- 2026-11-20 — الخصومات: أفضل عرض واحد لكل سطر (لا تكديس)، وسقف الخصم يوزَّع على أسطر العرض بالترتيب.
+- 2026-11-20 — إلغاء طلب مفوتر: إشعار دائن بكامل الفاتورة، والمدفوع يبقى رصيداً دائناً أو يُردّ (`refund`) بقرار الموظف.
+- 2026-11-20 — المهلة تُحسب على ساعات استقبال الطلبات (06:00–23:00) بتوقيت Asia/Gaza مع التوقيت الصيفي عبر Intl بلا مكتبات.
+
 ## أخطاء محلولة
 - `node --test tests/` يفشل على Node 22 (يعامل المجلد كملف) ← استخدم `node --test tests/*.test.mjs`.
 
@@ -47,6 +54,8 @@
 - خط Aref Ruqaa يدمج ميم «مورد» الابتدائية فتُقرأ «سورد» ← لا يُستخدم لكلمة «مورد» كاملة؛ يصلح للميم المفردة فقط.
 
 - أعلام أقواس Android vector كانت تُكتب «1.000» فتختفي الدوائر ← تُكتب 0/1 صحيحة، واختبار يمنع العودة.
+
+- npm 10 يفشل بـ`edgesOut` مع vitest 4 ← `legacy-peer-deps=true` في `worker/.npmrc`.
 
 ## قضايا مفتوحة
 - MFA الإداري يحتاج ترقية Identity Platform (D7) — قبل الإطلاق.
