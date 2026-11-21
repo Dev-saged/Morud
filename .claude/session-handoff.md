@@ -60,3 +60,12 @@ M8 — العروض والتقارير والنسخ:
 - أضيف `.github/workflows/deploy.yml` (يدوي: server/web/all + bootstrap مرة واحدة)، و`scripts/ci-kv.mjs` و`scripts/ci-secrets.mjs`. كلمة المالك من السر OWNER_PASSWORD لأن المستودع عام؛ لا تُطبع كلمات مرور في السجلات.
 - دليل الإعداد لساجد في وثيقة claude.ai «مورد — دليل الإعداد والنشر من الجوال». ننتظر منه: الأسرار والمتغيرات ثم تشغيل deploy. لم يُجرَّب deploy.yml فعلياً بعد (لا حسابات) — أول تشغيل قد يكشف تعديلات.
 - متغيرات M14 المنتظرة: MAWRED_FIREBASE_SENDER_ID, MAWRED_FIREBASE_WEB_APP_ID, MAWRED_FIREBASE_ANDROID_APP_ID, MAWRED_FIREBASE_VAPID_KEY.
+
+## الإنتاج يعمل (2026-11-21)
+- الخادم: https://mawred-api.dev-mr07.workers.dev (Worker mawred-api، جدول واحد * * * * *، KV mawred-kv، R2 mawred-files وmawred-backups).
+- الموقع: https://mawred.pages.dev (Pages project mawred). Firebase: mawred-gaza (Firestore me-west1، 17 فهرساً، القواعد منشورة، Email/Password مفعّل، تطبيق ويب وAndroid مسجّلان).
+- المالك: sajed (super_admin) بكلمة مؤقتة تُغيَّر عند أول دخول.
+- الإعداد العام في web/.env.production وandroid/gradle.properties (ليس سراً).
+- الأسرار عند Cloudflare (SERVICE_ACCOUNT_JSON، FIREBASE_API_KEY، BACKUP_KEY) ومفتاح التوقيع عند ساجد؛ نسخ الجلسة في ~/.mawred تزول مع البيئة.
+- إصلاح: fetch غير مربوط في أصناف Firestore/Identity/FCM سبّب Illegal invocation في Workers فقط.
+- ناقص: TTL لمجموعة idempotency يحتاج Blaze — استبدله بتنظيف يومي في المهمة المجدولة. أسرار GitHub الأربعة للتوقيع ينتظر ساجد إضافتها لتعمل Releases التلقائية (الجلسة لا تملك صلاحية الأسرار ولا Releases).
