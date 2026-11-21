@@ -176,3 +176,8 @@
 - `ui/admin/AdminOrders.kt`: AdminOrdersScreen/AdminProductsScreen؛ التبويبات تظهر حسب الصلاحية في `MawredRoot`.
 - `ui/agent/AgentScreens.kt`: TaskActions (on_the_way، delivered، delivery_failed).
 - قرار: Android للإدارة الميدانية السريعة (الطلبات، التوفر، الصور)؛ الإدارة الكاملة (المستخدمون، المالية، الإعدادات…) على الويب.
+
+## الويب — M13c (E2E)
+- `web/playwright.config.ts` يبني الإنتاج ويشغّل `vite preview`؛ `e2e/mock.ts` يعترض Identity Toolkit (JWT غير موقّع يكفي للـ SDK) و`api.mawred.test`.
+- `e2e/flows.spec.ts`: المحل (دخول→بحث→وحدة كرتونة→سلة→إرسال بمفتاح idempotency وBearer→تتبع SLA→إعادة تحميل)، المدير (المؤشرات، أقسام حسب الصلاحية، الطلبات، التقارير)، التوافق (320/390/768 بخط 150% بلا تمرير أفقي). فشل يُسقط الاختبار عند أي pageerror.
+- إصلاح كشفه E2E: شريط الإدارة على الجوال كان يحتل نصف الشاشة؛ صار شريطاً مضغوطاً لاصقاً بتنقل أفقي، وscroll-snap صار proximity.
