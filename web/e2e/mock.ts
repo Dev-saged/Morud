@@ -34,9 +34,9 @@ export async function mockBackend(page: Page, user: typeof shopUser, routes: Rec
     if (url.includes('accounts:lookup')) return route.fulfill({ json: { users: [{ localId: user.uid, lastLoginAt: String(Date.now()), createdAt: String(Date.now()) }] } });
     return route.fulfill({ json: { id_token: idToken, refresh_token: 'refresh', expires_in: '3600', user_id: user.uid } });
   });
-  await page.route('https://api.mawred.test/**', async (route) => {
+  await page.route('**/__api/**', async (route) => {
     const req = route.request();
-    const url = new URL(req.url());
+    const url = new URL(req.url().replace('/__api', ''));
     if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
     const body = req.postData() ? JSON.parse(req.postData()!) : null;
     calls.push({ method: req.method(), path: url.pathname, body, headers: req.headers() });
@@ -48,4 +48,4 @@ export async function mockBackend(page: Page, user: typeof shopUser, routes: Rec
   return calls;
 }
 
-const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET, POST, PUT, PATCH, DELETE' };
+const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'authorization, content-type, idempotency-key, x-work-context, x-device', 'access-control-allow-methods': 'GET, POST, PUT, PATCH, DELETE' };
