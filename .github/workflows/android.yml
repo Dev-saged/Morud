@@ -50,7 +50,7 @@ jobs:
           mkdir -p dist
           cp app/build/outputs/apk/release/*.apk "dist/Mawred-v${VERSION}-build${GITHUB_RUN_NUMBER}.apk"
           if [ -z "$KEYSTORE_BASE64" ]; then echo "::warning::بلا أسرار توقيع — APK بمفتاح التطوير، لن يُنشر Release."; fi
-          if [ -z "$MAWRED_API_URL" ]; then echo "::warning::MAWRED_API_URL غير مضبوط — التطبيق سيعرض «غير مهيأ» عند الدخول."; fi
+          if [ -z "$MAWRED_API_URL" ] && ! grep -q '^mawred.apiUrl=https://' gradle.properties; then echo "::warning::عنوان الخادم غير مضبوط — التطبيق سيعرض «غير مهيأ» عند الدخول."; fi
       - uses: actions/upload-artifact@v4
         with:
           name: Mawred-APK-${{ github.run_number }}
