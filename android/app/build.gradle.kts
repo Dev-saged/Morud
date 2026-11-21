@@ -113,6 +113,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.datastore.preferences)
     implementation(libs.work.runtime)
+    implementation(libs.mlkit.segmentation)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

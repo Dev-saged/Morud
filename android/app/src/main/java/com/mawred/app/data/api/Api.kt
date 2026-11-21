@@ -46,6 +46,21 @@ class Api(private val client: OkHttpClient, private val base: () -> String, priv
         }
     }
 
+    /** رفع ملف ثنائي (صور المنتجات المفرّغة). */
+    suspend fun upload(path: String, bytes: ByteArray, contentType: String): JsonObject = withContext(Dispatchers.IO) {
+        val b = Request.Builder().url(base() + path).header("x-device", "android").post(bytes.toRequestBody(contentType.toMediaType()))
+        token()?.let { b.header("authorization", "Bearer $it") }
+        val res = try { client.newCall(b.build()).execute() } catch (e: IOException) { throw ApiException(0, "NETWORK", "لا يوجد اتصال بالإنترنت") }
+        res.use { r ->
+            val obj = runCatching { ApiJson.parseToJsonElement(r.body?.string().orEmpty()).jsonObject }.getOrNull() ?: JsonObject(emptyMap())
+            if (!r.isSuccessful) {
+                val e = obj["error"] as? JsonObject
+                throw ApiException(r.code, e?.get("code")?.jsonPrimitive?.contentOrNull ?: "ERROR", e?.get("message")?.jsonPrimitive?.contentOrNull ?: "تعذّر رفع الملف")
+            }
+            obj
+        }
+    }
+
     suspend fun get(path: String) = request("GET", path)
     suspend fun post(path: String, body: JsonElement, idem: String? = null) = request("POST", path, body, idem)
 

@@ -168,3 +168,11 @@
 - `data/OutboxWorker.kt`: WorkManager بشرط الشبكة وتراجع أُسّي، عبر Hilt EntryPoint.
 - `ui/shop/ShopViewModel.kt` (CheckoutUi)، `ShopScreens.kt` (السلة: طريقة الدفع والملاحظات والإرسال وحوار السعر)، `OrderScreens.kt` (طلباتي، التفاصيل بالمراحل ومؤقت SLA بتوقيت غزة والإجراءات، كشف الحساب).
 - `ApiException.details` يحمل تفاصيل الخادم (مثل total في PRICE_CHANGED).
+
+## Android — M12 (الإدارة والمندوب)
+- `data/Admin.kt`: AdminRepository (orders?filter، agents من /delivery/board، assign-agent، PATCH التوفر، addImage: رفع PNG ثم PATCH images مع الإبقاء على السابقة، deliver بإثبات).
+- `data/Cutout.kt`: ML Kit Subject Segmentation (foregroundBitmap) → PNG شفاف ≤1600px؛ النموذج يُثبت مع التطبيق (meta-data subject_segment).
+- `Api.upload`: رفع ثنائي بنوع المحتوى وأخطاء عربية.
+- `ui/admin/AdminOrders.kt`: AdminOrdersScreen/AdminProductsScreen؛ التبويبات تظهر حسب الصلاحية في `MawredRoot`.
+- `ui/agent/AgentScreens.kt`: TaskActions (on_the_way، delivered، delivery_failed).
+- قرار: Android للإدارة الميدانية السريعة (الطلبات، التوفر، الصور)؛ الإدارة الكاملة (المستخدمون، المالية، الإعدادات…) على الويب.

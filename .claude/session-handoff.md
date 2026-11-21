@@ -52,3 +52,6 @@ M8 — العروض والتقارير والنسخ:
 
 ## تحديث — M11
 - أُغلقت M11 (20 اختبار وحدة، release ناجح). التالي: M12 Android الإدارة والمندوب (إجراءات الطلبات، التسليم بإثبات واسم المستلم والمبلغ، تفريغ صور المنتجات بـ ML Kit Subject Segmentation ورفعها)، ثم M11b FCM، M13c، M14.
+
+## تحديث — M12
+- أُغلقت M12 (24 اختبار وحدة، release 2.8MB). التالي: M11b FCM (يحتاج appId/projectId/senderId من Firebase كمتغيرات CI)، M13c Playwright + Web Push، M14 QA/E2E/أمان/v1.0.0، MFA للأدوار الحساسة.

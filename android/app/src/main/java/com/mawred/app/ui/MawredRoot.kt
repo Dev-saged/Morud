@@ -74,7 +74,11 @@ private data class Tab(val id: String, val label: String, val icon: ImageVector)
 private fun AreaShell(user: SessionUser, offline: Boolean, update: UpdateInfo?, onUpdate: (UpdateInfo) -> Unit, onLogout: () -> Unit, onSecret: () -> Unit) {
     val tabs = when (user.area) {
         "shop" -> listOf(Tab("catalog", "الرئيسية", Icons.home), Tab("cart", "السلة", Icons.cart), Tab("orders", "طلباتي", Icons.orders), Tab("account", "حسابي", Icons.wallet))
-        "admin" -> listOf(Tab("dashboard", "لوحة المعلومات", Icons.chart))
+        "admin" -> listOfNotNull(
+            Tab("dashboard", "لوحة المعلومات", Icons.chart).takeIf { user.can("orders.view") },
+            Tab("adminOrders", "الطلبات", Icons.orders).takeIf { user.can("orders.view") },
+            Tab("adminProducts", "المنتجات", Icons.box).takeIf { user.can("products.availability.update") || user.can("products.update") },
+        )
         "agent" -> listOf(Tab("tasks", "المهام", Icons.truck))
         else -> emptyList()
     }
@@ -116,6 +120,8 @@ private fun AreaShell(user: SessionUser, offline: Boolean, update: UpdateInfo?, 
                     "account" -> com.mawred.app.ui.shop.AccountScreen(hiltViewModel(), pad)
                     "dashboard" -> DashboardScreen(hiltViewModel(), pad)
                     "tasks" -> TasksScreen(hiltViewModel(), pad)
+                    "adminOrders" -> com.mawred.app.ui.admin.AdminOrdersScreen(hiltViewModel(), pad)
+                    "adminProducts" -> com.mawred.app.ui.admin.AdminProductsScreen(hiltViewModel(), pad, user.can("products.update"))
                     else -> com.mawred.app.ui.common.Empty("لا توجد واجهة لحسابك، تواصل مع الإدارة")
                 }
             }
