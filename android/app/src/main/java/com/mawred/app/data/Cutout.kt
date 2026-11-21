@@ -20,7 +20,8 @@ object Cutout {
         val scaled = scale(source, 1600)
         val result = segmenter.process(InputImage.fromBitmap(scaled, 0)).await()
         val fg = result.foregroundBitmap ?: throw IllegalStateException("لم يُعثر على منتج واضح في الصورة")
-        return ByteArrayOutputStream().use { out -> fg.compress(Bitmap.CompressFormat.PNG, 100, out); out.toByteArray() }
+        val marked = Watermark.stamp(fg)
+        return ByteArrayOutputStream().use { out -> marked.compress(Bitmap.CompressFormat.PNG, 100, out); out.toByteArray() }
     }
 
     fun scale(b: Bitmap, max: Int): Bitmap {

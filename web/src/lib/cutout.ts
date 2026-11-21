@@ -41,7 +41,41 @@ export function removeBackground(d: Rgba, w: number, h: number, tolerance = 60):
   return removed;
 }
 
-/** يحوّل ملف الصورة إلى PNG مفرّغ بحد أقصى 1600px (متصفح فقط). */
+/** شعار «M بالنقطة» (مسار المربع 256) — نفس brand/logo/final. */
+export const MARK_PATH = 'M43 59V191a15 15 0 0 0 30 0V100l42 47a15 15 0 0 0 22 0l42-47v41a15 15 0 0 0 30 0V59a15 15 0 0 0-26-10l-57 64-57-64a15 15 0 0 0-26 10z';
+export const MARK_BLUE = '#1D4ED8';
+export const MARK_ORANGE = '#F08A24';
+
+/** مكان علامة مورد: مربع في الزاوية السفلية اليسرى بعرض 14% من الضلع الأقصر (حد أدنى 40px) وهامش 3%. */
+export function markRect(w: number, h: number) {
+  const size = Math.max(40, Math.round(Math.min(w, h) * 0.14));
+  const pad = Math.round(Math.min(w, h) * 0.03);
+  return { x: pad, y: h - size - pad, size };
+}
+
+/** يرسم علامة مورد: بلاطة بيضاء دائرية الحواف وفوقها الشعار الملوّن. */
+export function stampMark(g: CanvasRenderingContext2D, w: number, h: number) {
+  const { x, y, size } = markRect(w, h);
+  g.save();
+  g.globalAlpha = 0.92;
+  g.fillStyle = '#FFFFFF';
+  g.beginPath();
+  g.roundRect(x, y, size, size, size * 0.22);
+  g.fill();
+  g.globalAlpha = 1;
+  g.translate(x + size * 0.12, y + size * 0.12);
+  const k = (size * 0.76) / 256;
+  g.scale(k, k);
+  g.fillStyle = MARK_BLUE;
+  g.fill(new Path2D(MARK_PATH));
+  g.fillStyle = MARK_ORANGE;
+  g.beginPath();
+  g.arc(194, 193, 19, 0, Math.PI * 2);
+  g.fill();
+  g.restore();
+}
+
+/** يحوّل ملف الصورة إلى PNG مفرّغ بعلامة مورد، بحد أقصى 1600px (متصفح فقط). */
 export async function toCutoutPng(file: Blob, tolerance = 60): Promise<{ blob: Blob; removedRatio: number }> {
   const bmp = await createImageBitmap(file);
   const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
@@ -53,6 +87,7 @@ export async function toCutoutPng(file: Blob, tolerance = 60): Promise<{ blob: B
   const img = g.getImageData(0, 0, w, h);
   const removed = hasTransparentEdges(img.data, w, h) ? 0 : removeBackground(img.data, w, h, tolerance);
   g.putImageData(img, 0, 0);
+  stampMark(g, w, h);
   const blob = await new Promise<Blob>((ok, no) => c.toBlob((b) => (b ? ok(b) : no(new Error('تعذّر إنشاء الصورة'))), 'image/png'));
   return { blob, removedRatio: removed / (w * h) };
 }

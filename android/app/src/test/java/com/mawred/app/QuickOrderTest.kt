@@ -48,3 +48,14 @@ class QuickOrderTest {
         assertEquals("box", Product("x", "x", units = listOf(u("box", 1))).defaultUnit()!!.unitId)
     }
 }
+
+class WatermarkTest {
+    @Test fun markRectMatchesWeb() {
+        assertEquals(com.mawred.app.data.Watermark.Rect(24, 800 - 112 - 24, 112), com.mawred.app.data.Watermark.markRect(1000, 800))
+        assertEquals(40, com.mawred.app.data.Watermark.markRect(100, 100).size)
+        for ((w, h) in listOf(64 to 64, 1600 to 900, 300 to 1200)) {
+            val r = com.mawred.app.data.Watermark.markRect(w, h)
+            org.junit.Assert.assertTrue(r.x + r.size <= w && r.y >= 0)
+        }
+    }
+}

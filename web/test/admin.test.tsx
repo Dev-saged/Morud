@@ -122,3 +122,17 @@ describe('لوحة الإدارة الشاملة', () => {
     expect((await screen.findByRole('alert')).textContent).toBe('تعذّر إنشاء النسخة');
   });
 });
+
+describe('علامة مورد على الصور', () => {
+  it('في الزاوية السفلية بعرض 14% وحد أدنى 40px، داخل الصورة دائماً', async () => {
+    const { markRect } = await import('../src/lib/cutout');
+    expect(markRect(1000, 800)).toEqual({ x: 24, y: 800 - 112 - 24, size: 112 });
+    const small = markRect(100, 100);
+    expect(small.size).toBe(40);
+    for (const [w, h] of [[64, 64], [1600, 900], [300, 1200]] as const) {
+      const r = markRect(w, h);
+      expect(r.x + r.size).toBeLessThanOrEqual(w);
+      expect(r.y).toBeGreaterThanOrEqual(0);
+    }
+  });
+});
