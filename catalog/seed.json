@@ -1,0 +1,4151 @@
+{
+ "source": {
+  "unicef": "UNICEF State of Palestine — Market Monitoring: Food & Non-Food Items, Gaza Strip, 25–27 Aug 2026 (median retail prices, ILS)",
+  "estimate": "تقدير مبدئي يراجعه المالك قبل النشر"
+ },
+ "products": [
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-001",
+   "name": "دجاج كامل مجمد",
+   "altNames": [
+    "فراخ مجمدة",
+    "جاج مجمد",
+    "دجاج"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 2100,
+     "minQtyMilli": 1000,
+     "stepMilli": 500,
+     "allowFraction": true
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 10000,
+     "price": 21000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "chicken",
+   "priceSource": "unicef",
+   "description": "كرتونة 10 كغ تقريباً"
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-002",
+   "name": "صدر دجاج مجمد",
+   "altNames": [
+    "صدور دجاج",
+    "فيليه دجاج",
+    "صدر"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 3200,
+     "minQtyMilli": 1000,
+     "stepMilli": 500,
+     "allowFraction": true
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 10000,
+     "price": 32000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "chicken_part",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-003",
+   "name": "أفخاذ دجاج مجمدة",
+   "altNames": [
+    "فخاد دجاج",
+    "اوراك",
+    "شيش"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 2400,
+     "minQtyMilli": 1000,
+     "stepMilli": 500,
+     "allowFraction": true
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 10000,
+     "price": 24000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "chicken_part",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-004",
+   "name": "أجنحة دجاج مجمدة",
+   "altNames": [
+    "جوانح",
+    "اجنحه"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 2000,
+     "minQtyMilli": 1000,
+     "stepMilli": 500,
+     "allowFraction": true
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 10000,
+     "price": 20000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "chicken_part",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-005",
+   "name": "كبدة دجاج مجمدة",
+   "altNames": [
+    "كبده",
+    "قوانص"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 1800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 10000,
+     "price": 17000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "box_red",
+   "priceSource": "estimate",
+   "description": "علبة 1 كغ، كرتونة 10 علب"
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-006",
+   "name": "لحم بقري مجمد",
+   "altNames": [
+    "لحمة عجل",
+    "لحم عجل",
+    "لحمه"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 4000,
+     "minQtyMilli": 1000,
+     "stepMilli": 500,
+     "allowFraction": true
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 20000,
+     "price": 80000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "meat",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-007",
+   "name": "لحم حبش مجمد",
+   "altNames": [
+    "حبش",
+    "ديك رومي",
+    "تركي"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 3200,
+     "minQtyMilli": 1000,
+     "stepMilli": 500,
+     "allowFraction": true
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 10000,
+     "price": 32000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "meat",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-008",
+   "name": "لحم مفروم مجمد",
+   "altNames": [
+    "مفرومة",
+    "كفتة"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 500,
+     "price": 2200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 10000,
+     "price": 21000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "carton",
+   "icon": "meat",
+   "priceSource": "estimate",
+   "description": "عبوة 500 غرام، كرتونة 20 عبوة"
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-009",
+   "name": "سمك بوري مجمد",
+   "altNames": [
+    "بوري",
+    "اسماك",
+    "سمك"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 2800,
+     "minQtyMilli": 1000,
+     "stepMilli": 500,
+     "allowFraction": true
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 10000,
+     "price": 28000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "fish",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-010",
+   "name": "سمك فيليه بانغا مجمد",
+   "altNames": [
+    "فيليه سمك",
+    "بانغا",
+    "فيليه"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 2200,
+     "minQtyMilli": 1000,
+     "stepMilli": 500,
+     "allowFraction": true
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 10000,
+     "price": 22000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "fish",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-011",
+   "name": "جمبري مجمد",
+   "altNames": [
+    "قريدس",
+    "روبيان",
+    "جمبري"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 5500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 10000,
+     "price": 52000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "box",
+   "icon": "shrimp",
+   "priceSource": "estimate",
+   "description": "علبة 1 كغ"
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-012",
+   "name": "بازيلاء مجمدة 400 غرام",
+   "altNames": [
+    "بازيلا",
+    "بسلة"
+   ],
+   "units": [
+    {
+     "unitId": "bag",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 20000,
+     "price": 11000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "bag",
+   "defaultUnitId": "carton",
+   "icon": "veg_green",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-013",
+   "name": "بامية مجمدة 400 غرام",
+   "altNames": [
+    "باميه"
+   ],
+   "units": [
+    {
+     "unitId": "bag",
+     "factorToBase": 1000,
+     "price": 800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 20000,
+     "price": 15000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "bag",
+   "defaultUnitId": "carton",
+   "icon": "veg_green",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-014",
+   "name": "ملوخية مجمدة 400 غرام",
+   "altNames": [
+    "ملوخيه",
+    "ملوخية ورق"
+   ],
+   "units": [
+    {
+     "unitId": "bag",
+     "factorToBase": 1000,
+     "price": 700,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 20000,
+     "price": 13000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "bag",
+   "defaultUnitId": "carton",
+   "icon": "veg_leaf",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-015",
+   "name": "فول أخضر مجمد 400 غرام",
+   "altNames": [
+    "فول اخضر",
+    "فول"
+   ],
+   "units": [
+    {
+     "unitId": "bag",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 20000,
+     "price": 11000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "bag",
+   "defaultUnitId": "carton",
+   "icon": "veg_green",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-016",
+   "name": "خضار مشكلة مجمدة 400 غرام",
+   "altNames": [
+    "خضار مشكل",
+    "مكس خضار"
+   ],
+   "units": [
+    {
+     "unitId": "bag",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 20000,
+     "price": 11000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "bag",
+   "defaultUnitId": "carton",
+   "icon": "veg_mix",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-017",
+   "name": "بطاطا مقلية مجمدة 2.5 كغ",
+   "altNames": [
+    "بطاطا فرايز",
+    "شيبس مجمد",
+    "فرنش فرايز"
+   ],
+   "units": [
+    {
+     "unitId": "bag",
+     "factorToBase": 1000,
+     "price": 2500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 4000,
+     "price": 9500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "bag",
+   "defaultUnitId": "bag",
+   "icon": "fries",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-018",
+   "name": "برغر لحم مجمد 20 قطعة",
+   "altNames": [
+    "برجر",
+    "همبرغر"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 3500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 6000,
+     "price": 20000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "box",
+   "icon": "burger",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "frozen",
+   "sku": "FRZ-019",
+   "name": "نقانق دجاج مجمدة 500 غرام",
+   "altNames": [
+    "نقانق",
+    "سجق",
+    "هوت دوغ"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 1200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 20000,
+     "price": 23000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "carton",
+   "icon": "sausage",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "staples",
+   "sku": "STP-001",
+   "name": "أرز حبة طويلة",
+   "altNames": [
+    "رز",
+    "ارز بسمتي",
+    "رز طويل"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "sack",
+     "factorToBase": 25000,
+     "price": 19000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "sack",
+   "icon": "sack_rice",
+   "priceSource": "unicef",
+   "description": "شوال 25 كغ"
+  },
+  {
+   "categoryId": "staples",
+   "sku": "STP-002",
+   "name": "سكر أبيض",
+   "altNames": [
+    "سكر"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 450,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "sack",
+     "factorToBase": 50000,
+     "price": 21500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "sack",
+   "icon": "sack",
+   "priceSource": "unicef",
+   "description": "شوال 50 كغ"
+  },
+  {
+   "categoryId": "staples",
+   "sku": "STP-003",
+   "name": "طحين أبيض متعدد الاستعمالات",
+   "altNames": [
+    "دقيق",
+    "طحين"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 120,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "sack",
+     "factorToBase": 25000,
+     "price": 3000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "sack",
+   "icon": "sack_flour",
+   "priceSource": "unicef",
+   "description": "شوال 25 كغ"
+  },
+  {
+   "categoryId": "staples",
+   "sku": "STP-004",
+   "name": "زيت نباتي 1 لتر",
+   "altNames": [
+    "زيت قلي",
+    "زيت ذرة",
+    "زيت"
+   ],
+   "units": [
+    {
+     "unitId": "liter",
+     "factorToBase": 1000,
+     "price": 800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 9200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "liter",
+   "defaultUnitId": "carton",
+   "icon": "bottle_oil",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "staples",
+   "sku": "STP-005",
+   "name": "عدس مجروش أحمر",
+   "altNames": [
+    "عدس احمر",
+    "شوربة عدس"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "sack",
+     "factorToBase": 25000,
+     "price": 14000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "sack_lentil",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "staples",
+   "sku": "STP-006",
+   "name": "حمص حب ناشف",
+   "altNames": [
+    "حمص ناشف",
+    "حمص"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "sack",
+     "factorToBase": 25000,
+     "price": 14000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "sack_beans",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "staples",
+   "sku": "STP-007",
+   "name": "فاصولياء بيضاء ناشفة",
+   "altNames": [
+    "فاصوليا",
+    "فاصولياء"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "sack",
+     "factorToBase": 25000,
+     "price": 11500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "sack_beans",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "staples",
+   "sku": "STP-008",
+   "name": "فول ناشف",
+   "altNames": [
+    "فول مدمس ناشف",
+    "فول حب"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "sack",
+     "factorToBase": 25000,
+     "price": 14000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "sack_beans",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "staples",
+   "sku": "STP-009",
+   "name": "طحينة 1 كغ",
+   "altNames": [
+    "طحينه",
+    "سمسم"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 1550,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 18000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "jar",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "staples",
+   "sku": "STP-010",
+   "name": "ملح طعام 1 كغ",
+   "altNames": [
+    "ملح"
+   ],
+   "units": [
+    {
+     "unitId": "bag",
+     "factorToBase": 1000,
+     "price": 400,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 20000,
+     "price": 7500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "bag",
+   "defaultUnitId": "carton",
+   "icon": "bag_salt",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "staples",
+   "sku": "STP-011",
+   "name": "معكرونة 400 غرام",
+   "altNames": [
+    "مكرونة",
+    "باستا",
+    "معكرونه"
+   ],
+   "units": [
+    {
+     "unitId": "bag",
+     "factorToBase": 1000,
+     "price": 400,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 20000,
+     "price": 7500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "bag",
+   "defaultUnitId": "carton",
+   "icon": "pasta",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "dairy",
+   "sku": "DAI-001",
+   "name": "حليب سائل كامل الدسم 1 لتر",
+   "altNames": [
+    "حليب",
+    "لبن حليب"
+   ],
+   "units": [
+    {
+     "unitId": "liter",
+     "factorToBase": 1000,
+     "price": 800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 9200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "liter",
+   "defaultUnitId": "carton",
+   "icon": "milk_carton",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "dairy",
+   "sku": "DAI-002",
+   "name": "حليب بودرة 500 غرام",
+   "altNames": [
+    "حليب مجفف",
+    "بودرة حليب",
+    "نيدو"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 1875,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 22000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "milk_powder",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "dairy",
+   "sku": "DAI-003",
+   "name": "لبن زبادي 1 كغ",
+   "altNames": [
+    "لبن",
+    "زبادي",
+    "لبنة سائلة"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 1650,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 6000,
+     "price": 9500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "box",
+   "icon": "yogurt",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "dairy",
+   "sku": "DAI-004",
+   "name": "جبنة بيضاء معلبة 250 غرام",
+   "altNames": [
+    "جبنه بيضاء",
+    "جبنة",
+    "جبن",
+    "فيتا"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 250,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 48000,
+     "price": 11500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "cheese_can",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "dairy",
+   "sku": "DAI-005",
+   "name": "جبنة نابلسية 1 كغ",
+   "altNames": [
+    "جبنة بلدية",
+    "نابلسي",
+    "جبنه"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 3800,
+     "minQtyMilli": 1000,
+     "stepMilli": 500,
+     "allowFraction": true
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 10000,
+     "price": 37000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "carton",
+   "icon": "cheese",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "dairy",
+   "sku": "DAI-006",
+   "name": "جبنة شرائح 200 غرام",
+   "altNames": [
+    "جبنة توست",
+    "شرائح",
+    "جبن"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 900,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 20500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "carton",
+   "icon": "cheese",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "dairy",
+   "sku": "DAI-007",
+   "name": "جبنة مثلثات 16 قطعة",
+   "altNames": [
+    "جبنة مثلثات",
+    "بقرة ضاحكة",
+    "جبن"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 1200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 27500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "cheese_round",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "dairy",
+   "sku": "DAI-008",
+   "name": "لبنة 500 غرام",
+   "altNames": [
+    "لبنه"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 1000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 11500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "yogurt",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "dairy",
+   "sku": "DAI-009",
+   "name": "زبدة 200 غرام",
+   "altNames": [
+    "زبده"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 1000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 40000,
+     "price": 38000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "carton",
+   "icon": "butter",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "dairy",
+   "sku": "DAI-010",
+   "name": "بيض طبق 30 حبة",
+   "altNames": [
+    "بيض",
+    "طبق بيض",
+    "كرتونة بيض"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 3500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 41000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "eggs",
+   "priceSource": "unicef",
+   "description": "الطبق 30 بيضة"
+  },
+  {
+   "categoryId": "snacks",
+   "sku": "SNK-001",
+   "name": "شيبس بطاطا 70 غرام",
+   "altNames": [
+    "شيبس",
+    "تشيبس"
+   ],
+   "units": [
+    {
+     "unitId": "bag",
+     "factorToBase": 1000,
+     "price": 200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 40000,
+     "price": 7500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "bag",
+   "defaultUnitId": "carton",
+   "icon": "chips",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "snacks",
+   "sku": "SNK-002",
+   "name": "بسكويت محشي 12 حبة",
+   "altNames": [
+    "بسكويت"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 11000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "carton",
+   "icon": "biscuit",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "snacks",
+   "sku": "SNK-003",
+   "name": "شوكولاتة ويفر",
+   "altNames": [
+    "ويفر",
+    "شوكولاته"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "box",
+     "factorToBase": 24000,
+     "price": 4200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 288000,
+     "price": 48000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "box",
+   "icon": "chocolate",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "snacks",
+   "sku": "SNK-004",
+   "name": "لوح شوكولاتة بالحليب 100 غرام",
+   "altNames": [
+    "شوكولاتة",
+    "شوكلاته"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "box",
+     "factorToBase": 20000,
+     "price": 11000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "box",
+   "icon": "chocolate",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "snacks",
+   "sku": "SNK-005",
+   "name": "بزر عباد الشمس",
+   "altNames": [
+    "بزر",
+    "بذر",
+    "لب سوري"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 2500,
+     "minQtyMilli": 500,
+     "stepMilli": 500,
+     "allowFraction": true
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 10000,
+     "price": 24000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "nuts",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "snacks",
+   "sku": "SNK-006",
+   "name": "فستق حلبي محمص",
+   "altNames": [
+    "فستق",
+    "فستق حلبي"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 7000,
+     "minQtyMilli": 500,
+     "stepMilli": 500,
+     "allowFraction": true
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "nuts",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "snacks",
+   "sku": "SNK-007",
+   "name": "فول سوداني محمص",
+   "altNames": [
+    "فستق عبيد",
+    "فول سوداني"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 2000,
+     "minQtyMilli": 500,
+     "stepMilli": 500,
+     "allowFraction": true
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "nuts",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "snacks",
+   "sku": "SNK-008",
+   "name": "كيك ملفوف بالكريمة",
+   "altNames": [
+    "كيك",
+    "سويسرول"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 4400,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "cake",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "snacks",
+   "sku": "SNK-009",
+   "name": "حلقوم بالنكهات",
+   "altNames": [
+    "راحة",
+    "حلقوم"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 1800,
+     "minQtyMilli": 500,
+     "stepMilli": 500,
+     "allowFraction": true
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "candy",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "snacks",
+   "sku": "SNK-010",
+   "name": "علكة نعناع",
+   "altNames": [
+    "علكه",
+    "لبان"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 1200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 20000,
+     "price": 22000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "box",
+   "icon": "candy",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "beverages",
+   "sku": "BEV-001",
+   "name": "مياه شرب معدنية 1.5 لتر",
+   "altNames": [
+    "مي",
+    "ماء",
+    "مياه"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 300,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 6000,
+     "price": 1600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "water",
+   "priceSource": "unicef",
+   "description": "مرجع UNICEF 5.33 للتر الواحد"
+  },
+  {
+   "categoryId": "beverages",
+   "sku": "BEV-002",
+   "name": "مشروب غازي كولا 330 مل",
+   "altNames": [
+    "كولا",
+    "بيبسي",
+    "كوكاكولا",
+    "غازي"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 300,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 6500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "soda",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "beverages",
+   "sku": "BEV-003",
+   "name": "مشروب غازي برتقال 330 مل",
+   "altNames": [
+    "ميرندا",
+    "فانتا",
+    "غازي برتقال"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 300,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 6500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "soda_orange",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "beverages",
+   "sku": "BEV-004",
+   "name": "عصير برتقال 1 لتر",
+   "altNames": [
+    "عصير",
+    "برتقال"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 9000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "juice",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "beverages",
+   "sku": "BEV-005",
+   "name": "عصير مانجو 200 مل",
+   "altNames": [
+    "عصير مانجا",
+    "مانجو"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 27000,
+     "price": 4800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "juice",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "beverages",
+   "sku": "BEV-006",
+   "name": "شاي أسود 100 كيس",
+   "altNames": [
+    "شاي",
+    "شاي فرط",
+    "تي"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 1500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 34000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "box",
+   "icon": "tea",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "beverages",
+   "sku": "BEV-007",
+   "name": "قهوة عربية مطحونة بالهيل 200 غرام",
+   "altNames": [
+    "قهوة",
+    "بن",
+    "قهوه"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 1500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 20000,
+     "price": 28000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "coffee",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "beverages",
+   "sku": "BEV-008",
+   "name": "قهوة سريعة التحضير 3 في 1",
+   "altNames": [
+    "نسكافيه",
+    "قهوة فوري"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 1800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 41000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "box",
+   "icon": "coffee",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "beverages",
+   "sku": "BEV-009",
+   "name": "مشروب طاقة 250 مل",
+   "altNames": [
+    "طاقة",
+    "ريد بول"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 11000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "soda",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "beverages",
+   "sku": "BEV-010",
+   "name": "شراب توت مركّز 1 لتر",
+   "altNames": [
+    "شراب",
+    "عصير مركز",
+    "توت"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 11500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "juice",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "cleaning",
+   "sku": "CLN-001",
+   "name": "مسحوق غسيل أوتوماتيك 3 كغ",
+   "altNames": [
+    "تايد",
+    "اريال",
+    "مسحوق"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 3500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 4000,
+     "price": 13500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "detergent_box",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "cleaning",
+   "sku": "CLN-002",
+   "name": "سائل غسيل ملابس 1 لتر",
+   "altNames": [
+    "منظف غسيل",
+    "سائل غسيل"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1400,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 16000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "detergent",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "cleaning",
+   "sku": "CLN-003",
+   "name": "سائل جلي 1 لتر",
+   "altNames": [
+    "صابون جلي",
+    "فيري",
+    "جلي"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1080,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 12500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "dish_soap",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "cleaning",
+   "sku": "CLN-004",
+   "name": "كلور مبيض 1 لتر",
+   "altNames": [
+    "كلور",
+    "كلوركس",
+    "مبيض"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1100,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 12500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "bleach",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "cleaning",
+   "sku": "CLN-005",
+   "name": "صابون غار 150 غرام",
+   "altNames": [
+    "صابون",
+    "صابونة"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 300,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 48000,
+     "price": 13500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "soap",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "cleaning",
+   "sku": "CLN-006",
+   "name": "معطر أرضيات 1 لتر",
+   "altNames": [
+    "فلاش",
+    "منظف ارضيات",
+    "معطر"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 900,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 10000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "detergent",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "cleaning",
+   "sku": "CLN-007",
+   "name": "منظف زجاج بخاخ 500 مل",
+   "altNames": [
+    "منظف زجاج",
+    "بخاخ"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 9000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "spray",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "cleaning",
+   "sku": "CLN-008",
+   "name": "إسفنج جلي 5 قطع",
+   "altNames": [
+    "سفنج",
+    "ليفة"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 48000,
+     "price": 22000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "sponge",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "cleaning",
+   "sku": "CLN-009",
+   "name": "أكياس قمامة كبيرة 20 كيس",
+   "altNames": [
+    "اكياس زبالة",
+    "اكياس نفايات"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 50000,
+     "price": 27000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "trash_bags",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "cleaning",
+   "sku": "CLN-010",
+   "name": "معقم مطهر 500 مل",
+   "altNames": [
+    "ديتول",
+    "مطهر",
+    "معقم"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 17000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "bottle",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "baby",
+   "sku": "BBY-001",
+   "name": "حفاضات أطفال مقاس 3 (40 حبة)",
+   "altNames": [
+    "بامبرز",
+    "حفاضات",
+    "فوط اطفال"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 3500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 4000,
+     "price": 13500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "diapers",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "baby",
+   "sku": "BBY-002",
+   "name": "حفاضات أطفال مقاس 4 (36 حبة)",
+   "altNames": [
+    "بامبرز 4",
+    "حفاضات"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 3600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 4000,
+     "price": 13800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "diapers",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "baby",
+   "sku": "BBY-003",
+   "name": "حفاضات أطفال مقاس 5 (32 حبة)",
+   "altNames": [
+    "بامبرز 5",
+    "حفاضات"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 3700,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 4000,
+     "price": 14200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "diapers",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "baby",
+   "sku": "BBY-004",
+   "name": "حليب أطفال رضع 400 غرام",
+   "altNames": [
+    "حليب رضع",
+    "حليب اطفال",
+    "سيميلاك"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 4000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 47000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "box",
+   "icon": "formula",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "baby",
+   "sku": "BBY-005",
+   "name": "مناديل مبللة للأطفال 72 منديل",
+   "altNames": [
+    "مناديل مبللة",
+    "وايبس"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 700,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 16000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "carton",
+   "icon": "wipes",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "baby",
+   "sku": "BBY-006",
+   "name": "سيريلاك أرز بالحليب 400 غرام",
+   "altNames": [
+    "سيريلاك",
+    "طعام اطفال"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 2200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 25500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "box",
+   "icon": "formula",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "baby",
+   "sku": "BBY-007",
+   "name": "شامبو أطفال 300 مل",
+   "altNames": [
+    "شامبو اطفال",
+    "جونسون"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 13800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "shampoo",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "baby",
+   "sku": "BBY-008",
+   "name": "زجاجة رضاعة 250 مل",
+   "altNames": [
+    "رضاعة",
+    "ببرونة"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 34000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "bottle_baby",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "baby",
+   "sku": "BBY-009",
+   "name": "كريم حفاضات 100 غرام",
+   "altNames": [
+    "كريم تسلخات",
+    "سودوكريم"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1400,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "cream",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "baby",
+   "sku": "BBY-010",
+   "name": "بودرة أطفال 200 غرام",
+   "altNames": [
+    "بودرة",
+    "باودر"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 900,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 20500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "powder",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "personal_care",
+   "sku": "PRC-001",
+   "name": "شامبو شعر 400 مل",
+   "altNames": [
+    "شامبو",
+    "هيد اند شولدرز"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 11500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "shampoo",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "personal_care",
+   "sku": "PRC-002",
+   "name": "معجون أسنان 100 مل",
+   "altNames": [
+    "معجون",
+    "كولجيت"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 72000,
+     "price": 41000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "toothpaste",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "personal_care",
+   "sku": "PRC-003",
+   "name": "فرشاة أسنان",
+   "altNames": [
+    "فرشاية",
+    "فرشاة"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "box",
+     "factorToBase": 12000,
+     "price": 2200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "box",
+   "icon": "toothbrush",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "personal_care",
+   "sku": "PRC-004",
+   "name": "فوط صحية 16 حبة",
+   "altNames": [
+    "فوط",
+    "اولويز"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 900,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 20500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "pads",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "personal_care",
+   "sku": "PRC-005",
+   "name": "مزيل عرق بخاخ 150 مل",
+   "altNames": [
+    "مزيل عرق",
+    "ديودرنت"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 13800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "spray",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "personal_care",
+   "sku": "PRC-006",
+   "name": "صابون سائل لليدين 500 مل",
+   "altNames": [
+    "صابون يدين",
+    "صابون سائل"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 9000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "carton",
+   "icon": "pump",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "personal_care",
+   "sku": "PRC-007",
+   "name": "شفرات حلاقة 5 حبات",
+   "altNames": [
+    "شفرات",
+    "موس حلاقة"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "box",
+     "factorToBase": 24000,
+     "price": 18000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "razor",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "personal_care",
+   "sku": "PRC-008",
+   "name": "ورق تواليت 10 لفات",
+   "altNames": [
+    "محارم تواليت",
+    "ورق حمام"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 2200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 4000,
+     "price": 8500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "toilet_paper",
+   "priceSource": "unicef",
+   "description": "مرجع UNICEF 2.5 للفة"
+  },
+  {
+   "categoryId": "personal_care",
+   "sku": "PRC-009",
+   "name": "محارم ورقية 500 منديل",
+   "altNames": [
+    "محارم",
+    "كلينكس",
+    "مناديل"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 30000,
+     "price": 14000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "tissue",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "personal_care",
+   "sku": "PRC-010",
+   "name": "كريم مرطب 200 مل",
+   "altNames": [
+    "كريم",
+    "نيفيا",
+    "مرطب"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 13800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "cream",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "produce",
+   "sku": "PRD-001",
+   "name": "بندورة",
+   "altNames": [
+    "طماطم",
+    "بندوره"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "box",
+     "factorToBase": 10000,
+     "price": 7500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "tomato",
+   "priceSource": "unicef",
+   "description": "صندوق 10 كغ تقريباً"
+  },
+  {
+   "categoryId": "produce",
+   "sku": "PRD-002",
+   "name": "بطاطا",
+   "altNames": [
+    "بطاطس",
+    "بطاطا حمرا"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 700,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "sack",
+     "factorToBase": 20000,
+     "price": 13000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "potato",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "produce",
+   "sku": "PRD-003",
+   "name": "بصل أحمر",
+   "altNames": [
+    "بصل"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "sack",
+     "factorToBase": 20000,
+     "price": 11000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "onion",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "produce",
+   "sku": "PRD-004",
+   "name": "خيار",
+   "altNames": [
+    "خيار بلدي"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 1200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "box",
+     "factorToBase": 10000,
+     "price": 11500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "cucumber",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "produce",
+   "sku": "PRD-005",
+   "name": "باذنجان",
+   "altNames": [
+    "بتنجان",
+    "باذنجان بلدي"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 400,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "box",
+     "factorToBase": 10000,
+     "price": 3800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "eggplant",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "produce",
+   "sku": "PRD-006",
+   "name": "فلفل حلو",
+   "altNames": [
+    "فليفلة",
+    "فلفل"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 1000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "pepper",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "produce",
+   "sku": "PRD-007",
+   "name": "ليمون",
+   "altNames": [
+    "ليمون حامض",
+    "لمون"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "lemon",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "produce",
+   "sku": "PRD-008",
+   "name": "تفاح أحمر",
+   "altNames": [
+    "تفاح"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 1200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "box",
+     "factorToBase": 18000,
+     "price": 20500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "apple",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "produce",
+   "sku": "PRD-009",
+   "name": "موز",
+   "altNames": [
+    "موز بلدي"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 900,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "box",
+     "factorToBase": 13000,
+     "price": 11000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "banana",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "produce",
+   "sku": "PRD-010",
+   "name": "جزر",
+   "altNames": [
+    "جزر بلدي"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "sack",
+     "factorToBase": 10000,
+     "price": 5500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "carrot",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "household",
+   "sku": "HSH-001",
+   "name": "دلو بلاستيك 15 لتر",
+   "altNames": [
+    "سطل",
+    "جردل",
+    "دلو"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 2500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "bucket",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "household",
+   "sku": "HSH-002",
+   "name": "جالون مياه 20 لتر",
+   "altNames": [
+    "جالون",
+    "قلن",
+    "جركن"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "jerrycan",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "household",
+   "sku": "HSH-003",
+   "name": "غاز طهي (تعبئة كيلو)",
+   "altNames": [
+    "غاز",
+    "جرة غاز"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 8000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "gas",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "household",
+   "sku": "HSH-004",
+   "name": "فحم",
+   "altNames": [
+    "فحم شوي",
+    "فحم"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 1600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "bag",
+     "factorToBase": 10000,
+     "price": 15000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "coal",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "household",
+   "sku": "HSH-005",
+   "name": "حطب",
+   "altNames": [
+    "حطب",
+    "خشب"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": true
+    },
+    {
+     "unitId": "sack",
+     "factorToBase": 25000,
+     "price": 14000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "wood",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "household",
+   "sku": "HSH-006",
+   "name": "شريط لاصق عريض",
+   "altNames": [
+    "لزق",
+    "تيب",
+    "شريط"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 2000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 36000,
+     "price": 68000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "tape",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "household",
+   "sku": "HSH-007",
+   "name": "حبل متعدد الاستخدام",
+   "altNames": [
+    "حبل",
+    "حبال"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 1000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "rope",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "household",
+   "sku": "HSH-008",
+   "name": "شادر نايلون (للمتر المربع)",
+   "altNames": [
+    "شادر",
+    "نايلون",
+    "مشمع"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "tarp",
+   "priceSource": "unicef",
+   "description": "السعر للمتر المربع"
+  },
+  {
+   "categoryId": "household",
+   "sku": "HSH-009",
+   "name": "بطانية",
+   "altNames": [
+    "حرام",
+    "بطانيه"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 2500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "piece",
+   "icon": "blanket",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "household",
+   "sku": "HSH-010",
+   "name": "ولاعة غاز",
+   "altNames": [
+    "قداحة",
+    "ولاعه"
+   ],
+   "units": [
+    {
+     "unitId": "piece",
+     "factorToBase": 1000,
+     "price": 200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "box",
+     "factorToBase": 50000,
+     "price": 8500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "piece",
+   "defaultUnitId": "box",
+   "icon": "lighter",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "household",
+   "sku": "HSH-011",
+   "name": "صحون بلاستيك 50 صحن",
+   "altNames": [
+    "صحون",
+    "اطباق بلاستيك"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 20000,
+     "price": 15000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "plates",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "canned",
+   "sku": "CAN-001",
+   "name": "تونة 160 غرام",
+   "altNames": [
+    "تونه",
+    "تونا"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 48000,
+     "price": 23000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "can_tuna",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "canned",
+   "sku": "CAN-002",
+   "name": "فول مدمس 380 غرام",
+   "altNames": [
+    "فول معلب",
+    "فول"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 285,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 6500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "can",
+   "priceSource": "unicef",
+   "description": ""
+  },
+  {
+   "categoryId": "canned",
+   "sku": "CAN-003",
+   "name": "حمص مسلوق 380 غرام",
+   "altNames": [
+    "حمص معلب",
+    "حمص"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 300,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 6800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "can",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "canned",
+   "sku": "CAN-004",
+   "name": "فاصولياء بيضاء بصلصة الطماطم",
+   "altNames": [
+    "فاصوليا معلبة",
+    "بيكد بينز"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 300,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 6800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "can",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "canned",
+   "sku": "CAN-005",
+   "name": "سردين بالزيت 125 غرام",
+   "altNames": [
+    "سردين",
+    "سردينة"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 300,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 50000,
+     "price": 14000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "can_tuna",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "canned",
+   "sku": "CAN-006",
+   "name": "لحمة معلبة (لانشون) 200 غرام",
+   "altNames": [
+    "لانشون",
+    "مرتديلا معلبة"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 13500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "can",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "canned",
+   "sku": "CAN-007",
+   "name": "معجون طماطم 400 غرام",
+   "altNames": [
+    "رب بندورة",
+    "صلصة",
+    "معجون"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 400,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 9000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "can_red",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "canned",
+   "sku": "CAN-008",
+   "name": "ذرة حلوة معلبة 340 غرام",
+   "altNames": [
+    "ذرة",
+    "ذره"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 400,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 9000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "can_yellow",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "canned",
+   "sku": "CAN-009",
+   "name": "مربى مشمش 450 غرام",
+   "altNames": [
+    "مربى",
+    "مربا"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 9000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "jar",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "canned",
+   "sku": "CAN-010",
+   "name": "حلاوة طحينية 500 غرام",
+   "altNames": [
+    "حلاوة",
+    "حلاوه"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 1200,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 12000,
+     "price": 13800,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "jar",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "spices",
+   "sku": "SPC-001",
+   "name": "زعتر بلدي",
+   "altNames": [
+    "زعتر",
+    "دقة"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 3000,
+     "minQtyMilli": 250,
+     "stepMilli": 250,
+     "allowFraction": true
+    },
+    {
+     "unitId": "half_kg",
+     "factorToBase": 500,
+     "price": 1600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "quarter_kg",
+     "factorToBase": 250,
+     "price": 850,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "kg",
+   "icon": "spice_green",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "spices",
+   "sku": "SPC-002",
+   "name": "بهارات مشكلة",
+   "altNames": [
+    "بهار",
+    "سبع بهارات"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 4000,
+     "minQtyMilli": 250,
+     "stepMilli": 250,
+     "allowFraction": true
+    },
+    {
+     "unitId": "pack",
+     "factorToBase": 100,
+     "price": 500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "pack",
+   "icon": "spice_brown",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "spices",
+   "sku": "SPC-003",
+   "name": "كمون مطحون",
+   "altNames": [
+    "كمون"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 4500,
+     "minQtyMilli": 250,
+     "stepMilli": 250,
+     "allowFraction": true
+    },
+    {
+     "unitId": "pack",
+     "factorToBase": 100,
+     "price": 550,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "pack",
+   "icon": "spice_brown",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "spices",
+   "sku": "SPC-004",
+   "name": "فلفل أسود مطحون",
+   "altNames": [
+    "فلفل اسود",
+    "بهار اسود"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 6000,
+     "minQtyMilli": 250,
+     "stepMilli": 250,
+     "allowFraction": true
+    },
+    {
+     "unitId": "pack",
+     "factorToBase": 100,
+     "price": 700,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "pack",
+   "icon": "spice_dark",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "spices",
+   "sku": "SPC-005",
+   "name": "كركم مطحون",
+   "altNames": [
+    "كركم",
+    "عقدة صفرا"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 3500,
+     "minQtyMilli": 250,
+     "stepMilli": 250,
+     "allowFraction": true
+    },
+    {
+     "unitId": "pack",
+     "factorToBase": 100,
+     "price": 450,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "pack",
+   "icon": "spice_yellow",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "spices",
+   "sku": "SPC-006",
+   "name": "سماق",
+   "altNames": [
+    "سماق بلدي"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 4000,
+     "minQtyMilli": 250,
+     "stepMilli": 250,
+     "allowFraction": true
+    },
+    {
+     "unitId": "pack",
+     "factorToBase": 100,
+     "price": 500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "pack",
+   "icon": "spice_red",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "spices",
+   "sku": "SPC-007",
+   "name": "ملح ليمون",
+   "altNames": [
+    "ليمون ملح",
+    "حامض ليمون"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 300,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 50000,
+     "price": 13500,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "pack",
+   "icon": "spice_white",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "spices",
+   "sku": "SPC-008",
+   "name": "خميرة فورية 11 غرام",
+   "altNames": [
+    "خميرة",
+    "خميره"
+   ],
+   "units": [
+    {
+     "unitId": "pack",
+     "factorToBase": 1000,
+     "price": 150,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "box",
+     "factorToBase": 20000,
+     "price": 2700,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "pack",
+   "defaultUnitId": "box",
+   "icon": "yeast",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "spices",
+   "sku": "SPC-009",
+   "name": "مرقة دجاج مكعبات",
+   "altNames": [
+    "ماجي",
+    "مرقة",
+    "مكعبات"
+   ],
+   "units": [
+    {
+     "unitId": "box",
+     "factorToBase": 1000,
+     "price": 400,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    },
+    {
+     "unitId": "carton",
+     "factorToBase": 24000,
+     "price": 9000,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "box",
+   "defaultUnitId": "carton",
+   "icon": "stock_cube",
+   "priceSource": "estimate",
+   "description": ""
+  },
+  {
+   "categoryId": "spices",
+   "sku": "SPC-010",
+   "name": "قرفة مطحونة",
+   "altNames": [
+    "قرفه",
+    "دارسين"
+   ],
+   "units": [
+    {
+     "unitId": "kg",
+     "factorToBase": 1000,
+     "price": 5000,
+     "minQtyMilli": 250,
+     "stepMilli": 250,
+     "allowFraction": true
+    },
+    {
+     "unitId": "pack",
+     "factorToBase": 100,
+     "price": 600,
+     "minQtyMilli": 1000,
+     "stepMilli": 1000,
+     "allowFraction": false
+    }
+   ],
+   "baseUnitId": "kg",
+   "defaultUnitId": "pack",
+   "icon": "spice_brown",
+   "priceSource": "estimate",
+   "description": ""
+  }
+ ]
+}

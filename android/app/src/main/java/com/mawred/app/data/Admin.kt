@@ -23,6 +23,9 @@ class AdminRepository(private val api: Api) {
 
     suspend fun setAvailability(productId: String, available: Boolean) { api.request("PATCH", "/admin/products/$productId", buildJsonObject { put("available", available) }) }
 
+    /** نشر مسودة (إظهارها للمحلات) بعد مراجعة سعرها. */
+    suspend fun setVisible(productId: String, visible: Boolean) { api.request("PATCH", "/admin/products/$productId", buildJsonObject { put("visible", visible) }) }
+
     /** يرفع PNG المفرّغ ثم يضيفه لصور المنتج مع الإبقاء على السابقة. */
     suspend fun addImage(product: Product, png: ByteArray): String {
         val key = api.upload("/admin/uploads/product-image", png, "image/png")["key"]!!.jsonPrimitive.content

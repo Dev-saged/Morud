@@ -136,3 +136,16 @@ describe('علامة مورد على الصور', () => {
     }
   });
 });
+
+describe('مراجعة المسودات ونشرها', () => {
+  it('فلتر المسودات ونشرها دفعة واحدة', async () => {
+    const drafts = { ...catalog, products: catalog.products.map((p) => ({ ...p, visible: false })) };
+    const { calls } = mount({ 'GET /auth/me': () => json({ user: { ...owner, home: 'admin.products' } }), 'GET /catalog': () => json(drafts), 'PATCH /admin/products/feta': () => json({}), 'PATCH /admin/products/off': () => json({}) }, true);
+    const u = userEvent.setup();
+    await u.click(await screen.findByRole('button', { name: 'المسودات (2)' }));
+    await u.click(screen.getByRole('button', { name: 'انشر 2 مسودة' }));
+    expect(await screen.findByText('نُشر 2 منتج')).toBeTruthy();
+    const pubs = calls.filter(([p, i]) => p.startsWith('/admin/products/') && i?.method === 'PATCH');
+    expect(pubs.map(([, i]) => JSON.parse(String(i!.body)))).toEqual([{ visible: true }, { visible: true }]);
+  });
+});

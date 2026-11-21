@@ -152,7 +152,7 @@ private fun AdminOrderDetail(vm: AdminOrdersViewModel, ui: AdminOrdersUi, d: Ord
     }
 }
 
-data class AdminProductsUi(val products: List<Product>? = null, val query: String = "", val busyId: String? = null, val error: String? = null, val info: String? = null)
+data class AdminProductsUi(val products: List<Product>? = null, val query: String = "", val busyId: String? = null, val error: String? = null, val info: String? = null, val draftsOnly: Boolean = false)
 
 @HiltViewModel
 class AdminProductsViewModel @Inject constructor(private val catalog: CatalogRepository, private val admin: AdminRepository) : ViewModel() {
@@ -163,6 +163,9 @@ class AdminProductsViewModel @Inject constructor(private val catalog: CatalogRep
         try { _ui.update { it.copy(products = catalog.load().data.products, error = null) } } catch (e: ApiException) { _ui.update { it.copy(error = e.message, products = it.products ?: emptyList()) } }
     }
     fun query(q: String) = _ui.update { it.copy(query = q) }
+    fun draftsOnly(v: Boolean) = _ui.update { it.copy(draftsOnly = v) }
+    fun publish(items: List<Product>) = run("all", "نُشر ${items.size} منتج") { items.forEach { admin.setVisible(it.id, true) } }
+    fun publishOne(p: Product) = run(p.id, "نُشر المنتج") { admin.setVisible(p.id, true) }
     fun toggle(p: Product) = run(p.id, if (p.available) "صار غير متوفر" else "صار متوفراً") { admin.setAvailability(p.id, !p.available) }
     fun image(p: Product, png: suspend () -> ByteArray) = run(p.id, "فُرّغت الصورة ورُفعت، تظهر للجميع الآن") { admin.addImage(p, png()) }
     private fun run(id: String, ok: String, block: suspend () -> Unit) = viewModelScope.launch {
@@ -185,11 +188,20 @@ fun AdminProductsScreen(vm: AdminProductsViewModel, padding: PaddingValues, canE
             withContext(Dispatchers.Default) { Cutout.toPng(bmp) }
         }
     }
-    val list = ui.products?.filter { ui.query.isBlank() || com.mawred.app.schema.SchemaEngine.normalize(it.name).contains(com.mawred.app.schema.SchemaEngine.normalize(ui.query)) || it.sku.contains(ui.query, true) }
+    val list = ui.products?.filter { (!ui.draftsOnly || !it.visible) }?.filter { ui.query.isBlank() || com.mawred.app.schema.SchemaEngine.normalize(it.name).contains(com.mawred.app.schema.SchemaEngine.normalize(ui.query)) || it.sku.contains(ui.query, true) }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         item {
             Text("المنتجات", style = MaterialTheme.typography.headlineMedium)
             OutlinedTextField(ui.query, vm::query, Modifier.fillMaxWidth(), placeholder = { Text("بحث بالاسم أو الرمز") }, singleLine = true)
+            val draftCount = ui.products?.count { !it.visible } ?: 0
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(!ui.draftsOnly, { vm.draftsOnly(false) }, { Text("الكل") })
+                FilterChip(ui.draftsOnly, { vm.draftsOnly(true) }, { Text("المسودات ($draftCount)") })
+            }
+            if (ui.draftsOnly && canEdit && list?.isNotEmpty() == true) {
+                Text("راجع الأسعار أولاً (السعر المرجعي في وصف كل منتج)، ثم انشر.", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)
+                com.mawred.app.ui.common.PrimaryButton(if (ui.busyId == "all") "جارٍ النشر…" else "انشر ${list.size} مسودة", { vm.publish(list) }, enabled = ui.busyId == null)
+            }
             ErrorText(ui.error); ui.info?.let { Text(it, color = Mawred.colors.ok) }
         }
         if (list == null) items(List(4) { it }) { Skeleton() }
@@ -200,6 +212,7 @@ fun AdminProductsScreen(vm: AdminProductsViewModel, padding: PaddingValues, canE
                     Column(Modifier.weight(1f)) {
                         Text(p.name, style = MaterialTheme.typography.titleSmall)
                         Text(Money.ltr(p.sku), style = MaterialTheme.typography.bodySmall.merge(Tabular), color = Mawred.colors.mute)
+                        if (!p.visible && canEdit) TextButton({ vm.publishOne(p) }, enabled = ui.busyId == null) { Text("مسودة · انشر", color = Mawred.colors.accentInk) }
                         if (canEdit) TextButton({ target = p; picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, enabled = ui.busyId == null) { Text(if (ui.busyId == p.id) "جارٍ التفريغ والرفع…" else "إضافة صورة مفرّغة") }
                     }
                     Switch(p.available, { vm.toggle(p) }, enabled = ui.busyId == null)

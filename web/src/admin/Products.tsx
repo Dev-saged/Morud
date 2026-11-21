@@ -15,8 +15,15 @@ export function Products() {
   const [q, setQ] = useState('');
   const [edit, setEdit] = useState<Product | 'new' | null>(null);
   const [tab, setTab] = useState<'products' | 'categories' | 'units'>('products');
+  const [show, setShow] = useState<'all' | 'drafts' | 'live'>('all');
   const act = useAction();
-  const list = useMemo(() => (data?.products ?? []).filter((p) => !q || p.name.includes(q) || p.sku.includes(q.toUpperCase())), [data, q]);
+  const list = useMemo(() => (data?.products ?? []).filter((p) => (!q || p.name.includes(q) || p.sku.includes(q.toUpperCase())) && (show === 'all' || (show === 'drafts' ? !p.visible : p.visible))), [data, q, show]);
+  const drafts = list.filter((p) => !p.visible);
+  /** نشر المسودات المعروضة (بعد مراجعة أسعارها) واحداً واحداً عبر نفس صلاحيات التعديل. */
+  const publish = (items: Product[]) => act.run(async () => {
+    for (const p of items) await api.patch(`/admin/products/${p.id}`, { visible: true });
+    await reload();
+  }, `نُشر ${items.length} منتج`);
   if (!data) return <Loading error={error} />;
   if (edit) return <ProductForm catalog={data} product={edit === 'new' ? null : edit} done={() => { setEdit(null); void reload(); }} />;
   const cat = new Map(data.categories.map((c) => [c.id, c.name]));
@@ -27,12 +34,14 @@ export function Products() {
       {tab === 'products' && <>
         <div className="row"><div className="search" style={{ flex: 1 }}><Icon name="search" /><input aria-label="بحث المنتجات" placeholder="الاسم أو الرمز" value={q} onChange={(e) => setQ(e.target.value)} /></div>
           {can('products.create') && <button className="btn primary" onClick={() => setEdit('new')}>منتج جديد</button>}</div>
+        <div className="chips">{([['all', 'الكل'], ['drafts', `المسودات (${(data.products ?? []).filter((p) => !p.visible).length})`], ['live', 'المنشورة']] as const).map(([k, l]) => <button key={k} className={show === k ? 'chip on' : 'chip'} onClick={() => setShow(k)}>{l}</button>)}</div>
+        {can('products.update') && drafts.length > 0 && show === 'drafts' && <p className="notice">راجع الأسعار أولاً (السعر المرجعي مكتوب في وصف كل منتج)، ثم <button className="btn primary" disabled={act.busy} onClick={() => void publish(drafts)}>انشر {drafts.length} مسودة</button></p>}
         {act.view}
         <table className="table"><thead><tr><th></th><th>المنتج</th><th>الرمز</th><th>التصنيف</th><th>السعر</th><th>الحالة</th><th></th></tr></thead>
           <tbody>{list.map((p) => <tr key={p.id}>
             <td>{p.images?.[0] ? <img src={`${api.base}/files/${p.images[0].thumb}`} alt="" width={40} height={40} style={{ objectFit: 'contain' }} /> : null}</td>
             <td>{p.name}</td><td className="num">{p.sku}</td><td>{cat.get(p.categoryId)}</td><td className="num">{formatMoney(p.units[0]!.price)}</td>
-            <td>{can('products.availability.update') ? <button className={`chip ${p.available ? 'tone-success' : 'tone-danger'}`} onClick={() => void act.run(() => api.patch(`/admin/products/${p.id}`, { available: !p.available }).then(reload), 'تم تحديث التوفر')}>{p.available ? 'متوفر' : 'غير متوفر'}</button> : (p.available ? 'متوفر' : 'غير متوفر')}{!p.visible && <span className="chip">مخفي</span>}</td>
+            <td>{can('products.availability.update') ? <button className={`chip ${p.available ? 'tone-success' : 'tone-danger'}`} onClick={() => void act.run(() => api.patch(`/admin/products/${p.id}`, { available: !p.available }).then(reload), 'تم تحديث التوفر')}>{p.available ? 'متوفر' : 'غير متوفر'}</button> : (p.available ? 'متوفر' : 'غير متوفر')}{!p.visible && (can('products.update') ? <button className="chip" onClick={() => void act.run(() => api.patch(`/admin/products/${p.id}`, { visible: true }).then(reload), 'نُشر المنتج')}>مسودة · انشر</button> : <span className="chip">مسودة</span>)}</td>
             <td>{can('products.update') && <button className="link" onClick={() => setEdit(p)}>تعديل</button>}</td></tr>)}</tbody></table>
         {list.length === 0 && <p className="empty">لا منتجات.</p>}
       </>}
