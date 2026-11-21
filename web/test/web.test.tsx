@@ -154,3 +154,18 @@ describe('الواجهة', () => {
     await waitFor(() => expect(screen.getByLabelText('المعرّف')).toBeTruthy());
   });
 });
+
+describe('نافذة التثبيت', () => {
+  it('لا تظهر في شاشة الدخول، وتظهر بعد المهلة لمستخدم آيفون ويمكن تأجيلها', async () => {
+    const { render } = await import('@testing-library/react');
+    const { InstallPrompt } = await import('../src/ui/InstallPrompt');
+    Object.defineProperty(navigator, 'userAgent', { value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0) AppleWebKit Version/18.0 Mobile Safari/604.1', configurable: true });
+    mount({});
+    await screen.findByLabelText('المعرّف');
+    expect(screen.queryByRole('dialog', { name: 'تثبيت مورد' })).toBeNull();
+    render(<InstallPrompt delayMs={0} />);
+    expect(await screen.findByRole('dialog', { name: 'تثبيت مورد' })).toBeTruthy();
+    await userEvent.setup().click(screen.getByRole('button', { name: 'لاحقاً' }));
+    expect(screen.queryByRole('dialog', { name: 'تثبيت مورد' })).toBeNull();
+  });
+});

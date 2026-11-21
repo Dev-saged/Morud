@@ -5,9 +5,12 @@ export function isIosSafari(ua: string, standalone: boolean): boolean {
   return /iPhone|iPad|iPod/.test(ua) && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua) && !standalone;
 }
 
-/** نافذة تثبيت مصممة: آيفون بخطوات المشاركة ← إضافة للشاشة، وأندرويد بزر التثبيت. */
-export function InstallPrompt() {
+/** نافذة تثبيت مصممة: آيفون بخطوات المشاركة ← إضافة للشاشة، وأندرويد بزر التثبيت.
+ *  تظهر بعد الدخول وبعد مهلة، فلا تغطي أزرار العمل في أول لحظة. */
+export function InstallPrompt({ delayMs = 20_000 }: { delayMs?: number }) {
   const [ios, setIos] = useState(false);
+  const [ready, setReady] = useState(delayMs === 0);
+  useEffect(() => { if (delayMs === 0) return; const t = setTimeout(() => setReady(true), delayMs); return () => clearTimeout(t); }, [delayMs]);
   const [evt, setEvt] = useState<(Event & { prompt(): Promise<void> }) | null>(null);
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem('mawred.install.dismissed') === '1'; } catch { return false; } });
   useEffect(() => {
@@ -18,7 +21,7 @@ export function InstallPrompt() {
     return () => window.removeEventListener('beforeinstallprompt', h);
   }, []);
   const dismiss = () => { setHidden(true); try { localStorage.setItem('mawred.install.dismissed', '1'); } catch { /* لا تخزين */ } };
-  if (hidden || (!ios && !evt)) return null;
+  if (hidden || !ready || (!ios && !evt)) return null;
   return (
     <div className="sheet install" role="dialog" aria-label="تثبيت مورد">
       <b>ثبّت مورد على شاشتك الرئيسية</b>
