@@ -183,3 +183,9 @@
 - إصلاح كشفه E2E: شريط الإدارة على الجوال كان يحتل نصف الشاشة؛ صار شريطاً مضغوطاً لاصقاً بتنقل أفقي، وscroll-snap صار proximity.
 - إصلاح كشفه WebKit E2E: نافذة تثبيت آيفون كانت تغطي زر «دخول»؛ صارت لا تظهر في شاشة الدخول وتظهر بعد الدخول بمهلة 20 ثانية.
 - E2E: الخادم المُحاكى على نفس الأصل (`/__api`) وخدمة العمل محجوبة أثناء الاختبار؛ WebKit تحت Playwright يفشل في preflight المُعترَض (الخادم الحقيقي يرسل CORS صريحة ومُختبرة).
+
+## v0.2.0
+- الطلب السريع: `worker/src/domain/quickorder.ts` (مصدر القواعد) ← `web/src/shop/ShopApp.tsx` (QuickOrder) و`android/.../core/QuickOrder.kt` (منفذ مطابق، نفس حالات الاختبار). `Product.defaultUnitId` + `defaultUnit()`.
+- علامة مورد: `web/src/lib/cutout.ts` (markRect/stampMark) و`android/.../data/Watermark.kt` و`catalog/packshots.py` — نفس قاعدة المكان.
+- الكتالوج: `catalog/build_seed.py` → `seed.json`، `catalog/packshots.py` → `images/`، `worker/scripts/import-catalog.ts` يستورد عبر createApp الحقيقي (R2 عبر Cloudflare REST، مفتاح idempotency حتمي لكل SKU) كمسودات.
+- إدارة Android الكاملة: `ui/admin/AdminVm.kt` (نموذج JSON عام) + `ui/admin/AdminMore.kt` (9 أقسام) تحت تبويب «المزيد».

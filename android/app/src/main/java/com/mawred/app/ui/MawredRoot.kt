@@ -78,6 +78,7 @@ private fun AreaShell(user: SessionUser, offline: Boolean, update: UpdateInfo?, 
             Tab("dashboard", "لوحة المعلومات", Icons.chart).takeIf { user.can("orders.view") },
             Tab("adminOrders", "الطلبات", Icons.orders).takeIf { user.can("orders.view") },
             Tab("adminProducts", "المنتجات", Icons.box).takeIf { user.can("products.availability.update") || user.can("products.update") },
+            Tab("adminMore", "المزيد", Icons.gear).takeIf { com.mawred.app.ui.admin.hasMoreSections(user) },
         )
         "agent" -> listOf(Tab("tasks", "المهام", Icons.truck))
         else -> emptyList()
@@ -122,6 +123,7 @@ private fun AreaShell(user: SessionUser, offline: Boolean, update: UpdateInfo?, 
                     "tasks" -> TasksScreen(hiltViewModel(), pad)
                     "adminOrders" -> com.mawred.app.ui.admin.AdminOrdersScreen(hiltViewModel(), pad)
                     "adminProducts" -> com.mawred.app.ui.admin.AdminProductsScreen(hiltViewModel(), pad, user.can("products.update"))
+                    "adminMore" -> com.mawred.app.ui.admin.AdminMoreScreen(user, pad)
                     else -> com.mawred.app.ui.common.Empty("لا توجد واجهة لحسابك، تواصل مع الإدارة")
                 }
             }
