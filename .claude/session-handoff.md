@@ -55,3 +55,8 @@ M8 — العروض والتقارير والنسخ:
 
 ## تحديث — M12
 - أُغلقت M12 (24 اختبار وحدة، release 2.8MB). التالي: M11b FCM (يحتاج appId/projectId/senderId من Firebase كمتغيرات CI)، M13c Playwright + Web Push، M14 QA/E2E/أمان/v1.0.0، MFA للأدوار الحساسة.
+
+## تحديث — النشر
+- أضيف `.github/workflows/deploy.yml` (يدوي: server/web/all + bootstrap مرة واحدة)، و`scripts/ci-kv.mjs` و`scripts/ci-secrets.mjs`. كلمة المالك من السر OWNER_PASSWORD لأن المستودع عام؛ لا تُطبع كلمات مرور في السجلات.
+- دليل الإعداد لساجد في وثيقة claude.ai «مورد — دليل الإعداد والنشر من الجوال». ننتظر منه: الأسرار والمتغيرات ثم تشغيل deploy. لم يُجرَّب deploy.yml فعلياً بعد (لا حسابات) — أول تشغيل قد يكشف تعديلات.
+- متغيرات M14 المنتظرة: MAWRED_FIREBASE_SENDER_ID, MAWRED_FIREBASE_WEB_APP_ID, MAWRED_FIREBASE_ANDROID_APP_ID, MAWRED_FIREBASE_VAPID_KEY.
