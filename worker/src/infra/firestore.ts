@@ -52,7 +52,7 @@ export class FirestoreDb implements Db {
   constructor(
     private readonly projectId: string,
     private readonly token: () => Promise<string>,
-    private readonly f: Fetch = fetch,
+    private readonly f: Fetch = (i, init) => fetch(i, init),
     private readonly clock: () => number = Date.now,
     private readonly base = 'https://firestore.googleapis.com/v1',
   ) {

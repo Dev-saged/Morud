@@ -15,7 +15,7 @@ export interface Pusher {
 }
 
 export class Fcm implements Pusher {
-  constructor(private readonly projectId: string, private readonly token: () => Promise<string>, private readonly f: Fetch = fetch) {}
+  constructor(private readonly projectId: string, private readonly token: () => Promise<string>, private readonly f: Fetch = (i, init) => fetch(i, init)) {}
 
   async send(deviceToken: string, p: PushPayload): Promise<PushResult> {
     const res = await this.f(`https://fcm.googleapis.com/v1/projects/${this.projectId}/messages:send`, {

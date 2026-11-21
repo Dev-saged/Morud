@@ -17,7 +17,7 @@ export class IdentityToolkit implements Identity {
     private readonly projectId: string,
     private readonly apiKey: string,
     private readonly token: () => Promise<string>,
-    private readonly f: Fetch = fetch,
+    private readonly f: Fetch = (i, init) => fetch(i, init),
     private readonly clock: () => number = Date.now,
   ) {}
 

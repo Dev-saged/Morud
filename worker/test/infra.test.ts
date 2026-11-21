@@ -200,3 +200,25 @@ describe('MemoryDb وحد المعدل', () => {
     expect(await r.blocked('a')).toBe(false);
   });
 });
+
+describe('fetch الافتراضي في Workers', () => {
+  it('لا يُستدعى fetch كدالة عضو (Illegal invocation في Cloudflare)', async () => {
+    const { FirestoreDb } = await import('../src/infra/firestore');
+    const { IdentityToolkit } = await import('../src/infra/identity');
+    const { Fcm } = await import('../src/infra/fcm');
+    const real = globalThis.fetch;
+    const strict = function (this: unknown) {
+      if (this !== undefined && this !== globalThis) throw new TypeError('Illegal invocation');
+      return Promise.resolve(new Response('{}', { status: 200 }));
+    };
+    globalThis.fetch = strict as typeof fetch;
+    try {
+      const tok = async () => 't';
+      await new FirestoreDb('p', tok).get('a/b').catch((e: Error) => { if (/Illegal/.test(e.message)) throw e; });
+      await new IdentityToolkit('p', 'k', tok).deleteUser('u').catch((e: Error) => { if (/Illegal/.test(e.message)) throw e; });
+      await new Fcm('p', tok).send('tok-aaaaaaaaaaaaaaaaaaaa', { title: 't', body: 'b', data: {} }).catch((e: Error) => { if (/Illegal/.test(e.message)) throw e; });
+    } finally {
+      globalThis.fetch = real;
+    }
+  });
+});

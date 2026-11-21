@@ -26,4 +26,4 @@ kv_namespaces = [{ binding = "KV", id = "REPLACE_WITH_PROD_KV_ID" }]
 r2_buckets = [{ binding = "FILES", bucket_name = "mawred-prod-files" }, { binding = "BACKUPS", bucket_name = "mawred-prod-backups" }]
 
 [triggers]
-crons = ["* * * * *", "*/5 * * * *", "0 1 * * *"]
+crons = ["* * * * *"]

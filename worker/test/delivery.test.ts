@@ -135,4 +135,15 @@ describe('المهلة والتأخير (SRS 7.3)', () => {
     await runScheduled(w.s, '0 1 * * *');
     expect(H()).toHaveProperty('idempotency-key');
   });
+  it('جدول واحد كل دقيقة يوزّع: النسخ اليومي 01:00 UTC فقط', async () => {
+    const w = setup();
+    const blobs = w.s.backupStore as unknown as { m: Map<string, unknown> };
+    w.s.backupKey = Buffer.alloc(32, 7).toString('base64');
+    await runScheduled(w.s, '* * * * *', Date.UTC(2026, 10, 21, 1, 3));
+    expect(blobs.m.size).toBe(0);
+    await runScheduled(w.s, '* * * * *', Date.UTC(2026, 10, 21, 2, 0));
+    expect(blobs.m.size).toBe(0);
+    await runScheduled(w.s, '* * * * *', Date.UTC(2026, 10, 21, 1, 0));
+    expect(blobs.m.size).toBe(1);
+  });
 });

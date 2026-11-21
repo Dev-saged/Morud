@@ -50,6 +50,6 @@ export default {
     return handle(req, services(env, ec), { allowedOrigins: env.ALLOWED_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean) });
   },
   async scheduled(event: ScheduledController, env: Env, ec: ExecutionContext): Promise<void> {
-    ec.waitUntil(runScheduled(services(env, ec), event.cron));
+    ec.waitUntil(runScheduled(services(env, ec), event.cron, event.scheduledTime));
   },
 } satisfies ExportedHandler<Env>;

@@ -4,3 +4,4 @@ src/tokens.css
 .env*
 test-results/
 playwright-report/
+!.env.production
