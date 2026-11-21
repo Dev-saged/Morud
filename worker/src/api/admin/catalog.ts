@@ -131,6 +131,7 @@ async function createProduct(ctx: Ctx) {
     barcodes: strArr(b.barcodes, 'الباركود', 10, 30), categoryId: cleanText(b.categoryId, 40, 'التصنيف'), baseUnitId: cleanText(b.baseUnitId, 40, 'الوحدة الأساسية'),
     units: parseUnits(b.units), available: b.available !== false, visible: b.visible !== false,
     ...(b.brand ? { brand: cleanText(b.brand, 60, 'العلامة التجارية') } : {}),
+    ...(b.defaultUnitId ? { defaultUnitId: cleanText(b.defaultUnitId, 40, 'وحدة الطلب الافتراضية') } : {}),
   };
   const problems = validateProduct(p, units);
   if (problems.length) throw fail('VALIDATION', 'بيانات المنتج غير مكتملة', { problems });
@@ -184,6 +185,7 @@ async function updateProduct(ctx: Ctx, params: Record<string, string>) {
     available: b.available !== undefined ? b.available === true : before.available,
     visible: b.visible !== undefined ? b.visible === true : before.visible,
     ...(b.brand !== undefined ? (b.brand ? { brand: cleanText(b.brand, 60, 'العلامة التجارية') } : {}) : before.brand ? { brand: before.brand } : {}),
+    ...(b.defaultUnitId !== undefined ? (b.defaultUnitId ? { defaultUnitId: cleanText(b.defaultUnitId, 40, 'وحدة الطلب الافتراضية') } : {}) : before.defaultUnitId ? { defaultUnitId: before.defaultUnitId } : {}),
   };
   const problems = validateProduct(next, await unitsMap(ctx));
   if (problems.length) throw fail('VALIDATION', 'بيانات المنتج غير مكتملة', { problems });

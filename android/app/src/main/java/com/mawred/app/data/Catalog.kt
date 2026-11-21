@@ -13,7 +13,7 @@ import kotlinx.serialization.json.JsonObject
 @Serializable data class Product(
     val id: String, val name: String, val sku: String = "", val categoryId: String = "", val baseUnitId: String = "", val units: List<SaleUnit> = emptyList(),
     val available: Boolean = true, val visible: Boolean = true, val altNames: List<String> = emptyList(), val barcodes: List<String> = emptyList(),
-    val brand: String? = null, val images: List<ProductImage> = emptyList(),
+    val brand: String? = null, val images: List<ProductImage> = emptyList(), val defaultUnitId: String? = null,
 )
 @Serializable data class Category(val id: String, val name: String, val order: Int = 0)
 @Serializable data class UnitDef(val id: String, val name: String)

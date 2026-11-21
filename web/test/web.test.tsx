@@ -169,3 +169,19 @@ describe('نافذة التثبيت', () => {
     expect(screen.queryByRole('dialog', { name: 'تثبيت مورد' })).toBeNull();
   });
 });
+
+describe('الطلب السريع على الويب', () => {
+  it('يفهم «3 جبنه» كرتونات (وحدة الصنف المعتادة) ويضيفها للسلة، ويشرح ما لم يفهمه', async () => {
+    const cat2 = { ...catalog, products: catalog.products.map((p) => (p.id === 'feta' ? { ...p, defaultUnitId: 'carton' } : p)) };
+    mount({ 'GET /auth/me': () => json({ user: shopUser }), 'GET /catalog': () => json(cat2) }, true);
+    const u = userEvent.setup();
+    await u.click(await screen.findByText('طلب سريع بالكتابة'));
+    await u.type(screen.getByLabelText('نص الطلب السريع'), '3 جبنه، 2 تفاح');
+    expect(screen.getByText(/3 كرتونة/)).toBeTruthy();
+    expect(screen.getByText('(الوحدة المعتادة)')).toBeTruthy();
+    expect(screen.getByText('لم أجد هذا الصنف')).toBeTruthy();
+    await u.click(screen.getByRole('button', { name: 'أضف 1 صنف إلى السلة' }));
+    expect(loadCart().lines).toEqual([{ productId: 'feta', unitId: 'carton', qtyMilli: 3000 }]);
+    expect(screen.getByRole('button', { name: 'كرتونة' }).className).toContain('on');
+  });
+});

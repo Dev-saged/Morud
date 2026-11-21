@@ -49,6 +49,7 @@ function ProductForm({ catalog, product, done }: { catalog: Catalog; product: Pr
     name: product?.name ?? '', sku: product?.sku ?? '', categoryId: product?.categoryId ?? catalog.categories[0]?.id ?? '', brand: product?.brand ?? '', description: product?.description ?? '',
     altNames: (product?.altNames ?? []).join('، '), barcodes: (product?.barcodes ?? []).join('، '), available: product?.available ?? true, visible: product?.visible ?? true,
     baseUnitId: product?.baseUnitId ?? catalog.units[0]?.id ?? '',
+    defaultUnitId: (product as any)?.defaultUnitId ?? '',
     units: (product?.units ?? [{ unitId: catalog.units[0]?.id ?? '', factorToBase: 1000, price: 0, minQtyMilli: 1000, stepMilli: 1000, allowFraction: false }]).map((u) => ({ ...u, priceText: product ? fromAgorot(u.price) : '', factor: String(u.factorToBase / 1000) })),
     images: product?.images ?? [], cost: '',
   }));
@@ -73,7 +74,7 @@ function ProductForm({ catalog, product, done }: { catalog: Catalog; product: Pr
       if (!Number.isSafeInteger(price)) throw new Error(`سعر غير صالح للوحدة ${u.unitId}`);
       return { unitId: u.unitId, factorToBase: Math.round(Number(u.factor) * 1000), price, minQtyMilli: u.minQtyMilli, stepMilli: u.stepMilli, allowFraction: u.allowFraction };
     });
-    const body: Record<string, unknown> = { name: f.name, sku: f.sku, categoryId: f.categoryId, baseUnitId: f.baseUnitId, units, brand: f.brand || undefined, description: f.description, altNames: list(f.altNames), barcodes: list(f.barcodes), available: f.available, visible: f.visible, images: f.images };
+    const body: Record<string, unknown> = { name: f.name, sku: f.sku, categoryId: f.categoryId, baseUnitId: f.baseUnitId, defaultUnitId: f.defaultUnitId && units.some((x) => x.unitId === f.defaultUnitId) ? f.defaultUnitId : '', units, brand: f.brand || undefined, description: f.description, altNames: list(f.altNames), barcodes: list(f.barcodes), available: f.available, visible: f.visible, images: f.images };
     if (f.cost && can('products.cost.view')) body.cost = toAgorot(f.cost);
     if (product) await api.patch(`/admin/products/${product.id}`, body); else await api.post('/admin/products', body, crypto.randomUUID().replace(/-/g, ''));
     done();
@@ -102,6 +103,7 @@ function ProductForm({ catalog, product, done }: { catalog: Catalog; product: Pr
           <Field label="رفع صورة"><input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ''; }} /></Field>
           <h3>وحدات البيع</h3>
           <Field label="الوحدة الأساسية"><select value={f.baseUnitId} onChange={(e) => set('baseUnitId', e.target.value)}>{catalog.units.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select></Field>
+          <Field label="وحدة الطلب المعتادة (حين يكتب المحل رقماً بلا وحدة)"><select value={f.defaultUnitId} onChange={(e) => set('defaultUnitId', e.target.value)}><option value="">أول وحدة بيع</option>{f.units.map((u) => <option key={u.unitId} value={u.unitId}>{catalog.units.find((x) => x.id === u.unitId)?.name ?? u.unitId}</option>)}</select></Field>
           {f.units.map((u, i) => <div key={i} className="card" style={{ marginBottom: 8 }}>
             <div className="row">
               <Field label="الوحدة"><select value={u.unitId} onChange={(e) => setUnit(i, 'unitId', e.target.value)}>{catalog.units.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>

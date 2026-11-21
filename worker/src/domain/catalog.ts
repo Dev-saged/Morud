@@ -26,6 +26,8 @@ export interface Product {
   barcodes: string[];
   categoryId: string;
   baseUnitId: string;
+  /** الوحدة المفهومة حين يُذكر رقم بلا وحدة: 10 سمك = 10 كغ، 2 جبنة = 2 كرتونة */
+  defaultUnitId?: string;
   units: ProductUnit[];
   available: boolean;
   visible: boolean;
@@ -34,6 +36,11 @@ export interface Product {
 
 export function findUnit(p: Product, unitId: string): ProductUnit | undefined {
   return p.units.find((u) => u.unitId === unitId);
+}
+
+/** وحدة الطلب الافتراضية: المحددة للمنتج، وإلا أول وحدة بيع. */
+export function defaultUnit(p: Pick<Product, 'defaultUnitId' | 'units'>): ProductUnit | undefined {
+  return (p.defaultUnitId ? p.units.find((u) => u.unitId === p.defaultUnitId) : undefined) ?? p.units[0];
 }
 
 // تحقق سلامة تعريف المنتج قبل حفظه
@@ -54,5 +61,6 @@ export function validateProduct(p: Product, units: ReadonlyMap<string, Unit>): s
     if (u.minQtyMilli <= 0 || u.stepMilli <= 0) problems.push(`QTY_RULE_INVALID:${u.unitId}`);
   }
   if (!p.units.some((u) => u.unitId === p.baseUnitId)) problems.push('BASE_UNIT_MISSING');
+  if (p.defaultUnitId !== undefined && !p.units.some((u) => u.unitId === p.defaultUnitId)) problems.push('DEFAULT_UNIT_MISSING');
   return problems;
 }

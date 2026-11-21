@@ -44,6 +44,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mawred.app.core.Money
+import com.mawred.app.core.QuickOrder
+import com.mawred.app.core.defaultUnit
+import com.mawred.app.data.CatalogData
 import com.mawred.app.data.Product
 import com.mawred.app.ui.Icons
 import com.mawred.app.ui.common.Card
@@ -66,6 +69,7 @@ fun CatalogScreen(ui: CatalogUi, vm: ShopViewModel, padding: PaddingValues) {
     LazyVerticalGrid(GridCells.Adaptive(160.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item(span = { GridItemSpan(maxLineSpan) }) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                ui.data?.let { QuickOrderCard(it, vm) }
                 OutlinedTextField(ui.query, vm::query, Modifier.fillMaxWidth(), placeholder = { Text("ابحث بالاسم أو الرمز أو الباركود") }, leadingIcon = { Icon(Icons.search, null) }, singleLine = true)
                 ui.offlineSince?.let { Notice("بلا اتصال — آخر تحديث ${SimpleDateFormat("d/M HH:mm", Locale("ar")).format(Date(it))}", "تحديث") { vm.refresh() } }
                 ErrorText(ui.error)
@@ -89,7 +93,7 @@ fun CatalogScreen(ui: CatalogUi, vm: ShopViewModel, padding: PaddingValues) {
 
 @Composable
 private fun ProductCard(p: Product, unitNames: Map<String, String>, onAdd: (String) -> Unit) {
-    var unit by remember(p.id) { mutableStateOf(p.units.firstOrNull()?.unitId.orEmpty()) }
+    var unit by remember(p.id) { mutableStateOf(p.defaultUnit()?.unitId.orEmpty()) }
     val u = p.units.firstOrNull { it.unitId == unit }
     Card {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -150,6 +154,30 @@ fun CartScreen(rows: List<CartRow>, checkout: CheckoutUi, vm: ShopViewModel, pad
             Spacer(Modifier.height(8.dp))
             PrimaryButton(if (checkout.busy) "جارٍ الإرسال…" else "تأكيد وإرسال الطلب", vm::submit, enabled = !checkout.busy && rows.none { it.product == null || it.product.available.not() })
             if (rows.any { it.product == null || !it.product.available }) Text("احذف الأصناف غير المتاحة للمتابعة", color = Mawred.colors.danger, style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+/** طلب سريع بالكتابة: الرقم بلا وحدة يُفهم بوحدة الصنف المعتادة (10 سمك = 10 كغ). */
+@Composable
+private fun QuickOrderCard(data: CatalogData, vm: ShopViewModel) {
+    var open by remember { mutableStateOf(false) }
+    var text by remember { mutableStateOf("") }
+    val r = remember(text, data) { if (text.isBlank()) null else QuickOrder.parse(text, data.products) }
+    val names = remember(data) { data.products.associate { it.id to it.name } }
+    val units = remember(data) { data.units.associate { it.id to it.name } }
+    Card {
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            TextButton({ open = !open }) { Icon(Icons.orders, null); Text(" طلب سريع بالكتابة", color = Mawred.colors.primary) }
+            if (open) {
+                Text("مثال: 10 سمك بوري، 2 جبنة، نص كيلو زعتر", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)
+                OutlinedTextField(text, { text = it }, Modifier.fillMaxWidth(), minLines = 3, label = { Text("نص الطلب") })
+                r?.lines?.forEach { l ->
+                    Row { Text(names[l.productId].orEmpty(), Modifier.weight(1f)); Text("${Money.ltr(Money.formatQty(l.qtyMilli))} ${units[l.unitId] ?: l.unitId}${if (l.assumedUnit) " (المعتادة)" else ""}", style = Tabular) }
+                }
+                r?.problems?.forEach { pr -> Text("${pr.text}: ${QuickOrder.PROBLEM_TEXT[pr.reason]}", color = Mawred.colors.danger, style = MaterialTheme.typography.bodySmall) }
+                if (r != null && r.lines.isNotEmpty()) PrimaryButton("أضف ${r.lines.size} صنف إلى السلة", { vm.addMany(r.lines); text = ""; open = false })
+            }
         }
     }
 }

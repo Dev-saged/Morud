@@ -290,6 +290,11 @@ describe('الكتالوج (SRS 3)', () => {
     const costed = await w.call('POST', '/admin/products', { token: T(w, 'own'), headers: H(), body: { ...feta, sku: 'C1', cost: 600 } });
     expect((await w.db.get(`products/${costed.body.id}/private/cost`))!.data.cost).toBe(600);
     expect((await w.call('POST', '/admin/products', { token: T(w, 'own'), headers: H(), body: { ...feta, sku: 'C2', cost: -1 } })).status).toBe(400);
+    const d = await w.call('POST', '/admin/products', { token: T(w, 'cat'), headers: H(), body: { ...feta, sku: 'D1', defaultUnitId: 'carton' } });
+    expect((await w.db.get(`products/${d.body.id}`))!.data.defaultUnitId).toBe('carton');
+    expect((await w.call('POST', '/admin/products', { token: T(w, 'cat'), headers: H(), body: { ...feta, sku: 'D2', defaultUnitId: 'kg' } })).body.error.details.problems).toContain('DEFAULT_UNIT_MISSING');
+    expect((await w.call('PATCH', `/admin/products/${d.body.id}`, { token: T(w, 'cat'), body: { defaultUnitId: 'box' } })).status).toBe(200);
+    expect((await w.db.get(`products/${d.body.id}`))!.data.defaultUnitId).toBe('box');
   });
   it('السعر للإدارة المخولة فقط، والتوفر بصلاحيته، والتعديل مسجّل', async () => {
     const w = staffWorld();

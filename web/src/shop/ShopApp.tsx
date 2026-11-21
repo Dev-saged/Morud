@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { findUnit } from '../../../worker/src/domain/catalog';
+import { defaultUnit, findUnit, type Product } from '../../../worker/src/domain/catalog';
+import { parseQuickOrder, type QuickResult } from '../../../worker/src/domain/quickorder';
 import { priceCart } from '../../../worker/src/domain/pricing';
 import { matches } from '../../../worker/src/domain/search';
 import { slaProgress } from '../../../worker/src/domain/sla';
@@ -44,7 +45,8 @@ export function ShopApp() {
         <div><b>مورد</b>{offline && <span className="chip warn">بلا اتصال — آخر نسخة محفوظة</span>}</div>
       </header>
       <main className="shop-main">
-        {tab === 'home' && cat && <Home cat={cat} onAdd={(p, u, q, el) => { dispatch({ type: 'add', productId: p, unitId: u, qtyMilli: q }); fly(el); setToast('أُضيف إلى السلة'); }} />}
+        {tab === 'home' && cat && <Home cat={cat} onAdd={(p, u, q, el) => { dispatch({ type: 'add', productId: p, unitId: u, qtyMilli: q }); fly(el); setToast('أُضيف إلى السلة'); }}
+          onAddMany={(lines) => { for (const l of lines) dispatch({ type: 'add', productId: l.productId, unitId: l.unitId, qtyMilli: l.qtyMilli }); setToast(`أُضيف ${lines.length} صنف إلى السلة`); }} />}
         {tab === 'cart' && cat && <CartView cat={cat} cart={cart} dispatch={dispatch} shopId={shopId} onDone={(id) => { setTab('orders'); setOpenOrder(id); }} />}
         {tab === 'orders' && (openOrder ? <OrderDetail id={openOrder} back={() => setOpenOrder(null)} /> : <OrderList shopId={shopId} open={setOpenOrder} />)}
         {tab === 'account' && <Account shopId={shopId} onLogout={logout} />}
@@ -63,13 +65,36 @@ export function ShopApp() {
   );
 }
 
-function Home({ cat, onAdd }: { cat: Catalog; onAdd: (p: string, u: string, q: number, el: HTMLElement) => void }) {
+const PROBLEM: Record<string, string> = { NOT_FOUND: 'لم أجد هذا الصنف', AMBIGUOUS: 'أكثر من صنف يطابق، اكتب الاسم أوضح', UNIT_NOT_SOLD: 'لا يُباع بهذه الوحدة', UNAVAILABLE: 'غير متوفر حالياً', FRACTION_NOT_ALLOWED: 'يُباع بالعدد الصحيح فقط' };
+
+/** طلب سريع: يكتب صاحب المحل كما يتكلم، والنظام يفهم الكمية والوحدة الافتراضية لكل صنف. */
+export function QuickOrder({ cat, onAddMany }: { cat: Catalog; onAddMany: (lines: QuickResult['lines']) => void }) {
+  const [text, setText] = useState('');
+  const r = useMemo(() => (text.trim() ? parseQuickOrder(text, cat.products as unknown as Product[]) : null), [text, cat]);
+  const pName = (id: string) => cat.products.find((p) => p.id === id)?.name ?? id;
+  const uName = (id: string) => cat.units.find((u) => u.id === id)?.name ?? id;
+  return (
+    <details className="card quick">
+      <summary><Icon name="orders" /> طلب سريع بالكتابة</summary>
+      <p className="mute">اكتب كل صنف في سطر أو افصل بفاصلة: «10 سمك بوري، 2 جبنة، نص كيلو زعتر». الرقم بلا وحدة يُفهم بوحدة الصنف المعتادة.</p>
+      <textarea aria-label="نص الطلب السريع" rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="10 سمك بوري&#10;2 جبنة بيضاء" />
+      {r && <ul className="lines">
+        {r.lines.map((l) => <li key={`${l.productId}|${l.unitId}`}><span>{pName(l.productId)}</span><span className="num">{formatQty(l.qtyMilli)} {uName(l.unitId)}{l.assumedUnit && <small className="mute"> (الوحدة المعتادة)</small>}</span></li>)}
+        {r.problems.map((x, i) => <li key={`p${i}`} className="danger-text"><span>{x.text}</span><small>{PROBLEM[x.reason]}{x.reason === 'AMBIGUOUS' && x.candidates ? `: ${x.candidates.map(pName).join('، ')}` : ''}</small></li>)}
+      </ul>}
+      {r && r.lines.length > 0 && <button className="btn primary block" onClick={() => { onAddMany(r.lines); setText(''); }}>أضف {r.lines.length} صنف إلى السلة</button>}
+    </details>
+  );
+}
+
+function Home({ cat, onAdd, onAddMany }: { cat: Catalog; onAdd: (p: string, u: string, q: number, el: HTMLElement) => void; onAddMany: (lines: QuickResult['lines']) => void }) {
   const [q, setQ] = useState('');
   const [category, setCategory] = useState<string | null>(null);
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const list = useMemo(() => cat.products.filter((p) => (!category || p.categoryId === category) && (!onlyAvailable || p.available) && matches(q, p)).sort((a, b) => Number(b.available) - Number(a.available) || (a.order ?? 999) - (b.order ?? 999)), [cat, q, category, onlyAvailable]);
   return (
     <>
+      <QuickOrder cat={cat} onAddMany={onAddMany} />
       <div className="search"><Icon name="search" /><input type="search" placeholder="ابحث باسم المنتج أو العلامة أو الرمز" value={q} onChange={(e) => setQ(e.target.value)} aria-label="بحث" /></div>
       <div className="chips" role="tablist">
         <button className={!category ? 'chip on' : 'chip'} onClick={() => setCategory(null)}>الكل</button>
@@ -84,7 +109,7 @@ function Home({ cat, onAdd }: { cat: Catalog; onAdd: (p: string, u: string, q: n
 }
 
 function ProductCard({ p, units, onAdd, style }: { p: Catalog['products'][number]; units: Catalog['units']; onAdd: (p: string, u: string, q: number, el: HTMLElement) => void; style?: React.CSSProperties }) {
-  const [unitId, setUnit] = useState(p.baseUnitId);
+  const [unitId, setUnit] = useState(defaultUnit(p)?.unitId ?? p.baseUnitId);
   const u = findUnit(p, unitId) ?? p.units[0]!;
   const [qty, setQty] = useState(u.minQtyMilli);
   const name = (id: string) => units.find((x) => x.id === id)?.name ?? id;
