@@ -15,5 +15,6 @@ class CartRepository(private val dao: CartDao, private val now: () -> Long = Sys
         else dao.put(CartLine(productId, unitId, qtyMilli, dao.find(productId, unitId)?.addedAt ?: now()))
     }
 
+    suspend fun all() = dao.all()
     suspend fun clear() = dao.clear()
 }

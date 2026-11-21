@@ -49,3 +49,6 @@ M8 — العروض والتقارير والنسخ:
 - أُغلقت M10 (android/): 15 اختبار وحدة، assembleRelease بـ R8 ناجح محلياً (SDK في /opt/android-sdk). CI android.yml.
 - لتشغيل فعلي: ضبط متغيرات المستودع MAWRED_API_URL وMAWRED_FIREBASE_API_KEY وأسرار التوقيع.
 - التالي: M11 — إرسال الطلب عبر outbox (مفتاح idempotency ثابت، إعادة المحاولة عند عودة الشبكة بـ WorkManager)، قائمة الطلبات وتفاصيلها مع مؤقت SLA، كشف الحساب، FCM.
+
+## تحديث — M11
+- أُغلقت M11 (20 اختبار وحدة، release ناجح). التالي: M12 Android الإدارة والمندوب (إجراءات الطلبات، التسليم بإثبات واسم المستلم والمبلغ، تفريغ صور المنتجات بـ ML Kit Subject Segmentation ورفعها)، ثم M11b FCM، M13c، M14.

@@ -48,6 +48,9 @@ object AppModule {
     fun catalog(api: Api, db: AppDatabase) = com.mawred.app.data.CatalogRepository(api, db.cache())
 
     @Provides @Singleton
+    fun orders(api: Api, db: AppDatabase) = com.mawred.app.data.OrderRepository(api, db.outbox())
+
+    @Provides @Singleton
     fun states(@ApplicationContext ctx: Context) = OrderStates(ctx.assets.open("spec/order-states.json").bufferedReader().use { it.readText() })
 
     @Provides @Singleton

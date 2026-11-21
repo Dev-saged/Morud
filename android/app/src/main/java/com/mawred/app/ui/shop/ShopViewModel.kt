@@ -3,7 +3,14 @@ package com.mawred.app.ui.shop
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mawred.app.data.CatalogData
+import android.content.Context
 import com.mawred.app.data.CatalogRepository
+import com.mawred.app.data.OrderRepository
+import com.mawred.app.data.OutboxWorker
+import com.mawred.app.data.SubmitResult
+import com.mawred.app.data.auth.AuthRepository
+import com.mawred.app.data.auth.SessionState
+import dagger.hilt.android.qualifiers.ApplicationContext
 import com.mawred.app.data.Product
 import com.mawred.app.data.api.ApiException
 import com.mawred.app.data.local.CartLine
@@ -52,13 +59,80 @@ fun cartRows(lines: List<CartLine>, data: CatalogData?): List<CartRow> {
     }
 }
 
+data class CheckoutUi(
+    val methods: List<String> = listOf("cash"),
+    val method: String = "cash",
+    val notes: String = "",
+    val busy: Boolean = false,
+    val error: String? = null,
+    val priceChange: Pair<String, Long>? = null,
+    val queued: Boolean = false,
+    val sentOrderId: String? = null,
+)
+
 @HiltViewModel
-class ShopViewModel @Inject constructor(private val catalog: CatalogRepository, private val cart: CartRepository) : ViewModel() {
+class ShopViewModel @Inject constructor(
+    private val catalog: CatalogRepository,
+    private val cart: CartRepository,
+    private val orders: OrderRepository,
+    auth: AuthRepository,
+    @ApplicationContext private val ctx: Context,
+) : ViewModel() {
     private val _ui = MutableStateFlow(CatalogUi())
     val ui: StateFlow<CatalogUi> = _ui
     val cartRows: StateFlow<List<CartRow>> = combine(cart.lines, _ui) { l, u -> cartRows(l, u.data) }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    private val _checkout = MutableStateFlow(CheckoutUi())
+    val checkout: StateFlow<CheckoutUi> = _checkout
+    val pendingCount = orders.pendingCount.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+    val shopId: String = (auth.state.value as? SessionState.SignedIn)?.user?.shopIds?.firstOrNull().orEmpty()
 
-    init { refresh() }
+    init {
+        refresh()
+        viewModelScope.launch {
+            runCatching { orders.shop(shopId) }.onSuccess { s -> _checkout.update { it.copy(methods = s.paymentTerms.ifEmpty { listOf("cash") }) } }
+            if (orders.pending().isNotEmpty()) OutboxWorker.schedule(ctx)
+        }
+    }
+
+    fun method(m: String) = _checkout.update { it.copy(method = m) }
+    fun notes(n: String) = _checkout.update { it.copy(notes = n.take(1000)) }
+    fun consumeSent() = _checkout.update { it.copy(sentOrderId = null, queued = false) }
+
+    fun submit() {
+        val c = _checkout.value
+        if (c.busy) return
+        viewModelScope.launch {
+            val lines = cart.all()
+            if (lines.isEmpty()) return@launch
+            _checkout.update { it.copy(busy = true, error = null) }
+            try {
+                handle(orders.submit(orders.body(shopId, lines, c.method, c.notes, null)))
+            } catch (e: ApiException) {
+                _checkout.update { it.copy(busy = false, error = e.message) }
+            }
+        }
+    }
+
+    fun acceptPrice() {
+        val (key, total) = _checkout.value.priceChange ?: return
+        viewModelScope.launch {
+            _checkout.update { it.copy(busy = true, priceChange = null) }
+            try { handle(orders.acceptPrice(key, total)) } catch (e: ApiException) { _checkout.update { it.copy(busy = false, error = e.message) } }
+        }
+    }
+
+    fun rejectPrice() {
+        val (key, _) = _checkout.value.priceChange ?: return
+        viewModelScope.launch { orders.discard(key); _checkout.update { it.copy(priceChange = null) } }
+    }
+
+    private suspend fun handle(r: SubmitResult) {
+        when (r) {
+            is SubmitResult.Sent -> { cart.clear(); _checkout.update { it.copy(busy = false, notes = "", sentOrderId = r.orderId) } }
+            SubmitResult.Queued -> { cart.clear(); OutboxWorker.schedule(ctx); _checkout.update { it.copy(busy = false, notes = "", queued = true) } }
+            is SubmitResult.PriceChanged -> _checkout.update { it.copy(busy = false, priceChange = r.key to r.newTotal) }
+        }
+    }
 
     fun refresh() = viewModelScope.launch {
         _ui.update { it.copy(loading = true, error = null) }

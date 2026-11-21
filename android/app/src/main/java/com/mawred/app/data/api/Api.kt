@@ -15,7 +15,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.util.UUID
 
-class ApiException(val status: Int, val code: String, message: String) : Exception(message)
+class ApiException(val status: Int, val code: String, message: String, val details: JsonObject? = null) : Exception(message)
 
 fun newIdempotencyKey(): String = UUID.randomUUID().toString().replace("-", "")
 
@@ -40,7 +40,7 @@ class Api(private val client: OkHttpClient, private val base: () -> String, priv
             val obj = runCatching { ApiJson.parseToJsonElement(text).jsonObject }.getOrNull() ?: JsonObject(emptyMap())
             if (!r.isSuccessful) {
                 val e = obj["error"] as? JsonObject
-                throw ApiException(r.code, e?.get("code")?.jsonPrimitive?.contentOrNull ?: "ERROR", e?.get("message")?.jsonPrimitive?.contentOrNull ?: "حدث خطأ، حاول مرة أخرى")
+                throw ApiException(r.code, e?.get("code")?.jsonPrimitive?.contentOrNull ?: "ERROR", e?.get("message")?.jsonPrimitive?.contentOrNull ?: "حدث خطأ، حاول مرة أخرى", e?.get("details") as? JsonObject)
             }
             obj
         }

@@ -19,7 +19,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +50,7 @@ import com.mawred.app.ui.common.Card
 import com.mawred.app.ui.common.Empty
 import com.mawred.app.ui.common.ErrorText
 import com.mawred.app.ui.common.Notice
+import com.mawred.app.ui.common.PrimaryButton
 import com.mawred.app.ui.common.Skeleton
 import com.mawred.app.ui.common.reducedMotion
 import com.mawred.app.ui.theme.Mawred
@@ -102,8 +106,15 @@ private fun ProductCard(p: Product, unitNames: Map<String, String>, onAdd: (Stri
 }
 
 @Composable
-fun CartScreen(rows: List<CartRow>, vm: ShopViewModel, padding: PaddingValues) {
-    if (rows.isEmpty()) { Empty("السلة فارغة"); return }
+fun CartScreen(rows: List<CartRow>, checkout: CheckoutUi, vm: ShopViewModel, padding: PaddingValues) {
+    checkout.priceChange?.let { (_, total) ->
+        AlertDialog(onDismissRequest = vm::rejectPrice,
+            title = { Text("تغيّرت الأسعار") },
+            text = { Text("تغيّرت الأسعار منذ إعداد السلة. الإجمالي الجديد ${Money.format(total)}. هل ترسل الطلب بالسعر الجديد؟") },
+            confirmButton = { TextButton(vm::acceptPrice) { Text("موافق، أرسل") } },
+            dismissButton = { TextButton(vm::rejectPrice) { Text("إلغاء") } })
+    }
+    if (rows.isEmpty()) { if (checkout.queued) Box(Modifier.padding(16.dp)) { Notice("حُفظ الطلب وسيُرسل تلقائياً عند عودة الاتصال") } else Empty("السلة فارغة"); return }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         item { Notice("مسودة محفوظة على الجهاز — تبقى حتى بلا نت") }
         items(rows, key = { "${it.line.productId}|${it.line.unitId}" }) { r ->
@@ -129,6 +140,16 @@ fun CartScreen(rows: List<CartRow>, vm: ShopViewModel, padding: PaddingValues) {
                 Text(Money.format(rows.sumOf { it.total }), style = MaterialTheme.typography.titleLarge.merge(Tabular))
             }
             Text("الخادم يعيد حساب الأسعار والعروض عند إرسال الطلب.", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)
+            Spacer(Modifier.height(12.dp))
+            Text("طريقة الدفع", style = MaterialTheme.typography.titleSmall)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                checkout.methods.forEach { m -> FilterChip(checkout.method == m, { vm.method(m) }, { Text(if (m == "credit") "آجل" else "نقدي عند الاستلام") }) }
+            }
+            OutlinedTextField(checkout.notes, vm::notes, Modifier.fillMaxWidth(), label = { Text("ملاحظات للطلب (اختياري)") }, minLines = 2)
+            ErrorText(checkout.error)
+            Spacer(Modifier.height(8.dp))
+            PrimaryButton(if (checkout.busy) "جارٍ الإرسال…" else "تأكيد وإرسال الطلب", vm::submit, enabled = !checkout.busy && rows.none { it.product == null || it.product.available.not() })
+            if (rows.any { it.product == null || !it.product.available }) Text("احذف الأصناف غير المتاحة للمتابعة", color = Mawred.colors.danger, style = MaterialTheme.typography.bodySmall)
         }
     }
 }

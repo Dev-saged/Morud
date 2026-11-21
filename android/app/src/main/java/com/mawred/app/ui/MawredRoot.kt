@@ -73,7 +73,7 @@ private data class Tab(val id: String, val label: String, val icon: ImageVector)
 @Composable
 private fun AreaShell(user: SessionUser, offline: Boolean, update: UpdateInfo?, onUpdate: (UpdateInfo) -> Unit, onLogout: () -> Unit, onSecret: () -> Unit) {
     val tabs = when (user.area) {
-        "shop" -> listOf(Tab("catalog", "الرئيسية", Icons.home), Tab("cart", "السلة", Icons.cart))
+        "shop" -> listOf(Tab("catalog", "الرئيسية", Icons.home), Tab("cart", "السلة", Icons.cart), Tab("orders", "طلباتي", Icons.orders), Tab("account", "حسابي", Icons.wallet))
         "admin" -> listOf(Tab("dashboard", "لوحة المعلومات", Icons.chart))
         "agent" -> listOf(Tab("tasks", "المهام", Icons.truck))
         else -> emptyList()
@@ -82,6 +82,9 @@ private fun AreaShell(user: SessionUser, offline: Boolean, update: UpdateInfo?, 
     val shopVm: ShopViewModel? = if (user.area == "shop") hiltViewModel() else null
     val cartCount = shopVm?.cartRows?.collectAsStateWithLifecycle()?.value?.size ?: 0
     var logoTaps by rememberSaveable { mutableStateOf(0) }
+    var openOrder by rememberSaveable { mutableStateOf<String?>(null) }
+    val checkout = shopVm?.checkout?.collectAsStateWithLifecycle()?.value
+    androidx.compose.runtime.LaunchedEffect(checkout?.sentOrderId) { checkout?.sentOrderId?.let { openOrder = it; tab = "orders"; shopVm.consumeSent() } }
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -108,7 +111,9 @@ private fun AreaShell(user: SessionUser, offline: Boolean, update: UpdateInfo?, 
             AnimatedContent(tab, transitionSpec = { fadeIn(spring()) togetherWith fadeOut(spring()) }, label = "tab") { t ->
                 when (t) {
                     "catalog" -> shopVm?.let { CatalogScreen(it.ui.collectAsStateWithLifecycle().value, it, pad) }
-                    "cart" -> shopVm?.let { CartScreen(it.cartRows.collectAsStateWithLifecycle().value, it, pad) }
+                    "cart" -> shopVm?.let { CartScreen(it.cartRows.collectAsStateWithLifecycle().value, it.checkout.collectAsStateWithLifecycle().value, it, pad) }
+                    "orders" -> com.mawred.app.ui.shop.OrdersScreen(hiltViewModel(), pad, openOrder) { openOrder = null }
+                    "account" -> com.mawred.app.ui.shop.AccountScreen(hiltViewModel(), pad)
                     "dashboard" -> DashboardScreen(hiltViewModel(), pad)
                     "tasks" -> TasksScreen(hiltViewModel(), pad)
                     else -> com.mawred.app.ui.common.Empty("لا توجد واجهة لحسابك، تواصل مع الإدارة")

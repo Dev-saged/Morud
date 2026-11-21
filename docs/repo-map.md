@@ -162,3 +162,9 @@
 - الواجهات: `ui/MawredRoot.kt` (توجيه بالجلسة والدور)، `screens/AuthScreens.kt`، `shop/ShopScreens.kt` (كتالوج + سلة)، `admin/AdminScreens.kt` (مؤشرات + sparkline)، `agent/AgentScreens.kt`، `screens/TestScreen.kt` (7 نقرات على الشعار).
 - التحديث: `update/UpdateChecker.kt` (آخر Release، مقارنة رقم البناء، تنزيل في مجلد التطبيق، حذف بعد التثبيت).
 - قرار: النص فوق البرتقالي لون ثابت `ON_ACCENT_HEX` (accentInk مخصص للنص على السطح فقط) — كشفه اختبار التباين.
+
+## Android — M11 (المحل)
+- `data/Orders.kt`: `OrderRepository` — submit يحفظ في outbox أولاً بمفتاح ثابت ثم يرسل؛ NETWORK/5xx ← Queued؛ PRICE_CHANGED ← يبقى بعلامة `PRICE_CHANGED:<total>` وflush يتخطاه حتى الموافقة؛ acceptPrice يعيد الإرسال بنفس المفتاح + seenTotal؛ رفض منطقي (4xx) ← يُحذف ويظهر الخطأ العربي.
+- `data/OutboxWorker.kt`: WorkManager بشرط الشبكة وتراجع أُسّي، عبر Hilt EntryPoint.
+- `ui/shop/ShopViewModel.kt` (CheckoutUi)، `ShopScreens.kt` (السلة: طريقة الدفع والملاحظات والإرسال وحوار السعر)، `OrderScreens.kt` (طلباتي، التفاصيل بالمراحل ومؤقت SLA بتوقيت غزة والإجراءات، كشف الحساب).
+- `ApiException.details` يحمل تفاصيل الخادم (مثل total في PRICE_CHANGED).
