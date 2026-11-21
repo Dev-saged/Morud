@@ -410,4 +410,14 @@ describe('التهيئة الأولى الآمنة', () => {
     const login = await w.call('POST', '/auth/login', { body: { identifier: 'sajed', password: r.tempPassword } });
     expect(login.body.user).toMatchObject({ home: 'admin.dashboard', mustChangePassword: true });
   });
+  it('كلمة المالك من سرّ النشر: لا كلمة مؤقتة تُعاد، وضعيفة تُرفض', async () => {
+    const w = world(ALL_ROUTES);
+    await expect(bootstrap(w.s, { username: 'sajed', displayName: 'مالك', password: 'short' })).rejects.toMatchObject({ code: 'PASSWORD_WEAK' });
+    expect(await w.db.get('system/bootstrap')).toBeNull();
+    const w2 = w;
+    const r = await bootstrap(w2.s, { username: 'sajed', displayName: 'مالك', password: 'Mawred2026Strong' });
+    expect(r.tempPassword).toBeNull();
+    const login = await w2.call('POST', '/auth/login', { body: { identifier: 'sajed', password: 'Mawred2026Strong' } });
+    expect(login.body.user).toMatchObject({ home: 'admin.dashboard', mustChangePassword: false });
+  });
 });

@@ -1,0 +1,122 @@
+# النشر الكامل من الجوال: Actions ← deploy ← Run workflow
+# الأسرار (Settings ← Secrets): CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, FIREBASE_SERVICE_ACCOUNT, BACKUP_KEY, OWNER_PASSWORD
+# المتغيرات (Settings ← Variables): MAWRED_FIREBASE_PROJECT_ID, MAWRED_FIREBASE_API_KEY, MAWRED_API_URL, MAWRED_WEB_ORIGIN, OWNER_USERNAME, OWNER_NAME
+name: deploy
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'ما الذي يُنشر'
+        type: choice
+        options: [all, server, web]
+        default: all
+      bootstrap:
+        description: 'التهيئة الأولى (مرة واحدة فقط): البيانات الأولية + حساب المالك'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  PROJECT_ID: ${{ vars.MAWRED_FIREBASE_PROJECT_ID }}
+  WEB_ORIGIN: ${{ vars.MAWRED_WEB_ORIGIN || 'https://mawred.pages.dev' }}
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: التحقق من الإعداد
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          KEY: ${{ vars.MAWRED_FIREBASE_API_KEY }}
+        run: |
+          miss=""
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || miss="$miss CLOUDFLARE_API_TOKEN"
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || miss="$miss CLOUDFLARE_ACCOUNT_ID"
+          [ -n "$SA" ] || miss="$miss FIREBASE_SERVICE_ACCOUNT"
+          [ -n "$PROJECT_ID" ] || miss="$miss MAWRED_FIREBASE_PROJECT_ID"
+          [ -n "$KEY" ] || miss="$miss MAWRED_FIREBASE_API_KEY"
+          if [ -n "$miss" ]; then echo "::error::ناقص:$miss"; exit 1; fi
+          echo "الإعداد الأساسي مكتمل"
+
+  server:
+    needs: check
+    if: inputs.target != 'web'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: حساب الخدمة
+        env: { SA: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' }
+        run: printf '%s' "$SA" > "$RUNNER_TEMP/sa.json"
+      - name: قواعد Firestore وفهارسه
+        working-directory: firebase
+        env: { GOOGLE_APPLICATION_CREDENTIALS: '${{ runner.temp }}/sa.json' }
+        run: npx -y firebase-tools@14 deploy --only firestore --project "$PROJECT_ID" --non-interactive
+      - run: npm ci
+        working-directory: worker
+      - name: مخازن Cloudflare (KV وR2)
+        run: |
+          KV_ID=$(node scripts/ci-kv.mjs mawred-kv | tail -1)
+          for b in mawred-files mawred-backups; do (cd worker && npx wrangler r2 bucket create "$b") || echo "المخزن $b موجود"; done
+          cd worker
+          sed -i "s/^id = \"REPLACE_WITH_KV_ID\"/id = \"$KV_ID\"/; s/mawred-staging-files/mawred-files/; s/mawred-staging-backups/mawred-backups/" wrangler.toml
+          sed -i "s|^FIREBASE_PROJECT_ID = .*|FIREBASE_PROJECT_ID = \"$PROJECT_ID\"|; s|^ALLOWED_ORIGINS = .*|ALLOWED_ORIGINS = \"$WEB_ORIGIN\"|" wrangler.toml
+      - name: نشر Worker
+        working-directory: worker
+        run: npx wrangler deploy
+      - name: أسرار Worker
+        env:
+          SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_API_KEY: ${{ vars.MAWRED_FIREBASE_API_KEY }}
+          BACKUP_KEY: ${{ secrets.BACKUP_KEY }}
+        run: |
+          node scripts/ci-secrets.mjs "$RUNNER_TEMP/secrets.json"
+          cd worker && npx wrangler secret bulk "$RUNNER_TEMP/secrets.json"
+          rm -f "$RUNNER_TEMP/secrets.json"
+      - name: التهيئة الأولى
+        if: inputs.bootstrap
+        working-directory: worker
+        env:
+          CI: '1'
+          SERVICE_ACCOUNT: ${{ runner.temp }}/sa.json
+          FIREBASE_API_KEY: ${{ vars.MAWRED_FIREBASE_API_KEY }}
+          OWNER_USERNAME: ${{ vars.OWNER_USERNAME }}
+          OWNER_NAME: ${{ vars.OWNER_NAME }}
+          OWNER_PASSWORD: ${{ secrets.OWNER_PASSWORD }}
+        run: |
+          [ -n "$OWNER_PASSWORD" ] || { echo "::error::السر OWNER_PASSWORD مطلوب للتهيئة (المستودع عام فلا تُطبع كلمات مرور)"; exit 1; }
+          npx tsx scripts/bootstrap.ts
+      - name: تنظيف
+        if: always()
+        run: rm -f "$RUNNER_TEMP/sa.json"
+
+  web:
+    needs: [check, server]
+    if: always() && needs.check.result == 'success' && inputs.target != 'server' && needs.server.result != 'failure'
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - name: بناء الويب
+        env:
+          VITE_API_URL: ${{ vars.MAWRED_API_URL }}
+          VITE_FIREBASE_API_KEY: ${{ vars.MAWRED_FIREBASE_API_KEY }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.MAWRED_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.MAWRED_FIREBASE_PROJECT_ID }}.firebaseapp.com
+        run: |
+          [ -n "$VITE_API_URL" ] || { echo "::error::MAWRED_API_URL غير مضبوط — انشر الخادم أولاً وانسخ رابطه"; exit 1; }
+          npm run build
+      - name: نشر Cloudflare Pages
+        run: |
+          npx wrangler pages project create mawred --production-branch main || echo "المشروع موجود"
+          npx wrangler pages deploy dist --project-name mawred --branch main

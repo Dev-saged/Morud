@@ -28,5 +28,11 @@ const s: Services = {
   now: () => Date.now(),
   id: () => crypto.randomUUID().replace(/-/g, ''),
 };
-const r = await bootstrap(s, { username: need('OWNER_USERNAME'), displayName: need('OWNER_NAME'), ...(process.env.OWNER_EMAIL ? { email: process.env.OWNER_EMAIL } : {}) });
-console.log(`تمت التهيئة. مالك النظام: ${r.uid}\nكلمة المرور المؤقتة (تُعرض مرة واحدة، تُغيَّر عند أول دخول): ${r.tempPassword}`);
+const r = await bootstrap(s, {
+  username: need('OWNER_USERNAME'),
+  displayName: need('OWNER_NAME'),
+  ...(process.env.OWNER_EMAIL ? { email: process.env.OWNER_EMAIL } : {}),
+  ...(process.env.OWNER_PASSWORD ? { password: process.env.OWNER_PASSWORD } : {}),
+});
+// في CI على مستودع عام لا تُطبع أي كلمة مرور؛ كلمة المالك تأتي من سرّ OWNER_PASSWORD
+console.log(r.tempPassword && !process.env.CI ? `تمت التهيئة. مالك النظام: ${r.uid}\nكلمة المرور المؤقتة (تُعرض مرة واحدة): ${r.tempPassword}` : `تمت التهيئة. مالك النظام: ${r.uid}`);
