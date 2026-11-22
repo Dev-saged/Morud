@@ -9,7 +9,7 @@ describe('لوحة لكل دور', () => {
     await move(w, 'oe', a, 'under_review');
     const r = await w.call('GET', '/me/summary', { token: T(w, 'so1') });
     expect(r.status).toBe(200);
-    expect(r.body).toMatchObject({ area: 'shop', open: 2, ordersMonth: 2, spendMonth: 49500, due: 0, creditAvailable: 100000 });
+    expect(r.body).toMatchObject({ area: 'shop', shopName: 'بقالة النور', open: 2, ordersMonth: 2, spendMonth: 49500, due: 0, creditAvailable: 100000 });
     expect(r.body.spendLast7Days).toHaveLength(7);
     expect(r.body.last).toMatchObject({ status: expect.any(String), total: 24750 });
     expect(r.body.reorder[0]).toMatchObject({ productId: 'feta', count: 2 });

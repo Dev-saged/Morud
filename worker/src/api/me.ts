@@ -42,6 +42,7 @@ async function mine(ctx: Ctx) {
   const finance = u.permissions.has('shop.statement.view');
   return json({
     area: 'shop',
+    shopName: String(shop?.data.name ?? ''),
     open: orders.filter((o) => OPEN.includes(String(o.data.status))).length,
     ordersMonth: live.length,
     spendMonth: live.reduce((a, o) => a + total(o), 0),

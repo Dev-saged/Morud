@@ -67,7 +67,7 @@ private val GLOW = Color(0xFFF08A24)
 
 /** رأس اللوحة الفاخر: تدرّج أزرق عميق، توهّج برتقالي ينجرف ببطء، تحية باسم المستخدم وتاريخ اليوم. */
 @Composable
-fun DeskHero(name: String, subtitle: String?, content: @Composable ColumnScope.() -> Unit = {}) {
+fun DeskHero(name: String, subtitle: String?, place: String? = null, content: @Composable ColumnScope.() -> Unit = {}) {
     val still = reducedMotion()
     val t = rememberInfiniteTransition(label = "hero")
     val drift by t.animateFloat(0f, 1f, infiniteRepeatable(tween(14000, easing = LinearEasing), RepeatMode.Reverse), label = "drift")
@@ -77,7 +77,7 @@ fun DeskHero(name: String, subtitle: String?, content: @Composable ColumnScope.(
             drawCircle(Brush.radialGradient(listOf(GLOW.copy(alpha = .45f), Color.Transparent), center = Offset(size.width * (.15f + .2f * d), size.height * (.1f + .4f * d)), radius = size.width * .55f), radius = size.width * .55f, center = Offset(size.width * (.15f + .2f * d), size.height * (.1f + .4f * d)))
         }
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(SimpleDateFormat("EEEE، d MMMM", Locale("ar")).format(Date()), style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = .75f))
+            Text((place?.takeIf { it.isNotBlank() }?.let { "$it · " }.orEmpty()) + SimpleDateFormat("EEEE، d MMMM", Locale("ar")).format(Date()), style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = .75f))
             Text("${greeting()}، ${name.substringBefore(' ')}", style = MaterialTheme.typography.headlineSmall.copy(fontFamily = Display, fontWeight = FontWeight.Bold), color = Color.White)
             subtitle?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = .85f)) }
             content()

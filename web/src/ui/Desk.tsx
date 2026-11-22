@@ -9,11 +9,11 @@ export function greeting(d = new Date()) {
 const DATE = new Intl.DateTimeFormat('ar-PS-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' });
 
 /** رأس اللوحة: تحية باسم المستخدم وتاريخ اليوم، وخلفية حيّة هادئة. */
-export function Hero({ name, title, children, tone = 'primary' }: { name: string; title?: string; children?: ReactNode; tone?: 'primary' | 'ink' }) {
+export function Hero({ name, title, place, children, tone = 'primary' }: { name: string; title?: string; place?: string; children?: ReactNode; tone?: 'primary' | 'ink' }) {
   return (
     <header className={`hero hero-${tone}`}>
       <div className="hero-glow" aria-hidden="true" />
-      <p className="hero-date">{DATE.format(new Date())}</p>
+      <p className="hero-date">{place ? <><b>{place}</b> · </> : null}{DATE.format(new Date())}</p>
       <h1>{greeting()}، {name.split(' ')[0]}</h1>
       {title && <p className="hero-sub">{title}</p>}
       {children}

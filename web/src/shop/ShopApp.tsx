@@ -82,7 +82,7 @@ export function ShopApp() {
   );
 }
 
-interface MySummary { open: number; ordersMonth: number; spendMonth: number; spendLast7Days: number[]; due?: number; creditAvailable?: number | null; last: { id: string; number: string; status: string; total: number; createdAt: number } | null; reorder: Array<{ productId: string; name: string; unitId: string; count: number }> }
+interface MySummary { shopName?: string; open: number; ordersMonth: number; spendMonth: number; spendLast7Days: number[]; due?: number; creditAvailable?: number | null; last: { id: string; number: string; status: string; total: number; createdAt: number } | null; reorder: Array<{ productId: string; name: string; unitId: string; count: number }> }
 
 /** لوحة صاحب المحل: المستحق والحد المتاح، الطلبات المفتوحة، مصروف الشهر، آخر طلب وتقدّمه، و«اطلب مجدداً» بنقرة. */
 function ShopDesk({ cat, shopId, pending, openOrders, openOrder, openAccount, reorder }: { cat: Catalog; shopId: string; pending: number; openOrders: () => void; openOrder: (id: string) => void; openAccount: () => void; reorder: (p: string, u: string, q: number) => void }) {
@@ -94,7 +94,7 @@ function ShopDesk({ cat, shopId, pending, openOrders, openOrder, openAccount, re
   const stage = m?.last ? stageIndex(m.last.status) : -1;
   return (
     <section className="desk">
-      <Hero name={user!.displayName} title={m ? (m.open ? `عندك ${m.open} طلب مفتوح` : 'جاهز لطلبك القادم؟') : undefined}>
+      <Hero name={user!.displayName} place={m?.shopName} title={m ? (m.open ? `عندك ${m.open} طلب مفتوح` : 'جاهز لطلبك القادم؟') : undefined}>
         {m && m.due !== undefined && <div className="hero-stats">
           <div><small>المستحق عليك</small><b className="num">{formatMoney(m.due)}</b></div>
           {m.creditAvailable != null && <div className="row"><Ring value={limitTotal ? m.creditAvailable / limitTotal : 0} label={`${limitTotal ? Math.round((m.creditAvailable / limitTotal) * 100) : 0}٪`} /><div><small>المتاح من الحد</small><b className="num" style={{ fontSize: '1.2rem' }}>{formatMoney(m.creditAvailable)}</b></div></div>}

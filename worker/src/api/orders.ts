@@ -167,6 +167,7 @@ async function transition(ctx: Ctx, p: Record<string, string>) {
     const r = checkTransition({ from, to, actor, permissions: u.permissions, reason, guards });
     if (!r.ok) throw fail(r.code === 'FORBIDDEN' ? 'FORBIDDEN' : r.code, r.message, r.details);
     const patch: Data = { status: to, updatedAt: ctx.s.now(), version: ((o.version as number) ?? 1) + 1 };
+    let settledNow = false;
     const effects = r.value.effects ?? [];
     let invoiceId = o.invoiceId as string | null;
     if (effects.includes('apply_change_request') && pendingChange) {
@@ -205,14 +206,24 @@ async function transition(ctx: Ctx, p: Record<string, string>) {
         photoKey: typeof proof.photoKey === 'string' ? proof.photoKey : null, signatureKey: typeof proof.signatureKey === 'string' ? proof.signatureKey : null,
         approxGeo: proof.geo ?? null, collected, at: ctx.s.now(),
       } });
-      if (collected > 0) await postPayment(tx, ctx, { shopId: String(o.shopId), amount: collected, method: 'cash', source: 'delivery', orderId: order.id, ...(invoiceId ? { invoiceId } : {}) });
+      if (collected > 0) {
+        const pr = await postPayment(tx, ctx, { shopId: String(o.shopId), amount: collected, method: 'cash', source: 'delivery', orderId: order.id, ...(invoiceId ? { invoiceId } : {}) });
+        settledNow = pr.settled.some((x) => x.orderId === order.id);
+      }
       patch.deliveredAt = ctx.s.now();
     }
+    // فاتورة مسددة بالكامل (تحصيل عند الباب أو دفع مسبق): الطلب «مكتمل مالياً» فوراً بدل انتظار التسوية الليلية
+    if (to === 'delivered' && !settledNow && invoiceId) {
+      const inv = await tx.get(`invoices/${invoiceId}`);
+      settledNow = inv?.data.remaining === 0 && inv.data.status !== 'void';
+    }
+    if (settledNow) { patch.status = 'financially_completed'; patch.settledAt = ctx.s.now(); }
     if (to === 'delivery_failed') patch.failure = { reason, at: ctx.s.now(), by: u.uid };
     if (to === 'cancelled' || to === 'rejected') patch.closure = { reason, by: u.uid, actor, at: ctx.s.now() };
     if (actor === 'staff' && !o.assignedTo && u.kinds.has('staff')) patch.assignedTo = u.uid;
     tx.write({ kind: 'update', path: order.path, data: patch });
     tx.write({ kind: 'create', path: `orders/${order.id}/history/${ctx.s.id()}`, data: { from, to, by: u.uid, actor, roleContext: ctx.workContext, reason: reason || null, at: ctx.s.now() } });
+    if (settledNow) tx.write({ kind: 'create', path: `orders/${order.id}/history/${ctx.s.id()}`, data: { from: to, to: 'financially_completed', by: 'system', actor: 'system', at: ctx.s.now() } });
     tx.write(auditWrite(ctx, { action: 'orders.transition', entity: { kind: 'order', id: order.id }, before: { status: from }, after: { status: to, reason: reason || null, effects } }));
     const jobs: string[] = [];
     const sMsg = SHOP_MSG[to];

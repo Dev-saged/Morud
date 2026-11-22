@@ -54,7 +54,7 @@ fun ShopDesk(me: MeViewModel, name: String, cat: CatalogData?, pending: Int, sta
     fun n(o: JsonObject?, k: String) = o?.get(k)?.jsonPrimitive?.longOrNull
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         val open = n(s, "open") ?: 0
-        DeskHero(name, if (s == null) null else if (open > 0) "عندك $open طلب مفتوح" else "جاهز لطلبك القادم؟") {
+        DeskHero(name, if (s == null) null else if (open > 0) "عندك $open طلب مفتوح" else "جاهز لطلبك القادم؟", place = s?.get("shopName")?.jsonPrimitive?.content) {
             val due = n(s, "due")
             if (due != null) Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
                 HeroStat("المستحق عليك", Money.format(due))

@@ -186,7 +186,11 @@ describe('الدفعات والتسويات والكشف (SRS 9)', () => {
     const w = fin();
     const { id } = await confirmed(w, 100);
     await deliver(w, id, 10000);
-    expect((await w.db.get(`orders/${id}`))!.data.status).toBe('delivered');
-    expect(await settleSweep(w.s)).toBe(1);
+    expect((await w.db.get(`orders/${id}`))!.data.status).toBe('financially_completed');
+    expect(await settleSweep(w.s)).toBe(0);
+    // تحصيل جزئي: يبقى «تم التسليم» حتى تُستكمل الدفعة
+    const b = (await confirmed(w, 100)).id;
+    await deliver(w, b, 4000);
+    expect((await w.db.get(`orders/${b}`))!.data.status).toBe('delivered');
   });
 });

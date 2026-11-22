@@ -90,7 +90,8 @@ describe('دورة حياة الطلب كاملة (SRS 5 و8 و9)', () => {
     const shopInbox = (await w.call('GET', '/notifications', { token: T(w, 'so1') })).body.notifications.map((n: any) => n.title);
     for (const t of ['طلبك قيد المراجعة', 'تم تأكيد طلبك وإصدار فاتورته', 'خرج طلبك للتوصيل', 'المندوب في الطريق إليك', 'تم تسليم طلبك']) expect(shopInbox).toContain(t);
     const hist = (await w.call('GET', `/orders/${id}`, { token: T(w, 'so1') })).body.history.map((h: any) => h.to);
-    expect(hist).toEqual(['new', 'under_review', 'confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery', 'on_the_way', 'delivered']);
+    expect(hist).toEqual(['new', 'under_review', 'confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery', 'on_the_way', 'delivered', 'financially_completed']);
+    expect((await w.db.get(`orders/${id}`))!.data.status).toBe('financially_completed');
   });
   it('تحصيل جزئي يترك متبقياً، والمرتجع الجزئي يُنشئ إشعاراً دائناً', async () => {
     const w = setup();
