@@ -6,8 +6,7 @@ import com.mawred.app.BrandConfig
 import com.mawred.app.data.api.ApiException
 import com.mawred.app.data.auth.AuthRepository
 import com.mawred.app.data.auth.LoginPrefs
-import com.mawred.app.update.UpdateChecker
-import com.mawred.app.update.UpdateInfo
+import com.mawred.app.update.UpdateManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,20 +17,19 @@ import javax.inject.Inject
 data class FormState(val busy: Boolean = false, val error: String? = null, val info: String? = null)
 
 @HiltViewModel
-class SessionViewModel @Inject constructor(private val auth: AuthRepository, private val updates: UpdateChecker) : ViewModel() {
+class SessionViewModel @Inject constructor(private val auth: AuthRepository, private val updates: UpdateManager) : ViewModel() {
     val session = auth.state
     /** وقت آخر بيانات محفوظة عُرضت بدل الحية (null = متصل). */
     val stale = auth.api.stale
     private val _form = MutableStateFlow(FormState())
     val form: StateFlow<FormState> = _form
-    private val _update = MutableStateFlow<UpdateInfo?>(null)
-    val update: StateFlow<UpdateInfo?> = _update
     private val _prefs = MutableStateFlow(LoginPrefs())
     val prefs: StateFlow<LoginPrefs> = _prefs
 
     init {
         viewModelScope.launch { _prefs.value = auth.loginPrefs(); auth.restore() }
-        viewModelScope.launch { updates.cleanup(); _update.value = updates.check() }
+        updates.restore(); updates.schedulePeriodic()
+        viewModelScope.launch { updates.check(silent = true) }
     }
 
     private fun run(block: suspend () -> Unit) {
@@ -57,6 +55,5 @@ class SessionViewModel @Inject constructor(private val auth: AuthRepository, pri
     }
 
     fun logout() = viewModelScope.launch { auth.logout() }
-    fun downloadUpdate(i: UpdateInfo) = updates.download(i)
     fun clearForm() { _form.value = FormState() }
 }

@@ -48,24 +48,28 @@ import com.mawred.app.ui.shop.CartScreen
 import com.mawred.app.ui.shop.CatalogScreen
 import com.mawred.app.ui.shop.ShopViewModel
 import com.mawred.app.ui.theme.Mawred
-import com.mawred.app.update.UpdateInfo
 
 /** التوجيه حسب الجلسة والدور (SRS 2.2): كل حساب إلى واجهته مباشرة. */
 @Composable
-fun MawredRoot(vm: SessionViewModel = hiltViewModel()) {
+fun MawredRoot(openUpdate: kotlinx.coroutines.flow.MutableStateFlow<Boolean> = remember { kotlinx.coroutines.flow.MutableStateFlow(false) }, vm: SessionViewModel = hiltViewModel(), updVm: com.mawred.app.ui.update.UpdateViewModel = hiltViewModel()) {
     val session by vm.session.collectAsStateWithLifecycle()
     val form by vm.form.collectAsStateWithLifecycle()
-    val update by vm.update.collectAsStateWithLifecycle()
+    val phase by updVm.phase.collectAsStateWithLifecycle()
+    val showUpdates by openUpdate.collectAsStateWithLifecycle()
+    val update = com.mawred.app.ui.update.UpdateViewModel.infoOf(phase)
     val prefs by vm.prefs.collectAsStateWithLifecycle()
     val stale by vm.stale.collectAsStateWithLifecycle()
     var secret by rememberSaveable { mutableStateOf(false) }
     if (secret) { BackHandler { secret = false }; TestScreen(session, update) { secret = false }; return }
+    if (showUpdates) { BackHandler { openUpdate.value = false }; com.mawred.app.ui.update.UpdateCenter(updVm) { openUpdate.value = false }; return }
     AnimatedContent(session, transitionSpec = { fadeIn(spring()) togetherWith fadeOut(spring()) }, contentKey = { it::class to ((it as? SessionState.SignedIn)?.user?.mustChangePassword) }, label = "root") { s ->
         when (s) {
             SessionState.Loading -> Box(Modifier.fillMaxSize().background(Mawred.colors.surface), contentAlignment = Alignment.Center) { LogoMark(72.dp, Mawred.colors.primary, Mawred.colors.accent) }
             SessionState.SignedOut -> LoginScreen(form, prefs, vm::login, vm::forgot, { secret = true }, vm::clearForm)
             is SessionState.SignedIn -> if (s.user.mustChangePassword) ChangePasswordScreen(form, vm::changePassword) { vm.logout() }
-                else AreaShell(s.user, s.offline || stale != null, update, { vm.downloadUpdate(it) }, { vm.logout() }, { secret = true })
+                else androidx.compose.runtime.CompositionLocalProvider(com.mawred.app.ui.update.LocalOpenUpdates provides { openUpdate.value = true }) {
+                    AreaShell(s.user, s.offline || stale != null, phase, { openUpdate.value = true }, { if (!updVm.install()) openUpdate.value = true }, { vm.logout() }, { secret = true })
+                }
         }
     }
 }
@@ -74,7 +78,7 @@ private data class Tab(val id: String, val label: String, val icon: ImageVector)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AreaShell(user: SessionUser, offline: Boolean, update: UpdateInfo?, onUpdate: (UpdateInfo) -> Unit, onLogout: () -> Unit, onSecret: () -> Unit) {
+private fun AreaShell(user: SessionUser, offline: Boolean, phase: com.mawred.app.update.UpdatePhase, onOpenUpdate: () -> Unit, onInstall: () -> Unit, onLogout: () -> Unit, onSecret: () -> Unit) {
     val tabs = when (user.area) {
         "shop" -> listOf(Tab("catalog", "الرئيسية", Icons.home), Tab("cart", "السلة", Icons.cart), Tab("orders", "طلباتي", Icons.orders), Tab("account", "حسابي", Icons.wallet))
         "admin" -> listOfNotNull(
@@ -118,7 +122,7 @@ private fun AreaShell(user: SessionUser, offline: Boolean, update: UpdateInfo?, 
     ) { pad ->
         Column(Modifier.padding(top = pad.calculateTopPadding())) {
             if (offline) Box(Modifier.padding(12.dp)) { Notice("وضع بلا اتصال — تُعرض آخر بيانات محفوظة") }
-            if (update != null) Box(Modifier.padding(12.dp)) { Notice("إصدار جديد ${update.version} متاح", "تنزيل") { onUpdate(update) } }
+            com.mawred.app.ui.update.UpdateBanner(phase, onOpenUpdate, onInstall)
             AnimatedContent(tab, transitionSpec = { fadeIn(spring()) togetherWith fadeOut(spring()) }, label = "tab") { t ->
                 when (t) {
                     "catalog" -> shopVm?.let { CatalogScreen(it.ui.collectAsStateWithLifecycle().value, it, pad) }

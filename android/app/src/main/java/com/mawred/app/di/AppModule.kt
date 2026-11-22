@@ -57,5 +57,12 @@ object AppModule {
     fun states(@ApplicationContext ctx: Context) = OrderStates(ctx.assets.open("spec/order-states.json").bufferedReader().use { it.readText() })
 
     @Provides @Singleton
-    fun updates(@ApplicationContext ctx: Context, http: OkHttpClient) = UpdateChecker(http, ctx)
+    fun updateChecker(http: OkHttpClient) = UpdateChecker(http)
+
+    @Provides @Singleton
+    fun downloader(http: OkHttpClient) = com.mawred.app.update.ApkDownloader(http.newBuilder().readTimeout(60, java.util.concurrent.TimeUnit.SECONDS).build())
+
+    /** مجلد التحديثات داخل ملفات التطبيق الخاصة (لا يحتاج أذونات تخزين، ويُحذف مع التطبيق). */
+    @Provides @Singleton
+    fun updates(@ApplicationContext ctx: Context, checker: UpdateChecker) = com.mawred.app.update.UpdateManager(ctx, checker, com.mawred.app.update.UpdateFiles(java.io.File(ctx.filesDir, "updates")))
 }

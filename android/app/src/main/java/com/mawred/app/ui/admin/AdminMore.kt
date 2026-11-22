@@ -126,6 +126,10 @@ fun AdminMoreScreen(user: SessionUser, padding: PaddingValues, focus: Focus? = n
     }
     val list = SECTIONS.filter { s -> s.perms.any(user::can) }
     LazyVerticalGrid(GridCells.Adaptive(150.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+            val ph by hiltViewModel<com.mawred.app.ui.update.UpdateViewModel>().phase.collectAsStateWithLifecycle()
+            com.mawred.app.ui.update.UpdateEntry(ph, com.mawred.app.BuildConfig.VERSION_NAME, com.mawred.app.ui.update.LocalOpenUpdates.current)
+        }
         items(list, key = { it.id }) { s ->
             Card(Modifier.clickable { open = s.id }) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

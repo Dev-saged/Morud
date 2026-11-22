@@ -47,13 +47,17 @@ object Icons {
     val eye: ImageVector by lazy { icon("eye", "M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z") }
     val pin: ImageVector by lazy { icon("pin", "M12 21s-6-5.5-6-10.5a6 6 0 1 1 12 0C18 15.5 12 21 12 21zM12 8.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4z") }
     val phone: ImageVector by lazy { icon("phone", "M6.5 4h3l1.5 4-2 1.5a10 10 0 0 0 5.5 5.5l1.5-2 4 1.5v3a1.5 1.5 0 0 1-1.5 1.5A15.5 15.5 0 0 1 5 5.5 1.5 1.5 0 0 1 6.5 4z") }
+    val download: ImageVector by lazy { icon("download", "M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14") }
+    val pause: ImageVector by lazy { icon("pause", "M9 6v12M15 6v12") }
+    val folder: ImageVector by lazy { icon("folder", "M4 7a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z") }
+    val sparkle: ImageVector by lazy { icon("sparkle", "M12 4l1.8 4.7L18.5 10.5l-4.7 1.8L12 17l-1.8-4.7L5.5 10.5l4.7-1.8zM18 16l.8 1.7 1.7.8-1.7.8L18 21l-.8-1.7-1.7-.8 1.7-.8z") }
     val share: ImageVector by lazy { icon("share", "M12 4v11M8 8l4-4 4 4M5 13v6h14v-6", mirror = true) }
 
     private fun icon(name: String, d: String, mirror: Boolean = false) = ImageVector.Builder(name = name, defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f, autoMirror = mirror)
         .addPath(pathData = addPathNodes(d), fill = null, stroke = SolidColor(Color.Black), strokeLineWidth = 1.75f, strokeLineCap = StrokeCap.Round, strokeLineJoin = StrokeJoin.Round)
         .build()
 
-    val all: Map<String, ImageVector> get() = mapOf("home" to home, "search" to search, "cart" to cart, "orders" to orders, "user" to user, "bell" to bell, "plus" to plus, "minus" to minus, "trash" to trash, "box" to box, "truck" to truck, "logout" to logout, "chevron" to chevron, "clock" to clock, "check" to check, "alert" to alert, "wallet" to wallet, "chart" to chart, "store" to store, "users" to users, "tag" to tag, "gear" to gear, "shield" to shield, "chat" to chat, "print" to print, "eye" to eye, "pin" to pin, "phone" to phone, "share" to share)
+    val all: Map<String, ImageVector> get() = mapOf("home" to home, "search" to search, "cart" to cart, "orders" to orders, "user" to user, "bell" to bell, "plus" to plus, "minus" to minus, "trash" to trash, "box" to box, "truck" to truck, "logout" to logout, "chevron" to chevron, "clock" to clock, "check" to check, "alert" to alert, "wallet" to wallet, "chart" to chart, "store" to store, "users" to users, "tag" to tag, "gear" to gear, "shield" to shield, "chat" to chat, "print" to print, "eye" to eye, "pin" to pin, "phone" to phone, "share" to share, "download" to download, "pause" to pause, "folder" to folder, "sparkle" to sparkle)
 }
 
 private val logoPath = PathParser().parsePathString("M43 59V191a15 15 0 0 0 30 0V100l42 47a15 15 0 0 0 22 0l42-47v41a15 15 0 0 0 30 0V59a15 15 0 0 0-26-10l-57 64-57-64a15 15 0 0 0-26 10z").toPath()

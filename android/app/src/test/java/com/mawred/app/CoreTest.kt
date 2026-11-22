@@ -119,6 +119,8 @@ class CoreTest {
         val json = """{"tag_name":"v0.2.0-b57","body":"ملاحظات","assets":[{"name":"Morud-v0.2.0-build57.apk","browser_download_url":"https://github.com/x.apk"}]}"""
         val u = UpdateChecker.parse(json)!!
         assertEquals(57, u.build); assertEquals("0.2.0", u.version); assertEquals("https://github.com/x.apk", u.apkUrl)
+        val d = UpdateChecker.parse("""{"tag_name":"v0.3.0-b11","published_at":"2026-11-22T07:09:56Z","assets":[{"name":"M.apk","size":3200000,"digest":"sha256:abc123","browser_download_url":"u"}]}""")!!
+        assertEquals(3_200_000L, d.size); assertEquals("abc123", d.sha256)
         assertNull(UpdateChecker.parse("""{"tag_name":"latest","assets":[]}"""))
         assertNull(UpdateChecker.parse("""{"tag_name":"v1.0.0-b2","assets":[{"name":"notes.txt","browser_download_url":"u"}]}"""))
         assertEquals(57, UpdateChecker.buildOf("mawred-57.apk"))

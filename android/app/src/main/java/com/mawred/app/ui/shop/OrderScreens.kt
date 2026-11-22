@@ -188,5 +188,6 @@ fun AccountScreen(vm: OrdersViewModel, padding: PaddingValues) {
                 }
             }
         }
+        item { val up = com.mawred.app.ui.update.LocalOpenUpdates.current; val ph by androidx.hilt.navigation.compose.hiltViewModel<com.mawred.app.ui.update.UpdateViewModel>().phase.collectAsStateWithLifecycle(); com.mawred.app.ui.update.UpdateEntry(ph, com.mawred.app.BuildConfig.VERSION_NAME, up) }
     }
 }

@@ -88,6 +88,7 @@ fun TasksScreen(vm: AgentViewModel, padding: PaddingValues) {
     val ctx = LocalContext.current
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { Text("مهام التوصيل", style = MaterialTheme.typography.headlineMedium); ErrorText(ui.error); ui.done?.let { Text(it, color = Mawred.colors.ok) } }
+        item { val ph by androidx.hilt.navigation.compose.hiltViewModel<com.mawred.app.ui.update.UpdateViewModel>().phase.collectAsStateWithLifecycle(); com.mawred.app.ui.update.UpdateEntry(ph, com.mawred.app.BuildConfig.VERSION_NAME, com.mawred.app.ui.update.LocalOpenUpdates.current) }
         val tasks = ui.tasks
         if (tasks == null) items(List(3) { it }) { Skeleton() }
         else if (tasks.isEmpty()) item { Empty("لا مهام حالياً") }
