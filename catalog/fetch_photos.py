@@ -29,7 +29,7 @@ def strip(html):
 
 def commons(q, n=4):
     s = get('https://commons.wikimedia.org/w/api.php?' + urllib.parse.urlencode({'action': 'query', 'format': 'json', 'generator': 'search', 'gsrsearch': f'{q} filetype:bitmap', 'gsrnamespace': 6, 'gsrlimit': 12,
-        'prop': 'imageinfo', 'iiprop': 'url|size|extmetadata|mime', 'iiurlwidth': 900}))
+        'prop': 'imageinfo', 'iiprop': 'url|size|extmetadata|mime', 'iiurlwidth': 960}))
     out = []
     for p in sorted((s.get('query') or {}).get('pages', {}).values(), key=lambda p: p.get('index', 99)):
         ii = (p.get('imageinfo') or [{}])[0]
@@ -95,5 +95,5 @@ def one(sku, mode='all'):
 if __name__ == '__main__':
     mode = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in ('all', 'off', 'commons', 'retry') else 'all'
     skus = [a for a in sys.argv[1:] if a not in ('all', 'off', 'commons', 'retry')] or (list(R) if mode == 'retry' else list(Q))
-    with ThreadPoolExecutor(3 if mode == 'off' else 1) as ex:
+    with ThreadPoolExecutor(3 if mode == 'off' else 2 if mode == 'retry' else 1) as ex:
         for sku, n in ex.map(lambda k: one(k, mode), skus): print(sku, n, flush=True)

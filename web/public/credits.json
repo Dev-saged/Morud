@@ -1028,5 +1028,155 @@
   "license": "CC BY-SA 3.0",
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
   "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "FRZ-003",
+  "mode": "full",
+  "src": "commons",
+  "title": "File:Raw leg chicken quarters.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Raw_leg_chicken_quarters.jpg",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "author": "Baoothersks"
+ },
+ {
+  "sku": "STP-005",
+  "mode": "full",
+  "src": "off",
+  "title": "LENTILLE CORAIL 500g",
+  "page": "https://world.openfoodfacts.org/product/3250392270971",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "DAI-002",
+  "mode": "full",
+  "src": "off",
+  "title": "Nido",
+  "page": "https://world.openfoodfacts.org/product/6111018909217",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "DAI-009",
+  "mode": "full",
+  "src": "off",
+  "title": "Beurre doux 82%mg, plaquette de 250g",
+  "page": "https://world.openfoodfacts.org/product/3256222646886",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "BEV-008",
+  "mode": "full",
+  "src": "off",
+  "title": "NESCAFÉ 3en1, Café soluble au lait sucré, Boîte de 10 sticks de 16,5g",
+  "page": "https://world.openfoodfacts.org/product/7613036900072",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "PRD-002",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Agriculture-72254.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Agriculture-72254.jpg",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "author": "Petr Kratochvil"
+ },
+ {
+  "sku": "PRD-003",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Three whole red onions.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Three_whole_red_onions.jpg",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "author": "Anja"
+ },
+ {
+  "sku": "PRD-004",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Cucumber from Denmark.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Cucumber_from_Denmark.jpg",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "author": "WiseMan42"
+ },
+ {
+  "sku": "PRD-005",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Aubergine.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Aubergine.jpg",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Horst Frank"
+ },
+ {
+  "sku": "PRD-006",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Capsicum annuum fruits IMGP0122.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Capsicum_annuum_fruits_IMGP0122.jpg",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "author": "Nikodem Nijaki"
+ },
+ {
+  "sku": "PRD-007",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Lemon with white background.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Lemon_with_white_background.jpg",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "author": "Bordercolliez"
+ },
+ {
+  "sku": "PRD-008",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Red Apple.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Red_Apple.jpg",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "author": "Abhijit Tembhekar from Mumbai, India"
+ },
+ {
+  "sku": "PRD-009",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Bananas white background DS.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Bananas_white_background_DS.jpg",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "author": "Augustus Binu : flickr"
+ },
+ {
+  "sku": "BBY-004",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:\"neo-mull-soy\" Baby Formula Product Can - DPLA - daaaceca128c17bcf9ac33de83617b83 (page 2).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:%22neo-mull-soy%22_Baby_Formula_Product_Can_-_DPLA_-_daaaceca128c17bcf9ac33de83617b83_(page_2).jpg",
+  "license": "Public domain",
+  "licenseUrl": "",
+  "author": "Syntex Laboratories"
+ },
+ {
+  "sku": "HSH-001",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Plastsic pail of paint.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Plastsic_pail_of_paint.jpg",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "author": "Rlsheehan"
  }
 ]

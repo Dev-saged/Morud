@@ -9,3 +9,9 @@
 ## الأسعار
 - 46 صنفاً بسعر مرجعي من **UNICEF — Market Monitoring: Food & Non-Food Items, Gaza Strip, 25–27 Aug 2026** (وسيط أسعار التجزئة بالشيكل في 15 سوقاً).
 - الباقي تقدير مبدئي. منذ 15 أكتوبر 2026 توقف دخول البضائع التجارية فتغيّرت الأسعار؛ راجع كل سعر من لوحة الإدارة ← المنتجات ← المسودات ثم انشر.
+
+
+## الصور الحقيقية (v0.4.1)
+- المصادر: Open Food Facts / Open Beauty Facts / Open Products Facts (CC BY-SA 3.0) وويكيميديا كومنز (CC0/CC BY/CC BY-SA). الإسناد في `photo_credits.json` ويُعرض في التطبيق وصفحة `/credits.html`.
+- الخطوات: `python3 fetch_photos.py off` ثم `commons`/`retry` ← مراجعة بصرية `python3 sheet.py c out.png SKU...` ← الاختيار في `photos/choices.json` (رقم = تفريغ، `[رقم,"full"]` = الصورة كاملة بزوايا دائرية للعبوات المقصوصة أصلاً) ← `python3 cutout_photos.py photos/choices.json` (rembg isnet، WebP 1000 + مصغّرة 360، علامة مورد) ← `worker/scripts/replace-images.ts`.
+- 118 من 131 بصور حقيقية. الباقي (لحوم طازجة، أدوات منزلية، زعتر وبهارات) يُستبدل من لوحة الإدارة بتصوير المنتج (التفريغ تلقائي على الجهاز).

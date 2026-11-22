@@ -1,0 +1,1182 @@
+[
+ {
+  "sku": "FRZ-001",
+  "mode": "cut",
+  "src": "off",
+  "title": "Poulet",
+  "page": "https://world.openfoodfacts.org/product/20594558",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "FRZ-004",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Plucked chicken wing.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Plucked_chicken_wing.jpg",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "author": "ProjectManhattan, crop and changes: User:Kersti Nebelsiek"
+ },
+ {
+  "sku": "FRZ-005",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Preparing Chicken Liver 01.JPG",
+  "page": "https://commons.wikimedia.org/wiki/File:Preparing_Chicken_Liver_01.JPG",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "author": "Poupou l'quourouce"
+ },
+ {
+  "sku": "FRZ-008",
+  "mode": "full",
+  "src": "off",
+  "title": "4 Biftecks hachés pur bœuf 5%",
+  "page": "https://world.openfoodfacts.org/product/3270160609338",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "FRZ-009",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Flathead grey mullet for sale.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Flathead_grey_mullet_for_sale.jpg",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "author": "Pradeep717"
+ },
+ {
+  "sku": "FRZ-010",
+  "mode": "full",
+  "src": "off",
+  "title": "Pangasius Filet",
+  "page": "https://world.openfoodfacts.org/product/4061462608629",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "FRZ-011",
+  "mode": "full",
+  "src": "commons",
+  "title": "File:Frozen cooked shrimp (20240124).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Frozen_cooked_shrimp_(20240124).jpg",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "author": "Fumikas Sagisavas"
+ },
+ {
+  "sku": "FRZ-012",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:USDA 2026 Peas frozen.png",
+  "page": "https://commons.wikimedia.org/wiki/File:USDA_2026_Peas_frozen.png",
+  "license": "Public domain",
+  "licenseUrl": "",
+  "author": "U.S. Department of Health and Human Services"
+ },
+ {
+  "sku": "FRZ-013",
+  "mode": "full",
+  "src": "commons",
+  "title": "File:Quiabo.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Quiabo.jpg",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "author": "ArionStar"
+ },
+ {
+  "sku": "FRZ-014",
+  "mode": "full",
+  "src": "off",
+  "title": "MOLOKHIA",
+  "page": "https://world.openfoodfacts.org/product/6224000234287",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "FRZ-015",
+  "mode": "cut",
+  "src": "off",
+  "title": "Fave sgranate",
+  "page": "https://world.openfoodfacts.org/product/8003495900840",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "FRZ-016",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:2020-08-31 03 37 20 A sample of Birds Eye Steamfresh Chef's Favorites Lightly Seasoned Asian Medley (Carrots, broccoli, baby cob corn, sugar snap peas) in the Dulles section of Sterling, Loudoun County, Virginia.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:2020-08-31_03_37_20_A_sample_of_Birds_Eye_Steamfresh_Chef%27s_Favorites_Lightly_Seasoned_Asian_Medley_(Carrots,_broccoli,_baby_cob_corn,_sugar_snap_peas)_in_the_Dulles_section_of_Sterling,_Loudoun_County,_Virginia.jpg",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "author": "Famartin"
+ },
+ {
+  "sku": "FRZ-017",
+  "mode": "cut",
+  "src": "off",
+  "title": "Alumettes Just au Four",
+  "page": "https://world.openfoodfacts.org/product/8710438123784",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "FRZ-018",
+  "mode": "cut",
+  "src": "off",
+  "title": "Le 100% pur Bœuf",
+  "page": "https://world.openfoodfacts.org/product/3661112080891",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "FRZ-019",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Chicken cocktail sausage 02.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Chicken_cocktail_sausage_02.jpg",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "author": "Indrajit Das"
+ },
+ {
+  "sku": "STP-001",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Germinated brown rice - long grain.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Germinated_brown_rice_-_long_grain.jpg",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "author": "Chouk Khmer"
+ },
+ {
+  "sku": "STP-002",
+  "mode": "full",
+  "src": "off",
+  "title": "Sucre Poudre",
+  "page": "https://world.openfoodfacts.org/product/3174660000896",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "STP-003",
+  "mode": "cut",
+  "src": "off",
+  "title": "Farine de blé complète - T150",
+  "page": "https://world.openfoodfacts.org/product/3068111301246",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "STP-004",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:2022-05-30 21 06 43 A bottle of Wesson vegetable oil in the Mountainville section of Ewing Township, Mercer County, New Jersey.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:2022-05-30_21_06_43_A_bottle_of_Wesson_vegetable_oil_in_the_Mountainville_section_of_Ewing_Township,_Mercer_County,_New_Jersey.jpg",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "author": "Famartin"
+ },
+ {
+  "sku": "STP-006",
+  "mode": "cut",
+  "src": "off",
+  "title": "Pois chiches",
+  "page": "https://world.openfoodfacts.org/product/3111950001928",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "STP-007",
+  "mode": "full",
+  "src": "off",
+  "title": "Haricots lingots",
+  "page": "https://world.openfoodfacts.org/product/4056489362814",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "STP-008",
+  "mode": "cut",
+  "src": "off",
+  "title": "Fava Beans",
+  "page": "https://world.openfoodfacts.org/product/5059604647413",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "STP-009",
+  "mode": "cut",
+  "src": "off",
+  "title": "Tahini",
+  "page": "https://world.openfoodfacts.org/product/5000362110206",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "STP-010",
+  "mode": "cut",
+  "src": "off",
+  "title": "Sel de table iodé",
+  "page": "https://world.openfoodfacts.org/product/6111184001562",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "STP-011",
+  "mode": "cut",
+  "src": "off",
+  "title": "Rigatoni Penne Rigate Nº73",
+  "page": "https://world.openfoodfacts.org/product/8076802085738",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "DAI-001",
+  "mode": "full",
+  "src": "off",
+  "title": "KDD Uht Full Cream Milk 1L",
+  "page": "https://world.openfoodfacts.org/product/6271002103011",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "DAI-003",
+  "mode": "cut",
+  "src": "off",
+  "title": "Skyr Natural Fat Free Icelandic Style Yogurt",
+  "page": "https://world.openfoodfacts.org/product/4016241030573",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "DAI-004",
+  "mode": "cut",
+  "src": "off",
+  "title": "Queso feta",
+  "page": "https://world.openfoodfacts.org/product/8480000511973",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "DAI-005",
+  "mode": "cut",
+  "src": "off",
+  "title": "Nabulsi cheese",
+  "page": "https://world.openfoodfacts.org/product/0796252002236",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "DAI-006",
+  "mode": "cut",
+  "src": "off",
+  "title": "High protein cheese slices",
+  "page": "https://world.openfoodfacts.org/product/4056489889533",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "DAI-007",
+  "mode": "cut",
+  "src": "off",
+  "title": "La vache qui rit",
+  "page": "https://world.openfoodfacts.org/product/3073781192186",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "DAI-008",
+  "mode": "full",
+  "src": "off",
+  "title": "Labneh Natur",
+  "page": "https://world.openfoodfacts.org/product/5201704063093",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "DAI-010",
+  "mode": "cut",
+  "src": "off",
+  "title": "Oeufs frais 30 économique",
+  "page": "https://world.openfoodfacts.org/product/6111262585557",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SNK-001",
+  "mode": "full",
+  "src": "off",
+  "title": "Sea salt & cider vinegar",
+  "page": "https://world.openfoodfacts.org/product/5060042641406",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SNK-002",
+  "mode": "full",
+  "src": "off",
+  "title": "Chocolate Os",
+  "page": "https://world.openfoodfacts.org/product/8008698005231",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SNK-003",
+  "mode": "cut",
+  "src": "off",
+  "title": "B'ono Wafer",
+  "page": "https://world.openfoodfacts.org/product/6111259344013",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SNK-004",
+  "mode": "full",
+  "src": "off",
+  "title": "Chocolat Villars Lait Suisse à l'ancienne 100g",
+  "page": "https://world.openfoodfacts.org/product/7610036010305",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SNK-005",
+  "mode": "full",
+  "src": "off",
+  "title": "",
+  "page": "https://world.openfoodfacts.org/product/6111258520012",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SNK-006",
+  "mode": "cut",
+  "src": "off",
+  "title": "Pistaches grillées à sec",
+  "page": "https://world.openfoodfacts.org/product/3564700397114",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SNK-007",
+  "mode": "full",
+  "src": "off",
+  "title": "Bénénuts cacahuètes grillées & salées",
+  "page": "https://world.openfoodfacts.org/product/3168930007340",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SNK-008",
+  "mode": "full",
+  "src": "off",
+  "title": "Roulade Au Chocolat",
+  "page": "https://world.openfoodfacts.org/product/3254950008204",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SNK-009",
+  "mode": "cut",
+  "src": "off",
+  "title": "Loukoum",
+  "page": "https://world.openfoodfacts.org/product/5411944105815",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SNK-010",
+  "mode": "cut",
+  "src": "off",
+  "title": "Spearmint Sugarfree Gum",
+  "page": "https://world.openfoodfacts.org/product/02289902",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "BEV-001",
+  "mode": "cut",
+  "src": "off",
+  "title": "THONON Eau Minérale Naturelle 1.5L",
+  "page": "https://world.openfoodfacts.org/product/3468570726299",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "BEV-002",
+  "mode": "cut",
+  "src": "off",
+  "title": "Pepsi 330ml Can",
+  "page": "https://world.openfoodfacts.org/product/4062139017416",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "BEV-003",
+  "mode": "cut",
+  "src": "off",
+  "title": "fanta Orange 0,33",
+  "page": "https://world.openfoodfacts.org/product/5449000011527",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "BEV-004",
+  "mode": "cut",
+  "src": "off",
+  "title": "Juper orange 1l",
+  "page": "https://world.openfoodfacts.org/product/6111251751888",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "BEV-005",
+  "mode": "cut",
+  "src": "off",
+  "title": "Zumo de mango",
+  "page": "https://world.openfoodfacts.org/product/8402001019272",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "BEV-006",
+  "mode": "full",
+  "src": "off",
+  "title": "Yorkshire Tea 80 Tea Bags",
+  "page": "https://world.openfoodfacts.org/product/5010357112061",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "BEV-007",
+  "mode": "cut",
+  "src": "off",
+  "title": "Coffee with cardamom",
+  "page": "https://world.openfoodfacts.org/product/0022644006385",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "BEV-009",
+  "mode": "full",
+  "src": "off",
+  "title": "Energy Drink",
+  "page": "https://world.openfoodfacts.org/product/90162909",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "BEV-010",
+  "mode": "cut",
+  "src": "off",
+  "title": "Sirop Framboise Rhubarbe",
+  "page": "https://world.openfoodfacts.org/product/3272036008856",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "CLN-001",
+  "mode": "full",
+  "src": "off",
+  "title": "Persil Lessive Poudre Bouquet de Provence 45 Doses",
+  "page": "https://world.openproductsfacts.org/product/8712561344494",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "CLN-002",
+  "mode": "cut",
+  "src": "off",
+  "title": "Natural Liquid Laundry Detergent Free & Clear",
+  "page": "https://world.openproductsfacts.org/product/0732913227808",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "CLN-003",
+  "mode": "cut",
+  "src": "off",
+  "title": "Vaisselle main",
+  "page": "https://world.openproductsfacts.org/product/3450601047039",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "CLN-004",
+  "mode": "cut",
+  "src": "off",
+  "title": "EAU DE JAVEL BREF",
+  "page": "https://world.openproductsfacts.org/product/6130430005413",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "CLN-005",
+  "mode": "full",
+  "src": "off",
+  "title": "Savon d'Alep Laurier 12%",
+  "page": "https://world.openbeautyfacts.org/product/3593290021895",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "CLN-006",
+  "mode": "cut",
+  "src": "off",
+  "title": "",
+  "page": "https://world.openproductsfacts.org/product/0764450738651",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "CLN-007",
+  "mode": "cut",
+  "src": "off",
+  "title": "Spray nettoyant vitres",
+  "page": "https://world.openproductsfacts.org/product/3245678160541",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "CLN-008",
+  "mode": "full",
+  "src": "off",
+  "title": "Sponges",
+  "page": "https://world.openproductsfacts.org/product/9001378700227",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "CLN-009",
+  "mode": "full",
+  "src": "off",
+  "title": "Drawstring Trash Bags",
+  "page": "https://world.openproductsfacts.org/product/0008399611456",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "CLN-010",
+  "mode": "full",
+  "src": "off",
+  "title": "Gel mains hydroalcoolique",
+  "page": "https://world.openbeautyfacts.org/product/3245678096673",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "BBY-001",
+  "mode": "cut",
+  "src": "off",
+  "title": "Couche lotus baby taille 3",
+  "page": "https://world.openproductsfacts.org/product/7322540852585",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "BBY-002",
+  "mode": "cut",
+  "src": "off",
+  "title": "AUCHAN BABY : Couches taille 2 x 36",
+  "page": "https://world.openproductsfacts.org/product/3596710324972",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "BBY-003",
+  "mode": "cut",
+  "src": "off",
+  "title": "AUCHAN BABY : Couches taille 1 x 22",
+  "page": "https://world.openproductsfacts.org/product/3596710447626",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "BBY-005",
+  "mode": "cut",
+  "src": "off",
+  "title": "Sensitive Wipes",
+  "page": "https://world.openbeautyfacts.org/product/4015400636649",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "BBY-006",
+  "mode": "full",
+  "src": "off",
+  "title": "Cerelac",
+  "page": "https://world.openfoodfacts.org/product/6221007032540",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "BBY-007",
+  "mode": "cut",
+  "src": "off",
+  "title": "Johnsons",
+  "page": "https://world.openbeautyfacts.org/product/6223000659243",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "BBY-008",
+  "mode": "full",
+  "src": "off",
+  "title": "Biberon d'apprentissage 2 en 1 en verre",
+  "page": "https://world.openproductsfacts.org/product/3384349135201",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "BBY-009",
+  "mode": "full",
+  "src": "off",
+  "title": "Crème change",
+  "page": "https://world.openbeautyfacts.org/product/3286011092310",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "BBY-010",
+  "mode": "full",
+  "src": "off",
+  "title": "gohnsons baby powder",
+  "page": "https://world.openbeautyfacts.org/product/8901012111024",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "PRC-001",
+  "mode": "cut",
+  "src": "off",
+  "title": "",
+  "page": "https://world.openbeautyfacts.org/product/5011321362406",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "PRC-002",
+  "mode": "full",
+  "src": "off",
+  "title": "Colgate",
+  "page": "https://world.openbeautyfacts.org/product/6281001112013",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "PRC-003",
+  "mode": "cut",
+  "src": "off",
+  "title": "Colgate Extra Clean Toothbrush Medium 1+1",
+  "page": "https://world.openbeautyfacts.org/product/8714789732244",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "PRC-004",
+  "mode": "full",
+  "src": "off",
+  "title": "Kotex Ultra Uzun Hijyenik Ped Uzun 18’li Süper Ekonomik",
+  "page": "https://world.openbeautyfacts.org/product/8691900174049",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "PRC-005",
+  "mode": "full",
+  "src": "off",
+  "title": "Brut Déodorant Homme Spray Original 200ml",
+  "page": "https://world.openbeautyfacts.org/product/3014230021404",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "PRC-006",
+  "mode": "cut",
+  "src": "off",
+  "title": "Essential Savon de Marseille & Feuilles d'Olivier Gel lavant mains",
+  "page": "https://world.openbeautyfacts.org/product/3250391185177",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "PRC-007",
+  "mode": "full",
+  "src": "off",
+  "title": "Disposable Razors 5 Pack",
+  "page": "https://world.openbeautyfacts.org/product/3086125705027",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "PRC-008",
+  "mode": "cut",
+  "src": "off",
+  "title": "Papier toilette 2 épaisseurs aqua tube",
+  "page": "https://world.openproductsfacts.org/product/7322540819342",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "PRC-009",
+  "mode": "cut",
+  "src": "off",
+  "title": "Facial Tissues",
+  "page": "https://world.openproductsfacts.org/product/0061328805036",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "PRC-010",
+  "mode": "cut",
+  "src": "off",
+  "title": "Nivea crème",
+  "page": "https://world.openbeautyfacts.org/product/4005808925124",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Beauty Facts contributors"
+ },
+ {
+  "sku": "PRD-001",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Tomato je.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Tomato_je.jpg",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Softeis"
+ },
+ {
+  "sku": "HSH-004",
+  "mode": "full",
+  "src": "off",
+  "title": "Charbon de bois",
+  "page": "https://world.openproductsfacts.org/product/3513050431375",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "HSH-006",
+  "mode": "cut",
+  "src": "off",
+  "title": "Heavy Duty Duct Tape",
+  "page": "https://world.openproductsfacts.org/product/5024763112522",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "HSH-010",
+  "mode": "cut",
+  "src": "off",
+  "title": "Bic Mini Lighter",
+  "page": "https://world.openproductsfacts.org/product/3086120600051",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "CAN-001",
+  "mode": "cut",
+  "src": "off",
+  "title": "Nostromo Tuna In Oil 160g X4",
+  "page": "https://world.openfoodfacts.org/product/8005850113001",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "CAN-002",
+  "mode": "cut",
+  "src": "off",
+  "title": "Foul Medames",
+  "page": "https://world.openfoodfacts.org/product/5018666021173",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "CAN-003",
+  "mode": "full",
+  "src": "off",
+  "title": "Americana chickpeas ready to eat",
+  "page": "https://world.openfoodfacts.org/product/0032894030481",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "CAN-004",
+  "mode": "full",
+  "src": "off",
+  "title": "Beanz in a rich tomato sauce",
+  "page": "https://world.openfoodfacts.org/product/5000157024671",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "CAN-005",
+  "mode": "cut",
+  "src": "off",
+  "title": "Plain Sardines",
+  "page": "https://world.openfoodfacts.org/product/3263670162219",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "CAN-006",
+  "mode": "full",
+  "src": "off",
+  "title": "Beef luncheon meat",
+  "page": "https://world.openfoodfacts.org/product/8711135570543",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "CAN-007",
+  "mode": "cut",
+  "src": "off",
+  "title": "Aicha Double Concentré De Tomates 140 G",
+  "page": "https://world.openfoodfacts.org/product/6111021022002",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "CAN-008",
+  "mode": "cut",
+  "src": "off",
+  "title": "Can of sweet corn kernels with no added sugars",
+  "page": "https://world.openfoodfacts.org/product/5949065018146",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "CAN-009",
+  "mode": "cut",
+  "src": "off",
+  "title": "Gerblé - No Sugar Added Apricot Jam, 320g (11.3oz)",
+  "page": "https://world.openfoodfacts.org/product/3175681854475",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "CAN-010",
+  "mode": "full",
+  "src": "off",
+  "title": "Halva pistache",
+  "page": "https://world.openfoodfacts.org/product/3276650101528",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SPC-003",
+  "mode": "full",
+  "src": "off",
+  "title": "Cumin moulu",
+  "page": "https://world.openfoodfacts.org/product/3166296210671",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SPC-004",
+  "mode": "cut",
+  "src": "off",
+  "title": "POIVRE NOIR MOULU",
+  "page": "https://world.openfoodfacts.org/product/15647023",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SPC-005",
+  "mode": "cut",
+  "src": "off",
+  "title": "CURCUMA moulu",
+  "page": "https://world.openfoodfacts.org/product/3417960022640",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SPC-006",
+  "mode": "full",
+  "src": "off",
+  "title": "Смрадлика",
+  "page": "https://world.openfoodfacts.org/product/3800208224171",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SPC-007",
+  "mode": "full",
+  "src": "off",
+  "title": "Acide citrique",
+  "page": "https://world.openfoodfacts.org/product/3517360011241",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SPC-008",
+  "mode": "full",
+  "src": "off",
+  "title": "Ma levure boulangère",
+  "page": "https://world.openfoodfacts.org/product/3068111752222",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SPC-009",
+  "mode": "full",
+  "src": "off",
+  "title": "Knorr Bouillon de Poule Bio 60g",
+  "page": "https://world.openfoodfacts.org/product/8714100880142",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SPC-010",
+  "mode": "full",
+  "src": "off",
+  "title": "Cannelle moulue",
+  "page": "https://world.openfoodfacts.org/product/3166290200197",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "FRZ-003",
+  "mode": "full",
+  "src": "commons",
+  "title": "File:Raw leg chicken quarters.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Raw_leg_chicken_quarters.jpg",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "author": "Baoothersks"
+ },
+ {
+  "sku": "STP-005",
+  "mode": "full",
+  "src": "off",
+  "title": "LENTILLE CORAIL 500g",
+  "page": "https://world.openfoodfacts.org/product/3250392270971",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "DAI-002",
+  "mode": "full",
+  "src": "off",
+  "title": "Nido",
+  "page": "https://world.openfoodfacts.org/product/6111018909217",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "DAI-009",
+  "mode": "full",
+  "src": "off",
+  "title": "Beurre doux 82%mg, plaquette de 250g",
+  "page": "https://world.openfoodfacts.org/product/3256222646886",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "BEV-008",
+  "mode": "full",
+  "src": "off",
+  "title": "NESCAFÉ 3en1, Café soluble au lait sucré, Boîte de 10 sticks de 16,5g",
+  "page": "https://world.openfoodfacts.org/product/7613036900072",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "PRD-002",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Agriculture-72254.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Agriculture-72254.jpg",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "author": "Petr Kratochvil"
+ },
+ {
+  "sku": "PRD-003",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Three whole red onions.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Three_whole_red_onions.jpg",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "author": "Anja"
+ },
+ {
+  "sku": "PRD-004",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Cucumber from Denmark.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Cucumber_from_Denmark.jpg",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "author": "WiseMan42"
+ },
+ {
+  "sku": "PRD-005",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Aubergine.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Aubergine.jpg",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Horst Frank"
+ },
+ {
+  "sku": "PRD-006",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Capsicum annuum fruits IMGP0122.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Capsicum_annuum_fruits_IMGP0122.jpg",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "author": "Nikodem Nijaki"
+ },
+ {
+  "sku": "PRD-007",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Lemon with white background.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Lemon_with_white_background.jpg",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "author": "Bordercolliez"
+ },
+ {
+  "sku": "PRD-008",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Red Apple.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Red_Apple.jpg",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "author": "Abhijit Tembhekar from Mumbai, India"
+ },
+ {
+  "sku": "PRD-009",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Bananas white background DS.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Bananas_white_background_DS.jpg",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "author": "Augustus Binu : flickr"
+ },
+ {
+  "sku": "BBY-004",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:\"neo-mull-soy\" Baby Formula Product Can - DPLA - daaaceca128c17bcf9ac33de83617b83 (page 2).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:%22neo-mull-soy%22_Baby_Formula_Product_Can_-_DPLA_-_daaaceca128c17bcf9ac33de83617b83_(page_2).jpg",
+  "license": "Public domain",
+  "licenseUrl": "",
+  "author": "Syntex Laboratories"
+ },
+ {
+  "sku": "HSH-001",
+  "mode": "cut",
+  "src": "commons",
+  "title": "File:Plastsic pail of paint.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Plastsic_pail_of_paint.jpg",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "author": "Rlsheehan"
+ }
+]
