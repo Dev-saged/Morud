@@ -10,6 +10,7 @@ import { formatDate, formatDuration, formatMoney, formatQty, STAGES, STATUS, sta
 import { useSession } from '../lib/session';
 import { askNotifyPermission, dropQueued, enqueue, useOutbox, type Queued } from '../lib/outbox';
 import { Icon, LogoMark } from '../ui/Icons';
+import { Hero, Ring, Tile } from '../ui/Desk';
 import { useCatalog, type Catalog } from './useCatalog';
 
 type Tab = 'home' | 'cart' | 'orders' | 'account';
@@ -48,6 +49,8 @@ export function ShopApp() {
         <div><b>مورد</b>{offline && <span className="chip warn">بلا اتصال — آخر نسخة محفوظة</span>}</div>
       </header>
       <main className="shop-main">
+        {tab === 'home' && cat && <ShopDesk cat={cat} shopId={shopId} pending={queue.length} openOrders={() => { setTab('orders'); setOpenOrder(null); }} openOrder={(id) => { setTab('orders'); setOpenOrder(id); }} openAccount={() => setTab('account')}
+          reorder={(p, u, q) => { dispatch({ type: 'add', productId: p, unitId: u, qtyMilli: q }); setToast('أُضيف إلى السلة'); }} />}
         {tab === 'home' && cat && <Home cat={cat} onAdd={(p, u, q, el) => { dispatch({ type: 'add', productId: p, unitId: u, qtyMilli: q }); fly(el); setToast('أُضيف إلى السلة'); }}
           onAddMany={(lines) => { for (const l of lines) dispatch({ type: 'add', productId: l.productId, unitId: l.unitId, qtyMilli: l.qtyMilli }); setToast(`أُضيف ${lines.length} صنف إلى السلة`); }} />}
         {tab === 'cart' && cat && <CartView cat={cat} cart={cart} dispatch={dispatch} shopId={shopId} onDone={(id) => { setTab('orders'); setOpenOrder(id); }} onQueued={() => { setTab('orders'); setToast('حُفظ الطلب وسيُرسل تلقائياً عند عودة النت'); }} />}
@@ -67,6 +70,44 @@ export function ShopApp() {
         ))}
       </nav>
     </div>
+  );
+}
+
+interface MySummary { open: number; ordersMonth: number; spendMonth: number; spendLast7Days: number[]; due?: number; creditAvailable?: number | null; last: { id: string; number: string; status: string; total: number; createdAt: number } | null; reorder: Array<{ productId: string; name: string; unitId: string; count: number }> }
+
+/** لوحة صاحب المحل: المستحق والحد المتاح، الطلبات المفتوحة، مصروف الشهر، آخر طلب وتقدّمه، و«اطلب مجدداً» بنقرة. */
+function ShopDesk({ cat, shopId, pending, openOrders, openOrder, openAccount, reorder }: { cat: Catalog; shopId: string; pending: number; openOrders: () => void; openOrder: (id: string) => void; openAccount: () => void; reorder: (p: string, u: string, q: number) => void }) {
+  const { api, user } = useSession();
+  const [m, setM] = useState<MySummary | null>(null);
+  useEffect(() => { void api.get<MySummary>(`/me/summary?shopId=${shopId}`).then(setM).catch(() => undefined); }, [api, shopId]);
+  const products = useMemo(() => new Map(cat.products.map((p) => [p.id, p])), [cat]);
+  const limitTotal = m?.creditAvailable != null && m.due !== undefined ? m.creditAvailable + m.due : 0;
+  const stage = m?.last ? stageIndex(m.last.status) : -1;
+  return (
+    <section className="desk">
+      <Hero name={user!.displayName} title={m ? (m.open ? `عندك ${m.open} طلب مفتوح` : 'جاهز لطلبك القادم؟') : undefined}>
+        {m && m.due !== undefined && <div className="hero-stats">
+          <div><small>المستحق عليك</small><b className="num">{formatMoney(m.due)}</b></div>
+          {m.creditAvailable != null && <div className="row"><Ring value={limitTotal ? m.creditAvailable / limitTotal : 0} label={`${limitTotal ? Math.round((m.creditAvailable / limitTotal) * 100) : 0}٪`} /><div><small>المتاح من الحد</small><b className="num" style={{ fontSize: '1.2rem' }}>{formatMoney(m.creditAvailable)}</b></div></div>}
+        </div>}
+      </Hero>
+      {m && <div className="tiles">
+        <Tile icon="orders" label="طلبات مفتوحة" value={m.open} hint={pending ? `+${pending} بانتظار النت` : 'اضغط للمتابعة'} tone={pending ? 'accent' : 'primary'} onClick={openOrders} />
+        <Tile icon="chart" label="مصروف 30 يوماً" value={formatMoney(m.spendMonth)} hint={`${m.ordersMonth} طلب`} spark={m.spendLast7Days} onClick={m.due !== undefined ? openAccount : undefined} />
+        {m.last && <button className="tile tap" onClick={() => openOrder(m.last!.id)} aria-label={`آخر طلب ${m.last.number}`}>
+          <span className="tile-ico t-ok"><Icon name="truck" size={20} /></span>
+          <span className="tile-text"><small>آخر طلب · <span className="num">{m.last.number}</span></small><b>{STATUS[m.last.status]?.label ?? m.last.status}</b>
+            {stage >= 0 && <span className="progress-line" aria-hidden="true">{STAGES.map((_, i) => <i key={i} className={i <= stage ? 'on' : ''} />)}</span>}</span>
+          <Icon name="chevron" size={14} flip className="tile-go" /></button>}
+      </div>}
+      {m && m.reorder.length > 0 && <div className="panel"><h3><span><Icon name="repeat" size={18} /> اطلب مجدداً</span><small className="mute">بنقرة، بوحدتك المعتادة</small></h3>
+        <div className="reorder">{m.reorder.map((r) => {
+          const p = products.get(r.productId);
+          if (!p || !p.available) return null;
+          const u = findUnit(p, r.unitId) ?? defaultUnit(p) ?? p.units[0]!;
+          return <button key={r.productId} onClick={() => reorder(p.id, u.unitId, u.minQtyMilli)}><Icon name="plus" size={16} />{p.name}<small className="mute">{cat.units.find((x) => x.id === u.unitId)?.name}</small></button>;
+        })}</div></div>}
+    </section>
   );
 }
 

@@ -53,8 +53,10 @@ test('المدير: لوحة المعلومات ثم الطلبات والتقا
   await page.getByLabel('المعرّف').fill('owner');
   await page.getByLabel('كلمة المرور', { exact: true }).fill('Secret123');
   await page.getByRole('button', { name: 'دخول' }).click();
-  await expect(page.getByText('طلبات اليوم')).toBeVisible();
-  await expect(page.getByText('1,247.50 ₪')).toBeVisible();
+  await expect(page.getByRole('button', { name: /^طلبات اليوم: 7/ })).toBeVisible();
+  await expect(page.getByText('1,247.50 ₪').first()).toBeVisible();
+  await page.waitForTimeout(900);
+  await page.screenshot({ path: 'test-results/admin-desk.png', fullPage: true });
   const nav = page.getByRole('navigation', { name: 'أقسام الإدارة' });
   await expect(nav.getByRole('button')).toHaveText(['لوحة المعلومات', 'الطلبات', 'المحلات', 'التوصيل', 'التقارير']);
   await nav.getByRole('button', { name: 'الطلبات' }).click();

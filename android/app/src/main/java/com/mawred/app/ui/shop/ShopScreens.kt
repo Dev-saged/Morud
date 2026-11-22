@@ -63,10 +63,11 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun CatalogScreen(ui: CatalogUi, vm: ShopViewModel, padding: PaddingValues) {
+fun CatalogScreen(ui: CatalogUi, vm: ShopViewModel, padding: PaddingValues, desk: (@Composable () -> Unit)? = null) {
     val haptics = LocalHapticFeedback.current
     val still = reducedMotion()
     LazyVerticalGrid(GridCells.Adaptive(160.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        desk?.let { d -> item(span = { GridItemSpan(maxLineSpan) }) { d() } }
         item(span = { GridItemSpan(maxLineSpan) }) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 ui.data?.let { QuickOrderCard(it, vm) }

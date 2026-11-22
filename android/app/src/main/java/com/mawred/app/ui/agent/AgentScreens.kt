@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -83,11 +84,29 @@ class AgentViewModel @Inject constructor(private val api: Api, private val admin
 }
 
 @Composable
-fun TasksScreen(vm: AgentViewModel, padding: PaddingValues) {
+fun TasksScreen(vm: AgentViewModel, padding: PaddingValues, name: String = "") {
     val ui by vm.ui.collectAsStateWithLifecycle()
     val ctx = LocalContext.current
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { Text("مهام التوصيل", style = MaterialTheme.typography.headlineMedium); ErrorText(ui.error); ui.done?.let { Text(it, color = Mawred.colors.ok) } }
+        item {
+            val me: com.mawred.app.ui.common.MeViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+            val m by me.summary.collectAsStateWithLifecycle()
+            fun n(k: String) = m?.get(k)?.jsonPrimitive?.longOrNull ?: 0L
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                com.mawred.app.ui.common.DeskHero(name, ui.tasks?.let { t -> if (t.isEmpty()) "لا مهام الآن، يوم موفق" else "أمامك ${t.size} مهمة" }) {
+                    if (m != null) Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                        com.mawred.app.ui.common.HeroStat("سُلّم اليوم", "${n("deliveredToday")}")
+                        com.mawred.app.ui.common.HeroStat("حُصّل اليوم", com.mawred.app.core.Money.format(n("collectedToday")))
+                    }
+                }
+                if (m != null) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    com.mawred.app.ui.common.DeskTile(Icons.box, "للاستلام", "${n("pending")}", Mawred.colors.primary, Modifier.weight(1f))
+                    com.mawred.app.ui.common.DeskTile(Icons.truck, "بالطريق", "${n("onRoad")}", Mawred.colors.accentInk, Modifier.weight(1f))
+                    com.mawred.app.ui.common.DeskTile(Icons.alert, "تعذّر", "${n("failed")}", Mawred.colors.danger, Modifier.weight(1f), alert = n("failed") > 0)
+                }
+                ErrorText(ui.error); ui.done?.let { Text(it, color = Mawred.colors.ok) }
+            }
+        }
         item { val ph by androidx.hilt.navigation.compose.hiltViewModel<com.mawred.app.ui.update.UpdateViewModel>().phase.collectAsStateWithLifecycle(); com.mawred.app.ui.update.UpdateEntry(ph, com.mawred.app.BuildConfig.VERSION_NAME, com.mawred.app.ui.update.LocalOpenUpdates.current) }
         val tasks = ui.tasks
         if (tasks == null) items(List(3) { it }) { Skeleton() }

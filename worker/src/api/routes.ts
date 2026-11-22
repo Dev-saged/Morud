@@ -7,6 +7,7 @@ import { userRoutes } from './admin/users';
 import { deliveryRoutes } from './delivery';
 import { backupRoutes } from './backup';
 import { publicCatalogRoutes } from './catalog-public';
+import { meRoutes } from './me';
 import { financeRoutes } from './finance';
 import { promotionRoutes } from './promotions';
 import { reportRoutes } from './reports';
@@ -14,4 +15,4 @@ import { supportRoutes } from './support';
 import { notifyRoutes } from './notify';
 import { orderRoutes } from './orders';
 
-export const ALL_ROUTES: RouteModule[] = [userRoutes, roleRoutes, shopRoutes, catalogRoutes, settingsRoutes, orderRoutes, notifyRoutes, deliveryRoutes, financeRoutes, promotionRoutes, reportRoutes, supportRoutes, backupRoutes, publicCatalogRoutes];
+export const ALL_ROUTES: RouteModule[] = [userRoutes, roleRoutes, shopRoutes, catalogRoutes, settingsRoutes, orderRoutes, notifyRoutes, deliveryRoutes, financeRoutes, promotionRoutes, reportRoutes, supportRoutes, backupRoutes, publicCatalogRoutes, meRoutes];

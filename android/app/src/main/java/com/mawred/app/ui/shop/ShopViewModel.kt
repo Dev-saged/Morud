@@ -147,6 +147,7 @@ class ShopViewModel @Inject constructor(
     fun query(q: String) = _ui.update { it.copy(query = q) }
     fun category(c: String?) = _ui.update { it.copy(category = c) }
     fun availableOnly(v: Boolean) = _ui.update { it.copy(availableOnly = v) }
+    fun addById(productId: String, unitId: String) { _ui.value.data?.products?.firstOrNull { it.id == productId }?.let { add(it, unitId) } }
     fun add(p: Product, unitId: String) = viewModelScope.launch { p.units.firstOrNull { it.unitId == unitId }?.let { cart.add(p.id, unitId, it.minQtyMilli.coerceAtLeast(it.stepMilli)) } }
     fun setQty(l: CartLine, qtyMilli: Long) = viewModelScope.launch { cart.set(l.productId, l.unitId, qtyMilli) }
     fun addMany(lines: List<com.mawred.app.core.QuickLine>) = viewModelScope.launch { lines.forEach { cart.add(it.productId, it.unitId, it.qtyMilli) } }

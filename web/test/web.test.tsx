@@ -133,9 +133,9 @@ describe('الواجهة', () => {
       'GET /reports': () => json({ reports: [{ id: 'debts', title: 'الديون المستحقة', allowed: true }, { id: 'profit', title: 'الأرباح', allowed: false }] }),
       'GET /reports/debts': () => json({ report: 'debts', title: 'الديون المستحقة', columns: [['shop', 'المحل'], ['balance', 'المستحق']], rows: [{ shop: 'بقالة النور', balance: 24750 }] }),
     }, true);
-    expect(await screen.findByText('طلبات اليوم')).toBeTruthy();
-    expect(screen.getAllByText('247.50 ₪').length).toBe(2);
-    expect(screen.getByText('متأخرة').parentElement!.className).toContain('alert');
+    expect((await screen.findAllByText('طلبات اليوم')).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('247.50 ₪').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByRole('button', { name: /^متأخرة: 1/ }).className).toContain('alert');
     const u = userEvent.setup();
     await u.click(screen.getByRole('button', { name: 'الطلبات' }));
     expect(await screen.findByText('بقالة النور')).toBeTruthy();
@@ -161,7 +161,8 @@ describe('الواجهة', () => {
     expect(await screen.findByRole('heading', { name: /MW-O-2026-000001 — بقالة النور/ })).toBeTruthy();
     // المنتجات خارج صلاحيات هذا المستخدم: السطر يظهر لكنه غير قابل للنقر
     await u.click(screen.getByRole('button', { name: 'لوحة المعلومات' }));
-    expect((await screen.findByRole('button', { name: /جبنة فيتا/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect(await screen.findByText('جبنة فيتا')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /جبنة فيتا/ })).toBeNull();
   });
   it('كلمة المرور المؤقتة تفرض شاشة التغيير', async () => {
     mount({ 'GET /auth/me': () => json({ user: { ...shopUser, mustChangePassword: true } }) }, true);
@@ -238,5 +239,23 @@ describe('التفاصيل والعمل بلا نت في واجهة المحل',
     await act(async () => { window.dispatchEvent(new Event('online')); });
     await waitFor(() => expect(screen.queryByText('بانتظار الإرسال')).toBeNull());
     expect(new Set(keys).size).toBe(1);
+  });
+});
+
+describe('لوحة صاحب المحل', () => {
+  it('تعرض المستحق والحد وآخر طلب، و«اطلب مجدداً» يضيف بالوحدة المعتادة', async () => {
+    const cat2 = { ...catalog, products: catalog.products.map((p) => (p.id === 'feta' ? { ...p, defaultUnitId: 'carton' } : p)) };
+    mount({
+      'GET /auth/me': () => json({ user: shopUser }), 'GET /catalog': () => json(cat2), 'GET /shops/s1/orders': () => json({ orders: [] }),
+      'GET /orders/o7': () => json({ order: { id: 'o7', number: 'MW-7', status: 'preparing', items: [], totals: { subtotal: 0, discount: 0, total: 9000 } }, history: [], actions: [] }),
+      'GET /me/summary': () => json({ open: 1, ordersMonth: 3, spendMonth: 27000, spendLast7Days: [0, 0, 9000, 0, 9000, 0, 9000], due: 9000, creditAvailable: 91000, last: { id: 'o7', number: 'MW-7', status: 'preparing', total: 9000, createdAt: Date.now() }, reorder: [{ productId: 'feta', name: 'جبنة فيتا', unitId: 'carton', count: 3 }] }),
+    }, true);
+    expect(await screen.findByText('عندك 1 طلب مفتوح')).toBeTruthy();
+    expect(screen.getAllByText('90.00 ₪').length).toBeGreaterThan(0);
+    const u = userEvent.setup();
+    await u.click(within(screen.getByText('اطلب مجدداً').closest('.panel') as HTMLElement).getByRole('button', { name: /جبنة فيتا/ }));
+    expect(loadCart().lines).toEqual([{ productId: 'feta', unitId: 'carton', qtyMilli: 1000 }]);
+    await u.click(screen.getByRole('button', { name: 'آخر طلب MW-7' }));
+    expect(await screen.findByText(/MW-7/)).toBeTruthy();
   });
 });

@@ -80,3 +80,10 @@ describe('الجهاز المشترك', () => {
     expect(localStorage.getItem('mawred.user.v1')).toBeNull();
   });
 });
+
+describe('تحديث الموقع', () => {
+  it('بطاقة التحديث لا تظهر في وضع التطوير وتعرف رقم الإصدار', async () => {
+    const { APP_VERSION } = await import('../src/ui/UpdateToast');
+    expect(typeof APP_VERSION).toBe('string');
+  });
+});

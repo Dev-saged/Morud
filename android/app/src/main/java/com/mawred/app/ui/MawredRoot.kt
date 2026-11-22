@@ -125,12 +125,20 @@ private fun AreaShell(user: SessionUser, offline: Boolean, phase: com.mawred.app
             com.mawred.app.ui.update.UpdateBanner(phase, onOpenUpdate, onInstall)
             AnimatedContent(tab, transitionSpec = { fadeIn(spring()) togetherWith fadeOut(spring()) }, label = "tab") { t ->
                 when (t) {
-                    "catalog" -> shopVm?.let { CatalogScreen(it.ui.collectAsStateWithLifecycle().value, it, pad) }
+                    "catalog" -> shopVm?.let { sv ->
+                        val cu = sv.ui.collectAsStateWithLifecycle().value
+                        val pend = sv.pendingCount.collectAsStateWithLifecycle().value
+                        val me: com.mawred.app.ui.common.MeViewModel = hiltViewModel()
+                        val st: com.mawred.app.ui.admin.DashboardViewModel = hiltViewModel()
+                        CatalogScreen(cu, sv, pad) {
+                            com.mawred.app.ui.shop.ShopDesk(me, user.displayName, cu.data, pend, st.states, { openOrder = null; tab = "orders" }, { openOrder = it; tab = "orders" }, { tab = "account" }) { p, u -> sv.addById(p, u) }
+                        }
+                    }
                     "cart" -> shopVm?.let { CartScreen(it.cartRows.collectAsStateWithLifecycle().value, it.checkout.collectAsStateWithLifecycle().value, it, pad) }
                     "orders" -> com.mawred.app.ui.shop.OrdersScreen(hiltViewModel(), pad, openOrder) { openOrder = null }
                     "account" -> com.mawred.app.ui.shop.AccountScreen(hiltViewModel(), pad)
-                    "dashboard" -> DashboardScreen(hiltViewModel(), pad, canOpen, go)
-                    "tasks" -> TasksScreen(hiltViewModel(), pad)
+                    "dashboard" -> DashboardScreen(hiltViewModel(), pad, canOpen, go, user.displayName)
+                    "tasks" -> TasksScreen(hiltViewModel(), pad, user.displayName)
                     "adminOrders" -> com.mawred.app.ui.admin.AdminOrdersScreen(hiltViewModel(), pad, focus) { focus = null }
                     "adminProducts" -> com.mawred.app.ui.admin.AdminProductsScreen(hiltViewModel(), pad, user.can("products.update"), focus) { focus = null }
                     "adminMore" -> com.mawred.app.ui.admin.AdminMoreScreen(user, pad, focus, { focus = null })

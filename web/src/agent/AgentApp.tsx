@@ -2,16 +2,18 @@ import { useEffect, useState } from 'react';
 import { formatMoney, formatQty, STATUS } from '../lib/format';
 import { useSession } from '../lib/session';
 import { Icon, LogoMark } from '../ui/Icons';
+import { Hero, Tile } from '../ui/Desk';
 
 /** واجهة المندوب: مهامه بالترتيب، الملاحة، والتسليم بإثبات والمبلغ المطلوب فقط. */
 export function AgentApp() {
-  const { api, logout } = useSession();
+  const { api, logout, user } = useSession();
   const [tasks, setTasks] = useState<any[] | null>(null);
+  const [m, setM] = useState<{ pending: number; onRoad: number; deliveredToday: number; failed: number; collectedToday: number } | null>(null);
   const [receiver, setReceiver] = useState('');
   const [collected, setCollected] = useState('');
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
-  const load = () => api.get('/agent/tasks').then((r) => setTasks(r.tasks));
+  const load = () => Promise.all([api.get('/agent/tasks').then((r) => setTasks(r.tasks)), api.get('/me/summary').then(setM).catch(() => undefined)]);
   useEffect(() => { void load(); }, [api]);
   const move = async (id: string, to: string, extra: object = {}) => {
     setError('');
@@ -22,6 +24,14 @@ export function AgentApp() {
     <div className="shop">
       <header className="shop-head"><LogoMark size={30} light /><b>مهام التوصيل</b><button className="icon-btn" aria-label="تسجيل الخروج" onClick={() => void logout()}><Icon name="logout" /></button></header>
       <main className="shop-main">
+        <Hero name={user!.displayName} title={tasks ? (tasks.length ? `أمامك ${tasks.length} مهمة` : 'لا مهام الآن، يوم موفق') : undefined}>
+          {m && <div className="hero-stats"><div><small>سُلّم اليوم</small><b className="num">{m.deliveredToday}</b></div><div><small>حُصّل اليوم</small><b className="num">{formatMoney(m.collectedToday)}</b></div></div>}
+        </Hero>
+        {m && <div className="tiles">
+          <Tile icon="box" label="بانتظار الاستلام" value={m.pending} />
+          <Tile icon="truck" label="في الطريق" value={m.onRoad} tone="accent" />
+          <Tile icon="alert" label="تعذّر تسليمها" value={m.failed} tone={m.failed ? 'danger' : 'mute'} alert={m.failed > 0} />
+        </div>}
         {!tasks ? <div className="skeleton" aria-busy="true" /> : !t ? <p className="empty">لا مهام حالياً.</p> : (
           <section className="card">
             <h2>{t.shopName} <span className={`chip tone-${STATUS[t.status]?.tone}`}>{STATUS[t.status]?.label}</span></h2>

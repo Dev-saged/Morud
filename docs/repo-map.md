@@ -210,3 +210,17 @@
 ### أخطاء محلولة
 - «المتأخرة» في اللوحة ≠ قائمتها (القائمة شملت المغلقة) ← استبعاد المغلقة في `listOrders`.
 - «قيد التجهيز» شمل ready_for_pickup بينما فلتره لا ← فصل مؤشر «جاهزة للتوصيل».
+
+## v0.4.0 — التحديثات واللوحات
+- مركز التحديث أندرويد: `update/UpdateChecker.kt` (GitHub latest + size + digest)، `ApkDownloader.kt` (Range استئناف + SHA-256 + rename ذرّي)، `UpdateFiles.kt` (filesDir/updates، cleanup)، `UpdateManager.kt` (UpdatePhase، download/pause/cancel/install، prefs، فحص دوري)، `UpdateWorkers.kt` (تنزيل كخدمة مقدّمة dataSync + فحص 12 ساعة)، `UpdateNotifications.kt` (قناتان، زر «ثبّت الآن»)، `ReleaseNotes.kt`.
+- الواجهة: `ui/update/UpdateScreens.kt` (UpdateBanner، UpdateCenter، UpdateEntry، LocalOpenUpdates) + `UpdateViewModel`؛ الإشعار يفتح المركز عبر `MainActivity` (ACTION_OPEN/ACTION_INSTALL).
+- تحديث الويب: `web/src/ui/UpdateToast.tsx` (sw.js?v=build، فحص version.json عند العودة وكل 30 د، SKIP_WAITING بموافقة)، `public/sw.js` (الصفحة شبكة أولاً)، `vite.config.ts` يكتب version.json بالملاحظات، `public/_headers`.
+- اللوحات: الخادم `api/me.ts` (`GET /me/summary` للمحل والمندوب)؛ الويب `ui/Desk.tsx` (Hero, Tile, Spark, Ring, Donut, Row) في `AdminApp.Dashboard` و`ShopApp.ShopDesk` و`AgentApp`؛ أندرويد `ui/common/Desk.kt` + `MeViewModel` + `ui/shop/ShopDesk.kt` + `AdminScreens.DashboardScreen` + `AgentScreens`.
+
+### قرارات
+- D18: التحديث لا يُفرض أبداً: يُنزّل بالخلفية ويُتحقق منه، والمستخدم يختار وقت التثبيت (أندرويد) أو التحديث (ويب).
+- D19: مجلد التحديث في filesDir الخاص (لا أذونات، يُحذف مع التطبيق)، والتنزيل التلقائي على Wi‑Fi فقط افتراضياً لتوفير باقات غزة.
+- D20: ملخص الدور من خادم واحد `/me/summary` ويُحفظ للعمل بلا نت كباقي القراءات.
+
+### أخطاء محلولة
+- الموقع قد يعلق على إصدار قديم: sw.js كان ثابت المحتوى ويخدم `/` من الكاش أولاً ← الصفحة شبكة أولاً، والعامل بإصدار البناء، و`_headers` بلا تخزين لـ sw.js وversion.json.

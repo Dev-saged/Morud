@@ -3,6 +3,7 @@ import { formatDate, formatMoney, formatQty, STATUS } from '../lib/format';
 import { useSession } from '../lib/session';
 import { openPrintable } from '../shop/ShopApp';
 import { Icon, LogoMark, type IconName } from '../ui/Icons';
+import { dayLabels, Donut, Hero, Row, Spark, Tile } from '../ui/Desk';
 import { Finance } from './Finance';
 import { Backups, Promotions, Settings, Support } from './More';
 import { Products } from './Products';
@@ -69,34 +70,44 @@ type Go = (to: Section, f?: Focus) => void;
 
 /** كل مؤشر وكل سطر في اللوحة يفتح تفاصيله: القائمة المفلترة نفسها التي حُسب منها العدد. */
 export function Dashboard({ go, can }: { go: Go; can: (s: Section) => boolean }) {
-  const { api } = useSession();
+  const { api, user } = useSession();
   const [d, setD] = useState<any>(null);
   useEffect(() => { void api.get('/dashboard/summary').then(setD); }, [api]);
   if (!d) return <div className="skeleton-grid" aria-busy="true">{Array.from({ length: 8 }, (_, i) => <div key={i} className="skeleton" />)}</div>;
-  const k: Array<[string, number | undefined, Section, Focus, boolean?]> = [
-    ['طلبات اليوم', d.ordersToday, 'orders', { filter: 'today' }], ['جديدة', d.new, 'orders', { filter: 'new' }], ['قيد المراجعة', d.review, 'orders', { filter: 'review' }],
-    ['قيد التجهيز', d.preparing, 'orders', { filter: 'preparing' }], ['جاهزة للتوصيل', d.ready, 'orders', { filter: 'ready' }], ['متأخرة', d.overdue, 'orders', { filter: 'overdue' }],
-    ['قيد التوصيل', d.delivering, 'orders', { filter: 'delivering' }], ['مكتملة', d.completed, 'orders', { filter: 'completed' }],
-    ['مبيعات اليوم', d.salesToday, 'reports', {}, true], ['المحصّل اليوم', d.collectedToday, 'finance', {}, true], ['المستحق على المحلات', d.totalDue, 'shops', { filter: 'due' }, true],
-    ['محلات نشطة', d.activeShops, 'shops', {}], ['منتجات متاحة', d.availableProducts, 'products', { filter: 'available' }], ['غير متوفرة', d.unavailableProducts, 'products', { filter: 'unavailable' }],
+  const open = (to: Section, f: Focus = {}) => (can(to) ? () => go(to, f) : undefined);
+  const has = (v: unknown) => v !== undefined && v !== null;
+  const pipeline = [
+    { key: 'new', label: 'جديدة', value: d.new ?? 0, tone: 'accent' as const }, { key: 'review', label: 'قيد المراجعة', value: d.review ?? 0, tone: 'primary' as const },
+    { key: 'preparing', label: 'قيد التجهيز', value: d.preparing ?? 0, tone: 'mute' as const }, { key: 'ready', label: 'جاهزة للتوصيل', value: d.ready ?? 0, tone: 'ok' as const },
+    { key: 'delivering', label: 'قيد التوصيل', value: d.delivering ?? 0, tone: 'danger' as const },
   ];
   return (
-    <section>
-      <h1>لوحة المعلومات</h1>
-      <div className="kpis">
-        {k.filter(([, v]) => v !== undefined).map(([label, v, to, f, money]) => {
-          const body = <><small>{label}</small><b className="num">{money ? formatMoney(v!) : v}</b></>;
-          const cls = `kpi${label === 'متأخرة' && v ? ' alert' : ''}`;
-          return can(to) ? <button key={label} className={`${cls} tap`} onClick={() => go(to, f)} aria-label={`${label}: ${v} — عرض التفاصيل`}>{body}<Icon name="chevron" flip /></button> : <div key={label} className={cls}>{body}</div>;
-        })}
-        {can('reports') ? <button className="kpi wide tap" onClick={() => go('reports')} aria-label="الطلبات آخر 7 أيام — فتح التقارير"><small>الطلبات آخر 7 أيام</small><Sparkline values={d.ordersLast7Days} /></button>
-          : <div className="kpi wide"><small>الطلبات آخر 7 أيام</small><Sparkline values={d.ordersLast7Days} /></div>}
+    <section className="desk">
+      <Hero name={user!.displayName} title="هذا ما يحدث في مورد اليوم">
+        <div className="hero-stats">
+          <div><small>طلبات اليوم</small><b className="num">{d.ordersToday}</b></div>
+          {has(d.salesToday) && <div><small>مبيعات اليوم</small><b className="num">{formatMoney(d.salesToday)}</b></div>}
+          {(d.overdue ?? 0) > 0 && <div><small>متأخرة الآن</small><b className="num">{d.overdue}</b></div>}
+        </div>
+      </Hero>
+      <div className="tiles">
+        <Tile icon="orders" label="طلبات اليوم" value={d.ordersToday} spark={d.ordersLast7Days} hint="آخر 7 أيام" onClick={open('orders', { filter: 'today' })} />
+        {has(d.overdue) && <Tile icon="clock" label="متأخرة" value={d.overdue} tone="danger" alert={d.overdue > 0} hint={d.overdue > 0 ? 'تحتاج تدخلاً' : 'كل الطلبات في وقتها'} onClick={open('orders', { filter: 'overdue' })} />}
+        {has(d.completed) && <Tile icon="check" label="مكتملة" value={d.completed} tone="ok" onClick={open('orders', { filter: 'completed' })} />}
+        {has(d.salesToday) && <Tile icon="chart" label="مبيعات اليوم" value={formatMoney(d.salesToday)} onClick={open('reports')} />}
+        {has(d.collectedToday) && <Tile icon="wallet" label="المحصّل اليوم" value={formatMoney(d.collectedToday)} tone="ok" onClick={open('finance')} />}
+        {has(d.totalDue) && <Tile icon="alert" label="المستحق على المحلات" value={formatMoney(d.totalDue)} tone="accent" onClick={open('shops', { filter: 'due' })} />}
+        {has(d.activeShops) && <Tile icon="store" label="محلات نشطة" value={d.activeShops} onClick={open('shops')} />}
+        {has(d.availableProducts) && <Tile icon="box" label="منتجات متاحة" value={d.availableProducts} tone="ok" onClick={open('products', { filter: 'available' })} />}
+        {has(d.unavailableProducts) && <Tile icon="box" label="غير متوفرة" value={d.unavailableProducts} tone={d.unavailableProducts ? 'danger' : 'mute'} onClick={open('products', { filter: 'unavailable' })} />}
       </div>
-      <div className="two">
-        <div className="card"><h3>الأكثر طلباً اليوم</h3>{d.topProducts.length === 0 ? <p className="mute">لا طلبات اليوم بعد.</p> : <ol className="taps">{d.topProducts.map((p: any) => <li key={p.productId ?? p.name}>
-          <button className="row-btn" disabled={!can('products')} onClick={() => go('products', { open: p.productId, q: p.name })}><span>{p.name}</span><span className="mute num">{p.count}</span></button></li>)}</ol>}</div>
-        <div className="card"><h3>أحدث الطلبات</h3>{d.recent.length === 0 ? <p className="mute">لا طلبات بعد.</p> : <ul className="plain taps">{d.recent.map((o: any) => <li key={o.id}>
-          <button className="row-btn" disabled={!can('orders')} onClick={() => go('orders', { filter: 'all', open: o.id })}><span><span className="num">{o.number}</span> {o.shopName}</span><span className={`chip tone-${STATUS[o.status]?.tone}`}>{STATUS[o.status]?.label}</span></button></li>)}</ul>}</div>
+      <div className="panels">
+        <div className="panel"><h3>مسار الطلبات المفتوحة</h3><Donut parts={pipeline} onPick={can('orders') ? (k) => go('orders', { filter: k }) : undefined} /></div>
+        <div className="panel"><h3>الطلبات آخر 7 أيام <small className="mute num">{(d.ordersLast7Days as number[]).reduce((a, b) => a + b, 0)}</small></h3><div className="big-spark"><Spark values={d.ordersLast7Days} labels={dayLabels()} /></div></div>
+        <div className="panel"><h3>الأكثر طلباً اليوم</h3>{d.topProducts.length === 0 ? <p className="mute">لا طلبات اليوم بعد.</p> : d.topProducts.map((p: any, i: number) => (
+          <Row key={p.productId ?? p.name} initial={String(i + 1)} title={p.name} sub={`${p.count} طلب`} onClick={open('products', { open: p.productId, q: p.name })} />))}</div>
+        <div className="panel"><h3>أحدث الطلبات</h3>{d.recent.length === 0 ? <p className="mute">لا طلبات بعد.</p> : d.recent.map((o: any) => (
+          <Row key={o.id} initial={o.shopName ?? ''} title={o.shopName} sub={<span className="num">{o.number}</span>} chip={<span className={`chip tone-${STATUS[o.status]?.tone}`}>{STATUS[o.status]?.label}</span>} amount={o.total !== undefined ? formatMoney(o.total) : undefined} onClick={open('orders', { filter: 'all', open: o.id })} />))}</div>
       </div>
     </section>
   );
