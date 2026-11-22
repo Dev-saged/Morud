@@ -39,6 +39,21 @@ class Api(private val client: OkHttpClient, private val base: () -> String, priv
     /** وقت آخر بيانات محفوظة عُرضت بدل الحية؛ null = متصل. */
     val stale = MutableStateFlow<Long?>(null)
 
+    // آخر قراءات هذه الجلسة في الذاكرة: فتح شاشة سبق فتحها فوري، ثم تُحدَّث بصمت
+    private val memory = object : LinkedHashMap<String, JsonObject>(64, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, JsonObject>?) = size > 80
+    }
+
+    /** آخر نسخة معروفة لهذا المسار (ذاكرة ثم قرص) للعرض الفوري قبل وصول الحديثة. */
+    suspend fun cached(path: String): JsonObject? {
+        val owner = scope ?: return null
+        synchronized(memory) { memory["$owner|$path"] }?.let { return it }
+        if (!cacheable("GET", path, true)) return null
+        return withContext(Dispatchers.IO) { cache!!.get("$owner|$path")?.let { (json, _) -> runCatching { ApiJson.parseToJsonElement(json).jsonObject }.getOrNull() } }
+    }
+
+    fun forgetMemory() = synchronized(memory) { memory.clear() }
+
     private fun cacheable(method: String, path: String, auth: Boolean) = method == "GET" && auth && scope != null && cache != null && !path.startsWith("/auth/") && !path.startsWith("/files/")
 
     suspend fun request(method: String, path: String, body: JsonElement? = null, idem: String? = null, auth: Boolean = true): JsonObject = withContext(Dispatchers.IO) {
@@ -65,6 +80,7 @@ class Api(private val client: OkHttpClient, private val base: () -> String, priv
             }
             // لا نحفظ لو تغيّر المستخدم أثناء الطلب
             if (useCache && owner == scope) { cache!!.put("$owner|$path", text); stale.value = null }
+            if (method == "GET" && owner != null && owner == scope) synchronized(memory) { memory["$owner|$path"] = obj }
             obj
         }
     }

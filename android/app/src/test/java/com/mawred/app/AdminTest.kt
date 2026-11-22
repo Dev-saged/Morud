@@ -85,4 +85,22 @@ class AdminTest {
         val e = runCatching { api.upload("/admin/uploads/product-image", byteArrayOf(1), "image/jpeg") }.exceptionOrNull() as ApiException
         assertEquals("IMAGE_TYPE", e.code); assertEquals("الصيغ المقبولة: PNG أو WebP", e.message)
     }
+
+    @Test fun auditShowsOnlyChangedFields() {
+        val b = Json.parseToJsonElement("""{"price":800,"name":"فيتا","updatedAt":1}""").jsonObject
+        val a = Json.parseToJsonElement("""{"price":900,"name":"فيتا","updatedAt":2,"available":false}""").jsonObject
+        assertEquals(listOf(Triple("price", "800", "900"), Triple("available", "—", "false")), com.mawred.app.ui.admin.auditChanges(b, a))
+        assertEquals(emptyList<Triple<String, String, String>>(), com.mawred.app.ui.admin.auditChanges(null, null))
+    }
+
+    @Test fun cachedReadsServeInstantlyAndClearOnLogout() = runTest {
+        server.dispatcher = object : Dispatcher() { override fun dispatch(request: RecordedRequest) = MockResponse().setBody("""{"orders":[{"id":"o1"}]}""") }
+        val api = Api(OkHttpClient(), { server.url("").toString().trimEnd('/') }) { "t" }
+        api.scope = "u1"
+        org.junit.Assert.assertNull(api.cached("/orders"))
+        api.get("/orders")
+        assertEquals("o1", api.cached("/orders")!!["orders"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive.content)
+        api.forgetMemory(); api.scope = "u2"
+        org.junit.Assert.assertNull(api.cached("/orders"))
+    }
 }

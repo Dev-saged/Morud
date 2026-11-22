@@ -64,6 +64,7 @@ class DashboardViewModel @Inject constructor(private val api: Api, val states: O
     val ui: StateFlow<DashboardUi> = _ui
     init { refresh() }
     fun refresh() = viewModelScope.launch {
+        if (_ui.value.data == null) api.cached("/dashboard/summary")?.let { _ui.value = DashboardUi(it) }
         _ui.value = try { DashboardUi(api.get("/dashboard/summary")) } catch (e: ApiException) { DashboardUi(_ui.value.data, e.message) }
     }
 }

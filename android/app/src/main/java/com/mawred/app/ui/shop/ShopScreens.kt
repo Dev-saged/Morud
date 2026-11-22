@@ -11,6 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -48,6 +53,7 @@ import com.mawred.app.core.QuickOrder
 import com.mawred.app.core.defaultUnit
 import com.mawred.app.data.CatalogData
 import com.mawred.app.data.Product
+import com.mawred.app.data.Promotion
 import com.mawred.app.ui.Icons
 import com.mawred.app.ui.common.Card
 import com.mawred.app.ui.common.Empty
@@ -66,6 +72,7 @@ import java.util.Locale
 fun CatalogScreen(ui: CatalogUi, vm: ShopViewModel, padding: PaddingValues, desk: (@Composable () -> Unit)? = null) {
     val haptics = LocalHapticFeedback.current
     val still = reducedMotion()
+    val onAdded = remember(still) { { if (!still) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove) } }
     LazyVerticalGrid(GridCells.Adaptive(160.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         desk?.let { d -> item(span = { GridItemSpan(maxLineSpan) }) { d() } }
         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -81,24 +88,62 @@ fun CatalogScreen(ui: CatalogUi, vm: ShopViewModel, padding: PaddingValues, desk
                 }
             }
         }
+        if (ui.promotions.isNotEmpty() && ui.query.isBlank()) item(span = { GridItemSpan(maxLineSpan) }) {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(ui.promotions, key = { it.id }) { pr -> OfferChip(pr, ui.promoFilter == pr.id) { vm.promo(pr.id) } }
+            }
+        }
+        if (ui.browsing) {
+            if (ui.featured.isNotEmpty()) item(span = { GridItemSpan(maxLineSpan) }) { Rail("منتجات مميزة", ui.featured, ui, vm, onAdded) }
+            if (ui.popular.isNotEmpty()) item(span = { GridItemSpan(maxLineSpan) }) { Rail("الأكثر طلباً", ui.popular, ui, vm, onAdded) }
+            if (ui.featured.isNotEmpty() || ui.popular.isNotEmpty()) item(span = { GridItemSpan(maxLineSpan) }) { Text("كل المنتجات", style = MaterialTheme.typography.titleMedium, color = Mawred.colors.ink) }
+        }
+        ui.promotions.firstOrNull { it.id == ui.promoFilter }?.let { pr ->
+            item(span = { GridItemSpan(maxLineSpan) }) { Text("منتجات عرض «${pr.name}» — ${pr.label}${pr.terms?.let { " · $it" }.orEmpty()}", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute) }
+        }
         if (ui.loading && ui.data == null) items(List(6) { it }) { Skeleton() }
         else if (ui.visible.isEmpty()) item(span = { GridItemSpan(maxLineSpan) }) { Empty("لا توجد منتجات مطابقة") }
-        else items(ui.visible, key = { it.id }) { p ->
-            ProductCard(p, ui.data?.units?.associate { it.id to it.name }.orEmpty()) { unitId ->
-                vm.add(p, unitId)
-                if (!still) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        else items(ui.visible, key = { it.id }, contentType = { "product" }) { p ->
+            ProductCard(p, ui.unitNames, ui.promoOf[p.id]) { unitId -> vm.add(p, unitId); onAdded() }
+        }
+    }
+}
+
+@Composable
+private fun OfferChip(pr: Promotion, on: Boolean, onClick: () -> Unit) {
+    Surface(onClick = onClick, shape = RoundedCornerShape(16.dp), color = if (on) Mawred.colors.accent else Mawred.colors.accent.copy(alpha = 0.14f), border = if (on) null else BorderStroke(1.dp, Mawred.colors.line), modifier = Modifier.semantics { contentDescription = "عرض ${pr.name}: ${pr.label}" }) {
+        Row(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Icon(Icons.tag, null, tint = if (on) androidx.compose.ui.graphics.Color(com.mawred.app.BrandConfig.ON_ACCENT_HEX) else Mawred.colors.accentInk)
+            Column {
+                Text(pr.name, style = MaterialTheme.typography.titleSmall, color = if (on) androidx.compose.ui.graphics.Color(com.mawred.app.BrandConfig.ON_ACCENT_HEX) else Mawred.colors.ink)
+                Text(pr.label, style = MaterialTheme.typography.labelSmall, color = if (on) androidx.compose.ui.graphics.Color(com.mawred.app.BrandConfig.ON_ACCENT_HEX) else Mawred.colors.mute)
             }
         }
     }
 }
 
 @Composable
-private fun ProductCard(p: Product, unitNames: Map<String, String>, onAdd: (String) -> Unit) {
+private fun Rail(title: String, items: List<Product>, ui: CatalogUi, vm: ShopViewModel, onAdded: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(title, style = MaterialTheme.typography.titleMedium, color = Mawred.colors.ink)
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(items, key = { it.id }, contentType = { "product" }) { p ->
+                Box(Modifier.width(168.dp)) { ProductCard(p, ui.unitNames, ui.promoOf[p.id]) { unitId -> vm.add(p, unitId); onAdded() } }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProductCard(p: Product, unitNames: Map<String, String>, promo: String?, onAdd: (String) -> Unit) {
     var unit by remember(p.id) { mutableStateOf(p.defaultUnit()?.unitId.orEmpty()) }
     val u = p.units.firstOrNull { it.unitId == unit }
     Card {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            ProductShelf(p, Modifier.fillMaxWidth().aspectRatio(1f))
+            Box {
+                ProductShelf(p, Modifier.fillMaxWidth().aspectRatio(1f))
+                promo?.let { Text(it, Modifier.padding(6.dp).background(Mawred.colors.accent, RoundedCornerShape(50)).padding(horizontal = 8.dp, vertical = 2.dp), style = MaterialTheme.typography.labelSmall, color = androidx.compose.ui.graphics.Color(com.mawred.app.BrandConfig.ON_ACCENT_HEX), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            }
             Text(p.name, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis, color = Mawred.colors.ink)
             if (p.units.size > 1) Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) { p.units.forEach { su -> FilterChip(su.unitId == unit, { unit = su.unitId }, { Text(unitNames[su.unitId] ?: su.unitId) }) } }
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -141,11 +186,16 @@ fun CartScreen(rows: List<CartRow>, checkout: CheckoutUi, vm: ShopViewModel, pad
         }
         item {
             Spacer(Modifier.height(8.dp))
-            Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
-                Text("الإجمالي التقديري", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
-                Text(Money.format(rows.sumOf { it.total }), style = MaterialTheme.typography.titleLarge.merge(Tabular))
+            val q = checkout.quote
+            if (q != null && q.discount > 0) {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) { Text("قبل الخصم", Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, color = Mawred.colors.mute); Text(Money.format(q.subtotal), style = MaterialTheme.typography.bodyMedium.merge(Tabular), color = Mawred.colors.mute) }
+                Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) { Text("خصم العروض", Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, color = Mawred.colors.ok); Text("− ${Money.format(q.discount)}", style = MaterialTheme.typography.bodyMedium.merge(Tabular), color = Mawred.colors.ok) }
             }
-            Text("الخادم يعيد حساب الأسعار والعروض عند إرسال الطلب.", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)
+            Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+                Text(if (q != null) "الإجمالي" else "الإجمالي التقديري", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                Text(Money.format(q?.total ?: rows.sumOf { it.total }), style = MaterialTheme.typography.titleLarge.merge(Tabular))
+            }
+            if (q == null) Text("بلا اتصال: الإجمالي تقديري، ويُعاد حسابه بالعروض عند الإرسال.", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)
             Spacer(Modifier.height(12.dp))
             Text("طريقة الدفع", style = MaterialTheme.typography.titleSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -28,6 +28,8 @@ import kotlinx.serialization.json.put
 @Serializable data class LedgerRow(val id: String, val type: String, val amount: Long, val at: Long, val running: Long = 0, val reason: String? = null)
 @Serializable data class Statement(val opening: Long = 0, val rows: List<LedgerRow> = emptyList(), val debit: Long = 0, val credit: Long = 0, val closing: Long = 0, val due: Long = 0, val creditBalance: Long = 0)
 @Serializable data class CreditInfo(val enabled: Boolean = false, val limit: Long = 0, val available: Long = 0)
+/** تسعير الخادم للسلة قبل الإرسال (بالعروض الفعالة): ما يراه المحل هو ما سيُعتمد. */
+@Serializable data class CartQuote(val lines: List<OrderLine> = emptyList(), val subtotal: Long = 0, val discount: Long = 0, val total: Long = 0)
 @Serializable data class ShopInfo(val id: String, val name: String = "", val paymentTerms: List<String> = listOf("cash"), val status: String = "active")
 
 /** نتيجة الإرسال: تم، أو في الانتظار بلا نت، أو تغيّر السعر بانتظار الموافقة. */
@@ -47,6 +49,11 @@ class OrderRepository(private val api: Api, private val outbox: OutboxDao, priva
         put("notes", notes)
         seenTotal?.let { put("seenTotal", it) }
     }
+
+    suspend fun quote(lines: List<CartLine>): CartQuote = ApiJson.decodeFromJsonElement(
+        CartQuote.serializer(),
+        api.post("/orders/quote", buildJsonObject { put("items", buildJsonArray { lines.forEach { l -> add(buildJsonObject { put("productId", l.productId); put("unitId", l.unitId); put("qtyMilli", l.qtyMilli) }) } }) })["cart"]!!,
+    )
 
     /** يُحفظ في outbox أولاً بمفتاح ثابت، ثم يُرسل؛ بلا نت يبقى ويُعاد لاحقاً بالمفتاح نفسه فلا يتكرر الطلب. */
     suspend fun submit(body: JsonObject, key: String = newIdempotencyKey()): SubmitResult {

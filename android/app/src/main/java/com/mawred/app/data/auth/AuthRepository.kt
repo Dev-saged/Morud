@@ -134,6 +134,7 @@ class AuthRepository(private val store: SessionStore, private val identity: Iden
         val uid = (state.value as? SessionState.SignedIn)?.user?.uid
         tokens = null
         api.scope = null
+        api.forgetMemory()
         store.save(null, null)
         uid?.let { api.cache?.clearScope(it) }
         api.stale.value = null

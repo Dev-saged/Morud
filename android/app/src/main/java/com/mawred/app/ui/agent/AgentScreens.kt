@@ -65,6 +65,7 @@ class AgentViewModel @Inject constructor(private val api: Api, private val admin
     val ui: StateFlow<TasksUi> = _ui
     init { refresh() }
     fun refresh() = viewModelScope.launch {
+        if (_ui.value.tasks == null) api.cached("/agent/tasks")?.let { c -> _ui.value = _ui.value.copy(tasks = c["tasks"]?.jsonArray?.map { it.jsonObject }.orEmpty()) }
         _ui.value = try { TasksUi(api.get("/agent/tasks")["tasks"]?.jsonArray?.map { it.jsonObject }.orEmpty()) } catch (e: ApiException) { _ui.value.copy(error = e.message) }
     }
 

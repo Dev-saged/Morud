@@ -14,7 +14,7 @@ export const ACTIONS: Record<string, string> = {
   'invoices.issue': 'إصدار فاتورة', 'invoices.void': 'إلغاء فاتورة', 'invoices.return': 'مرتجع', 'payments.create': 'تسجيل دفعة', 'payments.reverse': 'عكس دفعة', 'ledger.adjust': 'تسوية رصيد',
   'promotions.create': 'إضافة عرض', 'promotions.update': 'تعديل عرض',
   'shops.create': 'إنشاء محل', 'shops.update': 'تعديل محل', 'shops.profile': 'تعديل بيانات محل', 'shops.members.update': 'تعديل موظفي محل',
-  'users.create': 'إنشاء مستخدم', 'users.update': 'تعديل مستخدم', 'users.password.reset': 'إعادة تعيين كلمة مرور', 'users.sessions.revoke': 'إنهاء جلسات مستخدم',
+  'users.create': 'إنشاء مستخدم', 'users.suspend': 'إيقاف مستخدم', 'users.activate': 'تفعيل مستخدم', 'shops.suspend': 'إيقاف محل', 'shops.activate': 'تفعيل محل', 'users.update': 'تعديل مستخدم', 'users.password.reset': 'إعادة تعيين كلمة مرور', 'users.sessions.revoke': 'إنهاء جلسات مستخدم',
   'roles.upsert': 'حفظ دور', 'roles.delete': 'حذف دور', 'permissions.add': 'إضافة صلاحية', 'settings.update': 'تعديل الإعدادات',
   'support.create': 'فتح تذكرة دعم', 'support.update': 'تحديث تذكرة',
 };

@@ -26,6 +26,7 @@ class AdminVm @Inject constructor(private val api: Api) : ViewModel() {
         if (!force && path in _s.value.data) return
         _s.update { it.copy(loading = it.loading + path) }
         viewModelScope.launch {
+            if (path !in _s.value.data) api.cached(path)?.let { c -> _s.update { it.copy(data = it.data + (path to c)) } }
             try { val o = api.get(path); _s.update { it.copy(data = it.data + (path to o), loading = it.loading - path, error = null) } }
             catch (e: ApiException) { _s.update { it.copy(loading = it.loading - path, error = e.message) } }
         }

@@ -93,7 +93,8 @@ private val SECTIONS = listOf(
     Section("support", "الدعم الفني", Icons.chat, listOf("support.manage")),
     Section("settings", "الإعدادات", Icons.gear, listOf("settings.manage")),
     Section("backups", "النسخ الاحتياطي", Icons.shield, listOf("backups.manage")),
-    Section("security", "أمان حسابي", Icons.shield, emptyList()),
+    Section("audit", "سجل العمليات", Icons.list, listOf("audit.view")),
+    Section("security", "أمان حسابي", Icons.lock, emptyList()),
 )
 /** قسم بلا صلاحيات = متاح لكل موظف (أمان حسابه الشخصي). */
 private fun Section.allowed(user: SessionUser) = perms.isEmpty() || perms.any(user::can)
@@ -123,6 +124,7 @@ fun AdminMoreScreen(user: SessionUser, padding: PaddingValues, focus: Focus? = n
                 "support" -> SupportSection(vm, pad)
                 "settings" -> SettingsSection(vm, pad)
                 "backups" -> BackupsSection(vm, pad)
+                "audit" -> AuditSection(vm, pad)
                 "security" -> Column(Modifier.padding(pad)) { com.mawred.app.ui.common.SecurityPanel(hiltViewModel<com.mawred.app.ui.common.SecurityViewModel>().api) }
             }
         }
@@ -618,5 +620,67 @@ private fun BackupsSection(vm: AdminVm, pad: PaddingValues) {
         items(st.data["/admin/backups"].a("backups"), key = { it.s("id") }) { b ->
             Row2(fmtDate(b.l("at")), if (b.s("status") == "ok") "ناجحة · ${b.l("docs")} مستند · ${b.l("bytes") / 1024} KB" else b.s("error").ifBlank { "فشلت" })
         }
+    }
+}
+
+// ===== سجل العمليات =====
+/** نفس أسماء الويب: من عدّل السعر، من سجّل الدفعة، من ألغى الطلب (SRS 11.3). */
+val AUDIT_ACTIONS = linkedMapOf(
+    "orders.transition" to "تغيير حالة طلب", "orders.submit" to "إرسال طلب", "orders.change.request" to "تعديل طلب", "delivery.assign" to "إسناد لمندوب",
+    "products.price" to "تعديل سعر", "products.update" to "تعديل منتج", "products.availability" to "تغيير توفر", "products.create" to "إضافة منتج", "products.archive" to "أرشفة منتج",
+    "payments.create" to "تسجيل دفعة", "payments.reverse" to "عكس دفعة", "invoices.issue" to "إصدار فاتورة", "invoices.void" to "إلغاء فاتورة", "invoices.return" to "مرتجع", "ledger.adjust" to "تسوية رصيد",
+    "users.create" to "إنشاء مستخدم", "users.suspend" to "إيقاف مستخدم", "shops.suspend" to "إيقاف محل", "users.update" to "تعديل مستخدم", "users.password.reset" to "إعادة تعيين كلمة مرور", "shops.create" to "إنشاء محل", "shops.update" to "تعديل محل",
+    "promotions.create" to "إضافة عرض", "promotions.update" to "تعديل عرض", "settings.update" to "تعديل الإعدادات", "roles.upsert" to "حفظ دور", "auth.login" to "تسجيل دخول",
+)
+private val AUDIT_SKIP = setOf("updatedAt", "createdAt", "searchKeys", "version")
+
+/** الحقول التي تغيّرت فقط بين قبل وبعد. */
+fun auditChanges(before: JsonObject?, after: JsonObject?): List<Triple<String, String, String>> {
+    val keys = (before?.keys.orEmpty() + after?.keys.orEmpty()).filterNot { it in AUDIT_SKIP }.distinct()
+    fun show(e: kotlinx.serialization.json.JsonElement?) = when (e) { null, is kotlinx.serialization.json.JsonNull -> "—"; is JsonPrimitive -> e.content; else -> e.toString().take(120) }
+    return keys.mapNotNull { k -> val a = before?.get(k); val b = after?.get(k); if (a == b) null else Triple(k, show(a), show(b)) }
+}
+
+@Composable
+private fun AuditSection(vm: AdminVm, pad: PaddingValues) {
+    val st by vm.s.collectAsStateWithLifecycle()
+    var action by rememberSaveable { mutableStateOf<String?>(null) }
+    var actor by rememberSaveable { mutableStateOf<String?>(null) }
+    val path = when { action != null -> "/admin/audit?action=${enc(action!!)}"; actor != null -> "/admin/audit?actor=${enc(actor!!)}"; else -> "/admin/audit" }
+    LaunchedEffect(path) { vm.load(path, true) }
+    LaunchedEffect(Unit) { vm.load("/admin/users") }
+    val users = st.data["/admin/users"].a("users")
+    val logs = st.data[path].a("logs")
+    SectionList(pad) {
+        item {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                item { FilterChip(action == null && actor == null, { action = null; actor = null }, { Text("الكل") }) }
+                items(AUDIT_ACTIONS.entries.toList(), key = { it.key }) { (k, l) -> FilterChip(action == k, { action = if (action == k) null else k; actor = null }, { Text(l) }) }
+            }
+        }
+        if (users.isNotEmpty()) item {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                items(users, key = { it.s("uid") }) { u -> FilterChip(actor == u.s("uid"), { actor = if (actor == u.s("uid")) null else u.s("uid"); action = null }, { Text(u.s("displayName")) }) }
+            }
+        }
+        if (st.data[path] == null) item { Skeleton() }
+        else if (logs.isEmpty()) item { Empty("لا توجد عمليات مطابقة") }
+        items(logs, key = { it.s("id") }) { l ->
+            var open by rememberSaveable(l.s("id")) { mutableStateOf(false) }
+            val diff = auditChanges(l.o("before"), l.o("after"))
+            Card(Modifier.clickable(enabled = diff.isNotEmpty()) { open = !open }) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(AUDIT_ACTIONS[l.s("action")] ?: l.s("action"), Modifier.weight(1f), style = MaterialTheme.typography.titleSmall, color = if (l.s("result") == "ok") Mawred.colors.ink else Mawred.colors.danger)
+                        Text(java.text.SimpleDateFormat("d/M HH:mm", java.util.Locale("ar")).format(java.util.Date(l.l("at"))), style = Tabular, color = Mawred.colors.mute)
+                    }
+                    Text("${l.s("actor")} · ${l.o("entity").s("kind")} ${Money.ltr(l.o("entity").s("id").take(10))}", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)
+                    if (diff.isNotEmpty()) Text(if (open) "إخفاء التغييرات" else "ما تغيّر (${diff.size})", style = MaterialTheme.typography.labelMedium, color = Mawred.colors.primary)
+                    if (open) diff.forEach { (k, a, b) -> Row2(k, "${Money.ltr(a)} ← ${Money.ltr(b)}") }
+                }
+            }
+        }
+        val next = st.data[path]?.get("next") as? JsonPrimitive
+        if (next?.longOrNull != null) item { Text("تُعرض آخر 50 عملية؛ استخدم الفلاتر للوصول لعملية بعينها.", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute) }
     }
 }

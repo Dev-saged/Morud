@@ -307,6 +307,7 @@ async function listOrders(ctx: Ctx) {
   if (f === 'overdue') where.push(['sla.overdue', '==', true]);
   else if (f === 'today') where.push(['createdAt', '>=', ctx.s.now() - 86_400_000]);
   else if (f && FILTERS[f]) where.push(['status', 'in', FILTERS[f]]);
+  else if (f && f !== 'all') throw fail('VALIDATION', 'فلتر غير معروف');
   const shopId = ctx.url.searchParams.get('shopId');
   if (shopId) where.push(['shopId', '==', shopId]);
   const agentId = ctx.url.searchParams.get('agentId');

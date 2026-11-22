@@ -17,5 +17,8 @@ class MeViewModel @Inject constructor(private val api: Api) : ViewModel() {
     private val _s = MutableStateFlow<JsonObject?>(null)
     val summary: StateFlow<JsonObject?> = _s
     init { refresh() }
-    fun refresh() = viewModelScope.launch { try { _s.value = api.get("/me/summary") } catch (_: ApiException) { } }
+    fun refresh() = viewModelScope.launch {
+        if (_s.value == null) api.cached("/me/summary")?.let { _s.value = it }
+        try { _s.value = api.get("/me/summary") } catch (_: ApiException) { }
+    }
 }

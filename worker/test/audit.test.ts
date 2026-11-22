@@ -23,5 +23,9 @@ describe('سجل العمليات', () => {
     expect((await w.call('GET', '/admin/audit?action=x;drop', { token: T(w, 'own') })).status).toBe(400);
     expect((await w.call('GET', '/admin/audit?actor=a&entity=b', { token: T(w, 'own') })).status).toBe(400);
     expect((await w.call('GET', '/admin/audit', { token: T(w, 'so1') })).status).toBe(403);
+    w.db.seed('auditLogs/x1', { actorId: 'system', action: 'users.update', entity: { kind: 'user', id: 'u1' }, before: { loginEmail: 'a@b', name: 'أ' }, after: { totpSecret: 'S', name: 'ب' }, result: 'ok', at: w.s.now() + 5 });
+    const top = (await w.call('GET', '/admin/audit', { token: T(w, 'own') })).body.logs[0];
+    expect(top).toMatchObject({ actor: 'النظام', before: { name: 'أ' }, after: { name: 'ب' } });
+    expect(JSON.stringify(top)).not.toMatch(/loginEmail|totpSecret/);
   });
 });

@@ -2,6 +2,9 @@ import type { Data } from '../infra/db';
 import { requirePerm, type Ctx } from './context';
 import { fail, json, type Router } from './http';
 
+// لا تُعرض أي قيمة حساسة حتى لمن يملك السجل
+const HIDDEN = /secret|password|token|loginEmail/i;
+const scrub = (d: unknown): unknown => (d && typeof d === 'object' && !Array.isArray(d) ? Object.fromEntries(Object.entries(d as Data).filter(([k]) => !HIDDEN.test(k))) : d);
 const ACTION_RE = /^[a-z]+(\.[a-z_]+){1,3}$/;
 const ID_RE = /^[A-Za-z0-9_-]{1,80}$/;
 
@@ -31,7 +34,7 @@ async function list(ctx: Ctx) {
   return json({
     logs: rows.map((r) => {
       const d = r.data as Data;
-      return { id: r.id, at: d.at, action: d.action, actorId: d.actorId, actor: label(String(d.actorId)), entity: d.entity, result: d.result, before: d.before, after: d.after, ip: d.ip, device: d.device };
+      return { id: r.id, at: d.at, action: d.action, actorId: d.actorId, actor: label(String(d.actorId)), entity: d.entity, result: d.result, before: scrub(d.before), after: scrub(d.after), ip: d.ip, device: d.device };
     }),
     next: rows.length === limit ? rows[rows.length - 1]!.data.at : null,
   });

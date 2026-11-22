@@ -12,7 +12,8 @@ import com.mawred.app.schema.FieldType
 import com.mawred.app.schema.ModuleSchema
 import com.mawred.app.schema.Column
 import com.mawred.app.schema.SchemaEngine
-import com.mawred.app.ui.shop.CatalogUi
+import com.mawred.app.ui.shop.CatalogIndex
+import com.mawred.app.data.Promotion
 import com.mawred.app.ui.shop.cartRows
 import com.mawred.app.ui.theme.Oklch
 import com.mawred.app.update.UpdateChecker
@@ -101,11 +102,27 @@ class CoreTest {
     private val data = CatalogData(listOf(feta, off), units = listOf(UnitDef("box", "علبة"), UnitDef("carton", "كرتونة")))
 
     @Test fun catalogFiltering() {
-        assertEquals(listOf(feta), CatalogUi(data = data).visible)
-        assertEquals(2, CatalogUi(data = data, availableOnly = false).visible.size)
-        assertEquals(listOf(feta), CatalogUi(data = data, query = "جبنه").visible)
-        assertEquals(listOf(feta), CatalogUi(data = data, query = "dai-001").visible)
-        assertTrue(CatalogUi(data = data, category = "drinks").visible.isEmpty())
+        val ix = CatalogIndex(data)
+        assertEquals(listOf(feta), ix.filter("", null, true))
+        assertEquals(2, ix.filter("", null, false).size)
+        assertEquals(listOf(feta), ix.filter("جبنه", null, true))
+        assertEquals(listOf(feta), ix.filter("dai-001", null, true))
+        assertEquals(listOf(feta), ix.filter("فيتا", null, true))
+        assertTrue(ix.filter("", "drinks", true).isEmpty())
+        assertEquals("كرتونة", ix.unitNames["carton"])
+    }
+
+    @Test fun homeRailsAndPromotions() {
+        val promo = Promotion("p1", "أسبوع الأجبان", "item_percent", listOf("feta"), percentBp = 1250, startsAt = 10, endsAt = 100)
+        val d = data.copy(products = listOf(feta.copy(featured = true), off.copy(featured = true)), promotions = listOf(promo, promo.copy(id = "old", endsAt = 5)), popular = listOf("off", "feta", "missing"))
+        val ix = CatalogIndex(d)
+        assertEquals(listOf("p1"), ix.promotions(50).map { it.id })
+        assertTrue(ix.promotions(200).isEmpty())
+        assertEquals("خصم 12.5٪", promo.label)
+        assertEquals("اشترِ 3 واحصل على 1", promo.copy(type = "bxgy", buyQty = 3, getQty = 1).label)
+        assertEquals(listOf("feta"), ix.featured().map { it.id })
+        assertEquals(listOf("feta"), ix.popular().map { it.id })
+        assertEquals(listOf("feta"), ix.filter("", null, false, promo).map { it.id })
     }
 
     @Test fun cartEstimate() {
