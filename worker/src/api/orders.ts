@@ -303,16 +303,20 @@ const FILTERS: Record<string, string[]> = {
 async function listOrders(ctx: Ctx) {
   requirePerm(ctx, 'orders.view');
   const f = ctx.url.searchParams.get('filter');
-  const where: Array<[string, '==' | 'in', unknown]> = [];
+  const where: Array<[string, '==' | 'in' | '>=', unknown]> = [];
   if (f === 'overdue') where.push(['sla.overdue', '==', true]);
+  else if (f === 'today') where.push(['createdAt', '>=', ctx.s.now() - 86_400_000]);
   else if (f && FILTERS[f]) where.push(['status', 'in', FILTERS[f]]);
   const shopId = ctx.url.searchParams.get('shopId');
   if (shopId) where.push(['shopId', '==', shopId]);
   const agentId = ctx.url.searchParams.get('agentId');
   if (agentId) where.push(['agentId', '==', agentId]);
   const rows = await ctx.s.db.query({ collection: 'orders', where, orderBy: [['createdAt', 'desc']], limit: 100 });
-  return json({ orders: rows.map((r) => summary(r)) });
+  // المتأخرة كما تعدّها اللوحة: المفتوحة فقط (المغلقة لا تُعد تأخيراً قائماً)
+  const open = f === 'overdue' ? rows.filter((r) => !CLOSED.includes(String(r.data.status))) : rows;
+  return json({ orders: open.map((r) => summary(r)) });
 }
+const CLOSED = ['cancelled', 'rejected', 'delivered', 'financially_completed'];
 
 function summary(r: Doc) {
   const o = r.data;

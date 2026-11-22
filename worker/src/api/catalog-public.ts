@@ -41,21 +41,21 @@ async function summary(ctx: Ctx) {
     collected = (await ctx.s.db.query({ collection: 'payments', where: [['at', '>=', since]], limit: 5000 })).filter((p) => p.data.status === 'posted').reduce((a, p) => a + (p.data.amount as number), 0);
     due = shops.reduce((a, s) => a + Math.max(0, (s.data.balance as number) ?? 0), 0);
   }
-  const qty = new Map<string, { name: string; count: number }>();
+  const qty = new Map<string, { productId: string; name: string; count: number }>();
   for (const o of today) for (const l of (o.data.items as Data[]) ?? []) {
-    const e = qty.get(String(l.productId)) ?? { name: String(l.name), count: 0 };
+    const e = qty.get(String(l.productId)) ?? { productId: String(l.productId), name: String(l.name), count: 0 };
     e.count++;
     qty.set(String(l.productId), e);
   }
   const series = Array.from({ length: 7 }, (_, i) => orders.filter((o) => { const t = o.data.createdAt as number; return t >= ctx.s.now() - (7 - i) * DAY && t < ctx.s.now() - (6 - i) * DAY; }).length);
   return json({
-    ordersToday: today.length, new: by(['new']), review: by(['under_review', 'awaiting_shop_approval']), preparing: by(['confirmed', 'preparing', 'ready_for_pickup']),
+    ordersToday: today.length, new: by(['new']), review: by(['under_review', 'awaiting_shop_approval']), preparing: by(['confirmed', 'preparing']), ready: by(['ready_for_pickup']),
     overdue: orders.filter((o) => (o.data.sla as Data)?.overdue === true && !['cancelled', 'rejected', 'delivered', 'financially_completed'].includes(String(o.data.status))).length,
     delivering: by(['out_for_delivery', 'on_the_way']), completed: by(['delivered', 'financially_completed']),
     ...(finance ? { salesToday: sales, collectedToday: collected, totalDue: due } : {}),
     activeShops: shops.length, availableProducts: products.filter((p) => p.data.available === true).length, unavailableProducts: products.filter((p) => p.data.available !== true).length,
     topProducts: [...qty.values()].sort((a, b) => b.count - a.count).slice(0, 5), ordersLast7Days: series,
-    recent: orders.sort((a, b) => (b.data.createdAt as number) - (a.data.createdAt as number)).slice(0, 8).map((o) => ({ id: o.id, number: o.data.number, shopName: o.data.shopName, status: o.data.status, total: (o.data.totals as Data).total })),
+    recent: orders.sort((a, b) => (b.data.createdAt as number) - (a.data.createdAt as number)).slice(0, 8).map((o) => ({ id: o.id, number: o.data.number, shopId: o.data.shopId, shopName: o.data.shopName, status: o.data.status, total: (o.data.totals as Data).total })),
   });
 }
 

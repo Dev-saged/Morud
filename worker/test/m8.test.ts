@@ -120,9 +120,15 @@ describe('النسخ الاحتياطي والاستعادة (SRS 18)', () => {
     expect((await w.call('POST', '/admin/backups/run', { token: T(w, 'own') })).status).toBe(201);
     expect((await w.call('GET', '/admin/backups', { token: T(w, 'own') })).body.backups).toHaveLength(1);
     expect((await w.call('GET', '/admin/backups', { token: T(w, 'acc') })).status).toBe(403);
-    const { runScheduled } = await import('../src/api/cron');
+    const { runScheduled, purgeIdempotency } = await import('../src/api/cron');
+    const now = w.s.now();
+    w.db.seed('idempotency/u_old', { createdAt: now - 8 * 86_400_000 }).seed('idempotency/u_new', { createdAt: now - 86_400_000 });
     await runScheduled(w.s, '0 1 * * *');
     expect((await w.db.query({ collection: 'backupLogs' })).length).toBe(2);
+    const left = (await w.db.query({ collection: 'idempotency' })).map((d) => d.id);
+    expect(left).toContain('u_new');
+    expect(left).not.toContain('u_old');
+    expect(await purgeIdempotency(w.s)).toBe(0);
     const broken = { ...w.s, backupKey: 'c2hvcnQ=' };
     const { createApp } = await import('../src/api/app');
     const { ALL_ROUTES } = await import('../src/api/routes');

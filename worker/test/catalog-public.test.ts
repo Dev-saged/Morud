@@ -23,9 +23,14 @@ describe('الكتالوج ولوحة المؤشرات', () => {
     await move(w, 'oe', a, 'confirmed');
     const own = (await w.call('GET', '/dashboard/summary', { token: T(w, 'own') })).body;
     expect(own).toMatchObject({ ordersToday: 2, new: 1, preparing: 1, salesToday: 24750, totalDue: 24750, activeShops: 2, availableProducts: 2, unavailableProducts: 1 });
-    expect(own.topProducts[0]).toMatchObject({ name: 'جبنة فيتا', count: 2 });
+    expect(own.topProducts[0]).toMatchObject({ productId: 'feta', name: 'جبنة فيتا', count: 2 });
     expect(own.ordersLast7Days).toHaveLength(7);
     expect(own.recent).toHaveLength(2);
+    expect(own.recent[0]).toMatchObject({ shopId: expect.any(String) });
+    // كل بطاقة في اللوحة تفتح قائمة مطابقة لعددها
+    expect((await w.call('GET', '/orders?filter=today', { token: T(w, 'oe') })).body.orders).toHaveLength(own.ordersToday);
+    expect((await w.call('GET', '/orders?filter=new', { token: T(w, 'oe') })).body.orders).toHaveLength(own.new);
+    expect((await w.call('GET', '/orders?filter=preparing', { token: T(w, 'oe') })).body.orders).toHaveLength(own.preparing);
     const oe = (await w.call('GET', '/dashboard/summary', { token: T(w, 'oe') })).body;
     expect(oe.salesToday).toBeUndefined();
     expect((await w.call('GET', '/dashboard/summary', { token: T(w, 'so1') })).status).toBe(403);
