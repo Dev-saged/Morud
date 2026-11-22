@@ -227,3 +227,21 @@ describe('التقارير الـ17 (SRS 12)', () => {
     expect(s.body).toContain('ليست أرباحاً');
   });
 });
+
+describe('عزل المهام المجدولة', () => {
+  it('فشل مهمة الإشعارات لا يمنع النسخ الاحتياطي، والفشل يُسجّل', async () => {
+    const { runScheduled } = await import('../src/api/cron');
+    const { setup } = await import('./order-world');
+    const w = setup();
+    const at = Date.UTC(2026, 10, 23, 1, 0);
+    w.clock.now = at;
+    const orig = w.s.db.query.bind(w.s.db);
+    w.s.db.query = (q) => (q.collection === 'notificationJobs' ? Promise.reject(new Error('firestore 400 FAILED_PRECONDITION index')) : orig(q));
+    await runScheduled(w.s, '* * * * *', at);
+    expect((await w.db.query({ collection: 'backupLogs' })).length).toBe(1);
+    const h = (await w.db.get('systemHealth/cron'))!.data as Record<string, { ok: boolean; error?: string }>;
+    expect(h.notifications!.ok).toBe(false);
+    expect(h.notifications!.error).toContain('FAILED_PRECONDITION');
+    expect(h.backup!.ok).toBe(true);
+  });
+});

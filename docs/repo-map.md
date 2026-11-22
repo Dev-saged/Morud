@@ -239,3 +239,21 @@
 - ويكيميديا تحدّ المعدّل بشدة (429) وتخنق أحجام المصغّرات غير القياسية ← خيط واحد/اثنان، احترام Retry-After، وحجم 960 القياسي.
 - rembg يمسح أجزاء من صور العبوات المقصوصة على حدودها ← وضع «full».
 - BiRefNet يتجاوز ذاكرة البيئة (Killed) ← isnet-general-use.
+
+
+## v0.5.0 — الإشعارات، التحقق بخطوتين، الأمان، الاستعادة
+- الإشعارات: الخادم `api/notify.ts` (صندوق + مهام + FCM) كان جاهزاً. الويب `ui/Bell.tsx` + `lib/push.ts` (FCM بمفتاح VAPID الافتراضي لـFirebase، تسجيل/إلغاء الجهاز) + `public/sw.js` (push، notificationclick، `/?open=kind:id`). أندرويد `data/Inbox.kt` (InboxRepository، InboxPollWorker كل 15 د) + `ui/inbox/Inbox.kt` (BellButton، InboxSheet) + `Notifier.show(refKind, refId)` + `MainActivity` ACTION_OPEN_REF.
+- التحقق بخطوتين: `domain/totp.ts` (RFC 6238، ±خطوة، منع إعادة الاستخدام)، `api/mfa.ts` (setup/enable/disable، السر مشفّر AES-GCM بمفتاح HKDF من BACKUP_KEY في `mfa/{uid}`، تذاكر `mfaTickets` 5 د/5 محاولات)، `auth.ts` (`/auth/login` يرجع `mfaRequired+ticket`، `/auth/login/mfa`)؛ الويب `Login.tsx` + `ui/Security.tsx` (QR بـqrcode-generator)؛ أندرويد `AuthRepository.login→ticket`/`loginMfa` + `AuthScreens` + `ui/common/SecurityScreen.kt`.
+- الأمان: ترويسات الخادم في `api/app.ts`، CSP وHSTS في `web/public/_headers`، override لـ@grpc/grpc-js.
+- الجدولة: `api/cron.ts` يعزل كل مهمة ويكتب `systemHealth/cron`.
+- الفهارس: `firebase/firestore.indexes.json` (28)، `worker/scripts/deploy-indexes.ts`، `scripts/probe-indexes.ts` (فحص حي لـ32 نمطاً)، `test/indexes.test.ts`.
+- الاستعادة: `worker/scripts/restore-drill.ts` (تنزيل من R2، بصمة، فك تشفير، مقارنة بالإنتاج).
+
+### قرارات
+- D23: إشعارات أندرويد بفحص دوري (WorkManager 15 د + كل دقيقة والتطبيق مفتوح) بدل حزمة Firebase، اتساقاً مع D12.
+- D24: التحقق بخطوتين اختياري لكل حساب ومتاح لكل الأدوار؛ أسرار mfa خارج النسخ الاحتياطي (يُعاد تفعيلها بعد استعادة كارثية).
+- D25: كل استعلام مركّب يجب أن يكون في firestore.indexes.json ومُختبراً بـprobe-indexes قبل النشر.
+
+### أخطاء محلولة (حرجة)
+- النسخ الاحتياطي والإشعارات وفحص التأخير لم تعمل في الإنتاج منذ الإطلاق: أول مهمة مجدولة (الإشعارات) كانت تفشل كل دقيقة بفهرس مركّب ناقص، والمهام متسلسلة فتوقفت البقية. وُجد 11 فهرساً ناقصاً (لوحة التوصيل، المتأخرة، طلبات المندوب، الدعم، فلترة المستخدمين، المسودات). الحل: الفهارس + عزل المهام + سجل صحة + فحص حي.
+- رسالة خطأ Firestore كانت فارغة لأن runQuery يعيد الخطأ داخل مصفوفة.

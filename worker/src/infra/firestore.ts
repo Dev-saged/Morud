@@ -176,11 +176,14 @@ export class FirestoreDb implements Db {
   }
 
   private async error(res: Response): Promise<Error> {
-    const body = (await res.json().catch(() => ({}))) as { error?: { status?: string; message?: string } };
-    const status = body.error?.status ?? '';
-    if (status === 'ABORTED') return new RetryableError(body.error?.message ?? 'aborted');
-    if (status === 'ALREADY_EXISTS' || status === 'NOT_FOUND') return new ConflictError(body.error?.message ?? status);
-    return new Error(`firestore ${res.status} ${status}`);
+    // runQuery يعيد الخطأ داخل مصفوفة، وباقي الواجهات ككائن
+    const raw = (await res.json().catch(() => ({}))) as unknown;
+    const body = (Array.isArray(raw) ? raw[0] : raw) as { error?: { status?: string; message?: string } } | undefined;
+    const status = body?.error?.status ?? '';
+    const message = body?.error?.message ?? '';
+    if (status === 'ABORTED') return new RetryableError(message || 'aborted');
+    if (status === 'ALREADY_EXISTS' || status === 'NOT_FOUND') return new ConflictError(message || status);
+    return new Error(`firestore ${res.status} ${status} ${message.slice(0, 240)}`.trim());
   }
 }
 

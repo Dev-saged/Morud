@@ -41,7 +41,7 @@ const origPut = files.put.bind(files);
 files.put = async (k, b, c) => { await origPut(k, b, c); files.uploaded.add(k); };
 
 const owner = need('OWNER_UID');
-const s: Services = {
+export const s: Services = {
   db: new FirestoreDb(sa.project_id, token),
   identity: new IdentityToolkit(sa.project_id, need('FIREBASE_API_KEY'), token),
   files, pusher: new MemoryPusher(), backupStore: new MemoryBlobs(), backupKey: '', defer: () => undefined,
