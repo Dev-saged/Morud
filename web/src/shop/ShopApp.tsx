@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { defaultUnit, findUnit, type Product } from '../../../worker/src/domain/catalog';
 import { parseQuickOrder, type QuickResult } from '../../../worker/src/domain/quickorder';
 import { priceCart } from '../../../worker/src/domain/pricing';
@@ -8,6 +8,7 @@ import { ApiError, type Api } from '../lib/api';
 import { cartCount, cartReducer, loadCart, saveCart } from '../lib/cart';
 import { formatDate, formatDuration, formatMoney, formatQty, STAGES, STATUS, stageIndex } from '../lib/format';
 import { useSession } from '../lib/session';
+import { askNotifyPermission, dropQueued, enqueue, useOutbox, type Queued } from '../lib/outbox';
 import { Icon, LogoMark } from '../ui/Icons';
 import { useCatalog, type Catalog } from './useCatalog';
 
@@ -24,6 +25,8 @@ export function ShopApp() {
   const badge = useRef<HTMLSpanElement>(null);
   useEffect(() => saveCart(cart), [cart]);
   const shopId = user!.shopIds[0]!;
+  const onSent = useCallback((m: string) => setToast(m), []);
+  const { queue, flush } = useOutbox(api, user!.uid, onSent);
 
   const fly = (from: HTMLElement) => {
     // التفاعل التوقيعي: النقطة البرتقالية تقفز إلى السلة
@@ -47,8 +50,10 @@ export function ShopApp() {
       <main className="shop-main">
         {tab === 'home' && cat && <Home cat={cat} onAdd={(p, u, q, el) => { dispatch({ type: 'add', productId: p, unitId: u, qtyMilli: q }); fly(el); setToast('أُضيف إلى السلة'); }}
           onAddMany={(lines) => { for (const l of lines) dispatch({ type: 'add', productId: l.productId, unitId: l.unitId, qtyMilli: l.qtyMilli }); setToast(`أُضيف ${lines.length} صنف إلى السلة`); }} />}
-        {tab === 'cart' && cat && <CartView cat={cat} cart={cart} dispatch={dispatch} shopId={shopId} onDone={(id) => { setTab('orders'); setOpenOrder(id); }} />}
-        {tab === 'orders' && (openOrder ? <OrderDetail id={openOrder} back={() => setOpenOrder(null)} /> : <OrderList shopId={shopId} open={setOpenOrder} />)}
+        {tab === 'cart' && cat && <CartView cat={cat} cart={cart} dispatch={dispatch} shopId={shopId} onDone={(id) => { setTab('orders'); setOpenOrder(id); }} onQueued={() => { setTab('orders'); setToast('حُفظ الطلب وسيُرسل تلقائياً عند عودة النت'); }} />}
+        {tab === 'orders' && (openOrder ? <OrderDetail id={openOrder} back={() => setOpenOrder(null)} /> : <>
+          {queue.length > 0 && <Outbox queue={queue} uid={user!.uid} flush={flush} restore={(q) => { for (const l of q.body.items as Array<{ productId: string; unitId: string; qtyMilli: number }>) dispatch({ type: 'add', ...l }); dropQueued(user!.uid, q.key); setTab('cart'); }} />}
+          <OrderList key={queue.length} shopId={shopId} open={setOpenOrder} /></>)}
         {tab === 'account' && <Account shopId={shopId} onLogout={logout} />}
         {!cat && tab !== 'account' && <div className="skeleton-grid" aria-busy="true">{Array.from({ length: 6 }, (_, i) => <div key={i} className="skeleton" />)}</div>}
       </main>
@@ -56,7 +61,7 @@ export function ShopApp() {
       <nav className="bottom-nav" aria-label="التنقل">
         {([['home', 'home', 'الرئيسية'], ['cart', 'cart', 'السلة'], ['orders', 'orders', 'طلباتي'], ['account', 'user', 'حسابي']] as const).map(([t, icon, label]) => (
           <button key={t} className={tab === t ? 'on' : ''} onClick={() => { setTab(t); setOpenOrder(null); }} aria-current={tab === t ? 'page' : undefined}>
-            <span className="ico"><Icon name={icon} />{t === 'cart' && cartCount(cart) > 0 && <span ref={badge} className="dot-badge">{cartCount(cart)}</span>}{t === 'cart' && cartCount(cart) === 0 && <span ref={badge} />}</span>
+            <span className="ico"><Icon name={icon} />{t === 'orders' && queue.length > 0 && <span className="dot-badge wait">{queue.length}</span>}{t === 'cart' && cartCount(cart) > 0 && <span ref={badge} className="dot-badge">{cartCount(cart)}</span>}{t === 'cart' && cartCount(cart) === 0 && <span ref={badge} />}</span>
             {label}
           </button>
         ))}
@@ -114,10 +119,12 @@ function ProductCard({ p, units, onAdd, style }: { p: Catalog['products'][number
   const [qty, setQty] = useState(u.minQtyMilli);
   const name = (id: string) => units.find((x) => x.id === id)?.name ?? id;
   const img = p.images?.[0]?.thumb;
+  const [details, setDetails] = useState(false);
   return (
     <article className={`card product${p.available ? '' : ' off'}`} style={style}>
-      <div className="shelf">{img ? <img src={`${API}/files/${img}`} alt="" loading="lazy" /> : <Icon name="box" size={48} />}</div>
-      <h3>{p.name}</h3>
+      <button className="shelf tap" onClick={() => setDetails(true)} aria-label={`تفاصيل ${p.name}`}>{img ? <img src={`${API}/files/${img}`} alt="" loading="lazy" /> : <Icon name="box" size={48} />}</button>
+      <h3><button className="name-btn" onClick={() => setDetails(true)}>{p.name}</button></h3>
+      {details && <ProductSheet p={p} name={name} close={() => setDetails(false)} />}
       {p.units.length > 1 && <div className="units">{p.units.map((x) => <button key={x.unitId} className={x.unitId === u.unitId ? 'chip on' : 'chip'} onClick={() => { setUnit(x.unitId); setQty(x.minQtyMilli); }}>{name(x.unitId)}</button>)}</div>}
       <div className="price"><b>{formatMoney(u.price)}</b><span className="mute"> / {name(u.unitId)}</span></div>
       {p.available ? (
@@ -132,8 +139,8 @@ function ProductCard({ p, units, onAdd, style }: { p: Catalog['products'][number
   );
 }
 
-function CartView({ cat, cart, dispatch, shopId, onDone }: { cat: Catalog; cart: ReturnType<typeof loadCart>; dispatch: React.Dispatch<Parameters<typeof cartReducer>[1]>; shopId: string; onDone: (id: string) => void }) {
-  const { api } = useSession();
+function CartView({ cat, cart, dispatch, shopId, onDone, onQueued }: { cat: Catalog; cart: ReturnType<typeof loadCart>; dispatch: React.Dispatch<Parameters<typeof cartReducer>[1]>; shopId: string; onDone: (id: string) => void; onQueued: () => void }) {
+  const { api, user } = useSession();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [changed, setChanged] = useState<number | null>(null);
@@ -146,13 +153,20 @@ function CartView({ cat, cart, dispatch, shopId, onDone }: { cat: Catalog; cart:
     setBusy(true);
     setError('');
     dispatch({ type: 'begin' });
-    const key = cart.pendingKey ?? undefined;
+    const key = cart.pendingKey ?? crypto.randomUUID().replace(/-/g, '');
+    const body = { shopId, items: cart.lines, paymentMethod: cart.paymentMethod, notes: cart.notes, seenTotal: accepted ?? total ?? undefined };
     try {
-      const r = await api.post<{ order: { id: string } }>('/orders', { shopId, items: cart.lines, paymentMethod: cart.paymentMethod, notes: cart.notes, seenTotal: accepted ?? total ?? undefined }, key ?? crypto.randomUUID().replace(/-/g, ''));
+      const r = await api.post<{ order: { id: string } }>('/orders', body, key);
       dispatch({ type: 'clear' });
       onDone(r.order.id);
     } catch (e) {
-      if (e instanceof ApiError && e.code === 'PRICE_CHANGED') setChanged(e.details?.total as number);
+      if (e instanceof ApiError && e.code === 'NETWORK') {
+        // بلا نت: نفس المفتاح يُحفظ مع الطلب، فلو وصل الأول فعلاً لا يُنشأ ثانٍ
+        enqueue(user!.uid, { key, body, at: Date.now(), items: cart.lines.length, total });
+        askNotifyPermission();
+        dispatch({ type: 'clear' });
+        onQueued();
+      } else if (e instanceof ApiError && e.code === 'PRICE_CHANGED') setChanged(e.details?.total as number);
       else setError(e instanceof ApiError ? e.message : 'تعذّر الإرسال');
     } finally {
       setBusy(false);
@@ -185,7 +199,51 @@ function CartView({ cat, cart, dispatch, shopId, onDone }: { cat: Catalog; cart:
       )}
       {error && <p className="error" role="alert">{error}</p>}
       <button className="btn primary block" disabled={busy || !preview.ok} onClick={() => void send()}>{busy ? 'جارٍ الإرسال…' : 'تأكيد وإرسال الطلب'}</button>
+      <p className="mute small">بلا نت؟ أرسل عادي: يُحفظ الطلب ويصل وحده عند عودة الاتصال، وبيجيك إشعار.</p>
     </section>
+  );
+}
+
+/** الطلبات المحفوظة بانتظار النت، وما رفضه الخادم بانتظار المراجعة. */
+function Outbox({ queue, uid, flush, restore }: { queue: Queued[]; uid: string; flush: () => Promise<void>; restore: (q: Queued) => void }) {
+  return (
+    <section className="outbox" aria-label="طلبات بانتظار الإرسال">
+      <h3>بانتظار الإرسال <span className="chip warn">{queue.length}</span></h3>
+      <ul className="orders">{queue.map((q) => (
+        <li key={q.key} className={q.error ? 'bad' : ''}>
+          <div><b>{q.items} صنف</b><small className="mute"> · {formatDate(q.at)}</small>{q.total !== null && <span className="num"> · {formatMoney(q.total)}</span>}
+            {q.error ? <p className="error">{q.error}</p> : <p className="mute">يُرسل تلقائياً عند عودة النت</p>}</div>
+          <div className="row">
+            {q.error ? <button className="btn" onClick={() => restore(q)}>رجّعه للسلة</button> : <button className="btn" onClick={() => void flush()}>أرسل الآن</button>}
+            <button className="icon-btn" aria-label="إلغاء الطلب المحفوظ" onClick={() => dropQueued(uid, q.key)}><Icon name="trash" /></button>
+          </div>
+        </li>
+      ))}</ul>
+    </section>
+  );
+}
+
+/** تفاصيل المنتج: صورة كبيرة، كل الوحدات وأسعارها وقواعد الكمية، والوصف. */
+function ProductSheet({ p, name, close }: { p: Catalog['products'][number]; name: (id: string) => string; close: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (d && typeof d.showModal === 'function' && !d.open) d.showModal();
+  }, []);
+  const big = p.images?.[0]?.key;
+  const def = defaultUnit(p)?.unitId;
+  return (
+    <dialog ref={ref} className="sheet" onClose={close} onClick={(e) => { if (e.target === ref.current) ref.current?.close(); }} aria-label={p.name} open={typeof HTMLDialogElement === 'undefined' ? true : undefined}>
+      <div className="sheet-body">
+        <button className="icon-btn sheet-x" aria-label="إغلاق" onClick={() => (ref.current?.open ? ref.current.close() : close())}><Icon name="close" /></button>
+        <div className="sheet-img">{big ? <img src={`${API}/files/${big}`} alt={p.name} /> : <Icon name="box" size={72} />}</div>
+        <h2>{p.name}</h2>
+        <p><span className={`chip ${p.available ? 'tone-success' : 'tone-danger'}`}>{p.available ? 'متوفر' : 'غير متوفر حالياً'}</span>{p.brand && <span className="mute"> · {p.brand}</span>}</p>
+        <table className="table"><thead><tr><th>الوحدة</th><th>السعر</th><th>أقل كمية</th></tr></thead>
+          <tbody>{p.units.map((u) => <tr key={u.unitId}><td>{name(u.unitId)}{u.unitId === def && p.units.length > 1 && <span className="chip">الأكثر طلباً</span>}</td><td className="num">{formatMoney(u.price)}</td><td className="num">{formatQty(u.minQtyMilli)}{u.allowFraction ? ' (يقبل الكسور)' : ''}</td></tr>)}</tbody></table>
+        {p.description && <p className="mute">{p.description}</p>}
+      </div>
+    </dialog>
   );
 }
 

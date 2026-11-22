@@ -1,23 +1,28 @@
+import type { Focus } from './AdminApp';
 import { useMemo, useState } from 'react';
-import { formatMoney } from '../lib/format';
+import { formatMoney, formatQty } from '../lib/format';
 import { toCutoutPng } from '../lib/cutout';
 import { useSession } from '../lib/session';
 import { Icon } from '../ui/Icons';
 import { Field, fromAgorot, Loading, toAgorot, useAction, useLoad } from './kit';
 
 type Unit = { unitId: string; factorToBase: number; price: number; minQtyMilli: number; stepMilli: number; allowFraction: boolean };
-type Product = { id: string; name: string; sku: string; categoryId: string; baseUnitId: string; units: Unit[]; available: boolean; visible: boolean; images?: Array<{ key: string; thumb: string }>; altNames: string[]; barcodes: string[]; brand?: string; description?: string };
+type Product = { id: string; name: string; sku: string; categoryId: string; baseUnitId: string; units: Unit[]; available: boolean; visible: boolean; images?: Array<{ key: string; thumb: string }>; altNames: string[]; barcodes: string[]; brand?: string; description?: string; defaultUnitId?: string };
 type Catalog = { products: Product[]; categories: Array<{ id: string; name: string; order: number }>; units: Array<{ id: string; name: string; kind?: string }> };
 
-export function Products() {
+type Show = 'all' | 'drafts' | 'live' | 'available' | 'unavailable';
+const SHOW: Record<Show, (p: Product) => boolean> = { all: () => true, drafts: (p) => !p.visible, live: (p) => p.visible, available: (p) => p.available, unavailable: (p) => !p.available };
+
+export function Products({ focus = {} }: { focus?: Focus }) {
   const { api, can } = useSession();
   const { data, error, reload } = useLoad<Catalog>('/catalog');
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState(focus.q ?? '');
   const [edit, setEdit] = useState<Product | 'new' | null>(null);
   const [tab, setTab] = useState<'products' | 'categories' | 'units'>('products');
-  const [show, setShow] = useState<'all' | 'drafts' | 'live'>('all');
+  const [show, setShow] = useState<Show>((focus.filter as Show) in SHOW ? (focus.filter as Show) : 'all');
+  const [peek, setPeek] = useState<string | null>(focus.open ?? null);
   const act = useAction();
-  const list = useMemo(() => (data?.products ?? []).filter((p) => (!q || p.name.includes(q) || p.sku.includes(q.toUpperCase())) && (show === 'all' || (show === 'drafts' ? !p.visible : p.visible))), [data, q, show]);
+  const list = useMemo(() => (data?.products ?? []).filter((p) => (!q || p.name.includes(q) || p.sku.includes(q.toUpperCase())) && SHOW[show](p)), [data, q, show]);
   const drafts = list.filter((p) => !p.visible);
   /** نشر المسودات المعروضة (بعد مراجعة أسعارها) واحداً واحداً عبر نفس صلاحيات التعديل. */
   const publish = (items: Product[]) => act.run(async () => {
@@ -25,6 +30,8 @@ export function Products() {
     await reload();
   }, `نُشر ${items.length} منتج`);
   if (!data) return <Loading error={error} />;
+  const peeked = peek ? data.products.find((p) => p.id === peek) : undefined;
+  if (peeked && !edit) return <ProductPeek p={peeked} catName={data.categories.find((c) => c.id === peeked.categoryId)?.name ?? ''} units={data.units} back={() => setPeek(null)} onEdit={can('products.update') ? () => { setPeek(null); setEdit(peeked); } : undefined} />;
   if (edit) return <ProductForm catalog={data} product={edit === 'new' ? null : edit} done={() => { setEdit(null); void reload(); }} />;
   const cat = new Map(data.categories.map((c) => [c.id, c.name]));
   return (
@@ -34,19 +41,39 @@ export function Products() {
       {tab === 'products' && <>
         <div className="row"><div className="search" style={{ flex: 1 }}><Icon name="search" /><input aria-label="بحث المنتجات" placeholder="الاسم أو الرمز" value={q} onChange={(e) => setQ(e.target.value)} /></div>
           {can('products.create') && <button className="btn primary" onClick={() => setEdit('new')}>منتج جديد</button>}</div>
-        <div className="chips">{([['all', 'الكل'], ['drafts', `المسودات (${(data.products ?? []).filter((p) => !p.visible).length})`], ['live', 'المنشورة']] as const).map(([k, l]) => <button key={k} className={show === k ? 'chip on' : 'chip'} onClick={() => setShow(k)}>{l}</button>)}</div>
+        <div className="chips">{([['all', 'الكل'], ['drafts', `المسودات (${(data.products ?? []).filter((p) => !p.visible).length})`], ['live', 'المنشورة'], ['available', 'المتوفرة'], ['unavailable', `غير المتوفرة (${(data.products ?? []).filter((p) => !p.available).length})`]] as const).map(([k, l]) => <button key={k} className={show === k ? 'chip on' : 'chip'} onClick={() => setShow(k)}>{l}</button>)}</div>
         {can('products.update') && drafts.length > 0 && show === 'drafts' && <p className="notice">راجع الأسعار أولاً (السعر المرجعي مكتوب في وصف كل منتج)، ثم <button className="btn primary" disabled={act.busy} onClick={() => void publish(drafts)}>انشر {drafts.length} مسودة</button></p>}
         {act.view}
         <table className="table"><thead><tr><th></th><th>المنتج</th><th>الرمز</th><th>التصنيف</th><th>السعر</th><th>الحالة</th><th></th></tr></thead>
           <tbody>{list.map((p) => <tr key={p.id}>
             <td>{p.images?.[0] ? <img src={`${api.base}/files/${p.images[0].thumb}`} alt="" width={40} height={40} style={{ objectFit: 'contain' }} /> : null}</td>
-            <td>{p.name}</td><td className="num">{p.sku}</td><td>{cat.get(p.categoryId)}</td><td className="num">{formatMoney(p.units[0]!.price)}</td>
+            <td><button className="link" onClick={() => setPeek(p.id)}>{p.name}</button></td><td className="num">{p.sku}</td><td>{cat.get(p.categoryId)}</td><td className="num">{formatMoney(p.units[0]!.price)}</td>
             <td>{can('products.availability.update') ? <button className={`chip ${p.available ? 'tone-success' : 'tone-danger'}`} onClick={() => void act.run(() => api.patch(`/admin/products/${p.id}`, { available: !p.available }).then(reload), 'تم تحديث التوفر')}>{p.available ? 'متوفر' : 'غير متوفر'}</button> : (p.available ? 'متوفر' : 'غير متوفر')}{!p.visible && (can('products.update') ? <button className="chip" onClick={() => void act.run(() => api.patch(`/admin/products/${p.id}`, { visible: true }).then(reload), 'نُشر المنتج')}>مسودة · انشر</button> : <span className="chip">مسودة</span>)}</td>
             <td>{can('products.update') && <button className="link" onClick={() => setEdit(p)}>تعديل</button>}</td></tr>)}</tbody></table>
         {list.length === 0 && <p className="empty">لا منتجات.</p>}
       </>}
       {tab === 'categories' && <Categories catalog={data} reload={reload} />}
       {tab === 'units' && <Units catalog={data} reload={reload} />}
+    </section>
+  );
+}
+
+/** بطاقة المنتج: الصورة والوحدات والأسعار والحالة في مكان واحد، ومنها للتعديل. */
+function ProductPeek({ p, catName, units, back, onEdit }: { p: Product; catName: string; units: Catalog['units']; back: () => void; onEdit?: () => void }) {
+  const { api } = useSession();
+  const uName = (id: string) => units.find((u) => u.id === id)?.name ?? id;
+  return (
+    <section className="card peek">
+      <button className="link" onClick={back}><Icon name="chevron" flip /> المنتجات</button>
+      <div className="peek-head">
+        {p.images?.[0] ? <img src={`${api.base}/files/${p.images[0].key}`} alt={p.name} width={160} height={160} /> : <div className="peek-ph" aria-hidden="true" />}
+        <div><h2>{p.name}</h2><p className="mute">{catName} · <span className="num">{p.sku}</span></p>
+          <p><span className={`chip ${p.available ? 'tone-success' : 'tone-danger'}`}>{p.available ? 'متوفر' : 'غير متوفر'}</span> {!p.visible && <span className="chip">مسودة</span>}</p></div>
+      </div>
+      <table className="table"><thead><tr><th>الوحدة</th><th>السعر</th><th>الحد الأدنى</th></tr></thead>
+        <tbody>{p.units.map((u) => <tr key={u.unitId}><td>{uName(u.unitId)}{u.unitId === (p.defaultUnitId ?? p.units[0]?.unitId) && <span className="chip">افتراضية</span>}</td><td className="num">{formatMoney(u.price)}</td><td className="num">{u.minQtyMilli ? formatQty(u.minQtyMilli) : '—'}</td></tr>)}</tbody></table>
+      {p.description && <p className="mute">{p.description}</p>}
+      {onEdit && <button className="btn primary" onClick={onEdit}>تعديل المنتج</button>}
     </section>
   );
 }

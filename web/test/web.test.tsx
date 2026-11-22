@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { Sparkline } from '../src/admin/AdminApp';
@@ -112,7 +112,7 @@ describe('الواجهة', () => {
     expect(loadCart().lines).toEqual([]);
   });
   it('البحث والتصفية في الكتالوج، والعمل بلا نت من النسخة المحفوظة', async () => {
-    localStorage.setItem('mawred.catalog.v1', JSON.stringify(catalog));
+    localStorage.setItem('mawred.c.so1./catalog', JSON.stringify({ at: 1, data: catalog }));
     mount({ 'GET /auth/me': () => json({ user: shopUser }), 'GET /catalog': () => { throw new TypeError('offline'); } }, true);
     const u = userEvent.setup();
     expect(await screen.findByText(/بلا اتصال/)).toBeTruthy();
@@ -143,6 +143,25 @@ describe('الواجهة', () => {
     await u.click(await screen.findByRole('button', { name: 'الديون المستحقة' }));
     expect(await screen.findByText('247.50 ₪')).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'الأرباح' })).toBeNull();
+  });
+  it('كل بطاقة وسطر في اللوحة يفتح تفاصيله', async () => {
+    const order = { id: 'o1', number: 'MW-O-2026-000001', shopName: 'بقالة النور', status: 'new', items: [], totals: { total: 24750 }, address: {} };
+    const { calls } = mount({
+      'GET /auth/me': () => json({ user: adminUser }),
+      'GET /dashboard/summary': () => json({ ordersToday: 4, new: 2, overdue: 1, activeShops: 2, topProducts: [{ productId: 'feta', name: 'جبنة فيتا', count: 2 }], ordersLast7Days: [0, 1, 0, 2, 1, 0, 4], recent: [{ id: 'o1', number: 'MW-O-2026-000001', shopName: 'بقالة النور', status: 'new', total: 24750 }] }),
+      'GET /orders': () => json({ orders: [] }),
+      'GET /orders/o1': () => json({ order, history: [], actions: [], internal: [], changes: [] }),
+    }, true);
+    const u = userEvent.setup();
+    await u.click(await screen.findByRole('button', { name: /متأخرة: 1/ }));
+    await waitFor(() => expect(calls.some(([p]) => p === '/orders?filter=overdue')).toBe(true));
+    expect(screen.getByRole('button', { name: 'المتأخرة' }).className).toContain('on');
+    await u.click(screen.getByRole('button', { name: 'لوحة المعلومات' }));
+    await u.click(await screen.findByRole('button', { name: /MW-O-2026-000001/ }));
+    expect(await screen.findByRole('heading', { name: /MW-O-2026-000001 — بقالة النور/ })).toBeTruthy();
+    // المنتجات خارج صلاحيات هذا المستخدم: السطر يظهر لكنه غير قابل للنقر
+    await u.click(screen.getByRole('button', { name: 'لوحة المعلومات' }));
+    expect((await screen.findByRole('button', { name: /جبنة فيتا/ }) as HTMLButtonElement).disabled).toBe(true);
   });
   it('كلمة المرور المؤقتة تفرض شاشة التغيير', async () => {
     mount({ 'GET /auth/me': () => json({ user: { ...shopUser, mustChangePassword: true } }) }, true);
@@ -183,5 +202,41 @@ describe('الطلب السريع على الويب', () => {
     await u.click(screen.getByRole('button', { name: 'أضف 1 صنف إلى السلة' }));
     expect(loadCart().lines).toEqual([{ productId: 'feta', unitId: 'carton', qtyMilli: 3000 }]);
     expect(screen.getByRole('button', { name: 'كرتونة' }).className).toContain('on');
+  });
+});
+
+describe('التفاصيل والعمل بلا نت في واجهة المحل', () => {
+  it('النقر على المنتج يفتح تفاصيله بكل الوحدات والأسعار', async () => {
+    mount({ 'GET /auth/me': () => json({ user: shopUser }), 'GET /catalog': () => json(catalog) }, true);
+    const u = userEvent.setup();
+    await u.click(await screen.findByRole('button', { name: 'تفاصيل جبنة فيتا' }));
+    const dlg = await screen.findByRole('dialog', { hidden: true });
+    expect(dlg.textContent).toContain('كرتونة');
+    expect(dlg.textContent).toContain('90.00 ₪');
+  });
+  it('طلب بلا نت يُحفظ بمفتاحه ويظهر «بانتظار الإرسال» ثم يُرسل وحده', async () => {
+    let online = false;
+    const keys: string[] = [];
+    const { b } = mount({
+      'GET /auth/me': () => json({ user: shopUser }),
+      'GET /catalog': () => json(catalog),
+      'GET /shops/s1/orders': () => json({ orders: [] }),
+      'POST /orders': (init) => {
+        keys.push((init!.headers as Record<string, string>)['idempotency-key']!);
+        if (!online) throw new TypeError('Failed to fetch');
+        return json({ order: { id: 'o9', number: 'MW-9' } }, 201);
+      },
+    }, true);
+    void b;
+    const u = userEvent.setup();
+    await u.click(await screen.findByRole('button', { name: 'أضف جبنة فيتا إلى السلة' }));
+    await u.click(within(screen.getByRole('navigation', { name: 'التنقل' })).getByRole('button', { name: /السلة/ }));
+    await u.click(screen.getByRole('button', { name: 'تأكيد وإرسال الطلب' }));
+    expect(await screen.findByText('بانتظار الإرسال')).toBeTruthy();
+    expect(loadCart().lines).toEqual([]);
+    online = true;
+    await act(async () => { window.dispatchEvent(new Event('online')); });
+    await waitFor(() => expect(screen.queryByText('بانتظار الإرسال')).toBeNull());
+    expect(new Set(keys).size).toBe(1);
   });
 });

@@ -1,4 +1,5 @@
-// عميل الخادم: ترويسة الجلسة، مفاتيح منع التكرار، وأخطاء عربية موحدة
+// عميل الخادم: ترويسة الجلسة، مفاتيح منع التكرار، وأخطاء عربية موحدة، ونسخ محفوظة للعمل بلا نت
+import { cacheGet, cachePut, markStale } from './offline';
 export class ApiError extends Error {
   constructor(public readonly status: number, public readonly code: string, message: string, public readonly details?: Record<string, unknown>) {
     super(message);
@@ -13,6 +14,8 @@ export function newKey(): string {
 
 export class Api {
   workContext: string | null = null;
+  /** معرّف المستخدم الحالي لفصل النسخ المحفوظة؛ null = لا حفظ */
+  scope: string | null = null;
   constructor(readonly base: string, private readonly token: TokenProvider, private readonly f: typeof fetch = (...a) => fetch(...a)) {}
 
   async request<T = any>(method: string, path: string, body?: unknown, opts: { idem?: string; raw?: boolean } = {}): Promise<T> {
@@ -21,10 +24,15 @@ export class Api {
     if (t) headers.authorization = `Bearer ${t}`;
     if (opts.idem) headers['idempotency-key'] = opts.idem;
     if (this.workContext) headers['x-work-context'] = this.workContext;
+    const cacheable = method === 'GET' && !opts.raw && this.scope !== null;
     let res: Response;
     try {
       res = await this.f(`${this.base}${path}`, { method, headers, ...(body !== undefined ? { body: JSON.stringify(body) } : {}) });
     } catch {
+      if (cacheable) {
+        const hit = cacheGet<T>(this.scope!, path);
+        if (hit) { markStale(hit.at); return hit.data; }
+      }
       throw new ApiError(0, 'NETWORK', 'لا يوجد اتصال بالإنترنت، سنحاول مجدداً عند عودته');
     }
     if (opts.raw && res.ok) return (await res.text()) as T;
@@ -33,6 +41,7 @@ export class Api {
       const e = (data as { error?: { code?: string; message?: string; details?: Record<string, unknown> } }).error ?? {};
       throw new ApiError(res.status, e.code ?? 'ERROR', e.message ?? 'حدث خطأ، حاول مرة أخرى', e.details);
     }
+    if (cacheable) { cachePut(this.scope!, path, data); markStale(null); }
     return data as T;
   }
 

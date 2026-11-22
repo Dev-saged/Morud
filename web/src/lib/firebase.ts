@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { browserLocalPersistence, getAuth, onAuthStateChanged, setPersistence, signInWithCustomToken, signOut } from 'firebase/auth';
+import { browserLocalPersistence, browserSessionPersistence, getAuth, onAuthStateChanged, setPersistence, signInWithCustomToken, signOut } from 'firebase/auth';
 import type { AuthBackend } from './session';
 
 /** Firebase Auth فقط (القراءة والكتابة عبر الخادم). الجلسة تُحفظ بأمان في المتصفح (تذكّرني). */
@@ -8,7 +8,8 @@ export function firebaseBackend(): AuthBackend {
   const auth = getAuth(app);
   void setPersistence(auth, browserLocalPersistence);
   return {
-    async signInWithCustomToken(t) {
+    async signInWithCustomToken(t, remember = true) {
+      await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
       await signInWithCustomToken(auth, t);
     },
     idToken: async () => (auth.currentUser ? auth.currentUser.getIdToken() : null),

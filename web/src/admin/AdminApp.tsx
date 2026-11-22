@@ -30,20 +30,23 @@ export function AdminApp() {
   const allowed = SECTIONS.filter(([, , , p]) => p.some(can));
   const home = user!.home.split('.')[1] as Section;
   const [sec, setSec] = useState<Section>(allowed.some(([id]) => id === home) ? home : allowed[0]?.[0] ?? 'dashboard');
+  // التنقل من أي بطاقة إلى تفاصيلها: القسم + ما يُفتح فيه (فلتر أو عنصر)
+  const [focus, setFocus] = useState<Focus>({});
+  const go: Go = (to, f = {}) => { if (!allowed.some(([id]) => id === to)) return; setFocus(f); setSec(to); window.scrollTo?.({ top: 0 }); };
   return (
     <div className="admin">
       <aside className="side">
         <div className="brand"><LogoMark size={32} /><b>مورد</b></div>
-        <nav aria-label="أقسام الإدارة">{allowed.map(([id, icon, label]) => <button key={id} className={sec === id ? 'on' : ''} onClick={() => setSec(id)}><Icon name={icon} />{label}</button>)}</nav>
+        <nav aria-label="أقسام الإدارة">{allowed.map(([id, icon, label]) => <button key={id} className={sec === id ? 'on' : ''} onClick={() => { setFocus({}); setSec(id); }}><Icon name={icon} />{label}</button>)}</nav>
         <div className="me"><small>{user!.displayName}</small><button className="icon-btn" aria-label="تسجيل الخروج" onClick={() => void logout()}><Icon name="logout" /></button></div>
       </aside>
       <main className="admin-main">
-        {sec === 'dashboard' && <Dashboard />}
-        {sec === 'orders' && <Orders />}
+        {sec === 'dashboard' && <Dashboard go={go} can={(s) => allowed.some(([id]) => id === s)} />}
+        {sec === 'orders' && <Orders key={JSON.stringify(focus)} focus={focus} />}
         {sec === 'delivery' && <Delivery />}
         {sec === 'reports' && <Reports />}
-        {sec === 'products' && <Products />}
-        {sec === 'shops' && <Shops />}
+        {sec === 'products' && <Products key={JSON.stringify(focus)} focus={focus} />}
+        {sec === 'shops' && <Shops key={JSON.stringify(focus)} focus={focus} />}
         {sec === 'finance' && <Finance />}
         {sec === 'promotions' && <Promotions />}
         {sec === 'users' && <Users />}
@@ -61,38 +64,52 @@ export function Sparkline({ values }: { values: number[] }) {
   return <svg className="spark" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true"><polyline points={pts} fill="none" stroke="currentColor" strokeWidth="2" vectorEffect="non-scaling-stroke" /></svg>;
 }
 
-function Dashboard() {
+export type Focus = { filter?: string; open?: string; q?: string };
+type Go = (to: Section, f?: Focus) => void;
+
+/** كل مؤشر وكل سطر في اللوحة يفتح تفاصيله: القائمة المفلترة نفسها التي حُسب منها العدد. */
+export function Dashboard({ go, can }: { go: Go; can: (s: Section) => boolean }) {
   const { api } = useSession();
   const [d, setD] = useState<any>(null);
   useEffect(() => { void api.get('/dashboard/summary').then(setD); }, [api]);
   if (!d) return <div className="skeleton-grid" aria-busy="true">{Array.from({ length: 8 }, (_, i) => <div key={i} className="skeleton" />)}</div>;
-  const k: Array<[string, number | undefined, boolean?]> = [
-    ['طلبات اليوم', d.ordersToday], ['جديدة', d.new], ['قيد المراجعة', d.review], ['قيد التجهيز', d.preparing], ['متأخرة', d.overdue], ['قيد التوصيل', d.delivering], ['مكتملة', d.completed],
-    ['مبيعات اليوم', d.salesToday, true], ['المحصّل اليوم', d.collectedToday, true], ['المستحق على المحلات', d.totalDue, true], ['محلات نشطة', d.activeShops], ['منتجات متاحة', d.availableProducts], ['غير متوفرة', d.unavailableProducts],
+  const k: Array<[string, number | undefined, Section, Focus, boolean?]> = [
+    ['طلبات اليوم', d.ordersToday, 'orders', { filter: 'today' }], ['جديدة', d.new, 'orders', { filter: 'new' }], ['قيد المراجعة', d.review, 'orders', { filter: 'review' }],
+    ['قيد التجهيز', d.preparing, 'orders', { filter: 'preparing' }], ['جاهزة للتوصيل', d.ready, 'orders', { filter: 'ready' }], ['متأخرة', d.overdue, 'orders', { filter: 'overdue' }],
+    ['قيد التوصيل', d.delivering, 'orders', { filter: 'delivering' }], ['مكتملة', d.completed, 'orders', { filter: 'completed' }],
+    ['مبيعات اليوم', d.salesToday, 'reports', {}, true], ['المحصّل اليوم', d.collectedToday, 'finance', {}, true], ['المستحق على المحلات', d.totalDue, 'shops', { filter: 'due' }, true],
+    ['محلات نشطة', d.activeShops, 'shops', {}], ['منتجات متاحة', d.availableProducts, 'products', { filter: 'available' }], ['غير متوفرة', d.unavailableProducts, 'products', { filter: 'unavailable' }],
   ];
   return (
     <section>
       <h1>لوحة المعلومات</h1>
       <div className="kpis">
-        {k.filter(([, v]) => v !== undefined).map(([label, v, money]) => <div key={label} className={`kpi${label === 'متأخرة' && v ? ' alert' : ''}`}><small>{label}</small><b className="num">{money ? formatMoney(v!) : v}</b></div>)}
-        <div className="kpi wide"><small>الطلبات آخر 7 أيام</small><Sparkline values={d.ordersLast7Days} /></div>
+        {k.filter(([, v]) => v !== undefined).map(([label, v, to, f, money]) => {
+          const body = <><small>{label}</small><b className="num">{money ? formatMoney(v!) : v}</b></>;
+          const cls = `kpi${label === 'متأخرة' && v ? ' alert' : ''}`;
+          return can(to) ? <button key={label} className={`${cls} tap`} onClick={() => go(to, f)} aria-label={`${label}: ${v} — عرض التفاصيل`}>{body}<Icon name="chevron" flip /></button> : <div key={label} className={cls}>{body}</div>;
+        })}
+        {can('reports') ? <button className="kpi wide tap" onClick={() => go('reports')} aria-label="الطلبات آخر 7 أيام — فتح التقارير"><small>الطلبات آخر 7 أيام</small><Sparkline values={d.ordersLast7Days} /></button>
+          : <div className="kpi wide"><small>الطلبات آخر 7 أيام</small><Sparkline values={d.ordersLast7Days} /></div>}
       </div>
       <div className="two">
-        <div className="card"><h3>الأكثر طلباً اليوم</h3><ol>{d.topProducts.map((p: any) => <li key={p.name}>{p.name} <span className="mute num">{p.count}</span></li>)}</ol></div>
-        <div className="card"><h3>أحدث الطلبات</h3><ul className="plain">{d.recent.map((o: any) => <li key={o.id}><span className="num">{o.number}</span> {o.shopName} <span className={`chip tone-${STATUS[o.status]?.tone}`}>{STATUS[o.status]?.label}</span></li>)}</ul></div>
+        <div className="card"><h3>الأكثر طلباً اليوم</h3>{d.topProducts.length === 0 ? <p className="mute">لا طلبات اليوم بعد.</p> : <ol className="taps">{d.topProducts.map((p: any) => <li key={p.productId ?? p.name}>
+          <button className="row-btn" disabled={!can('products')} onClick={() => go('products', { open: p.productId, q: p.name })}><span>{p.name}</span><span className="mute num">{p.count}</span></button></li>)}</ol>}</div>
+        <div className="card"><h3>أحدث الطلبات</h3>{d.recent.length === 0 ? <p className="mute">لا طلبات بعد.</p> : <ul className="plain taps">{d.recent.map((o: any) => <li key={o.id}>
+          <button className="row-btn" disabled={!can('orders')} onClick={() => go('orders', { filter: 'all', open: o.id })}><span><span className="num">{o.number}</span> {o.shopName}</span><span className={`chip tone-${STATUS[o.status]?.tone}`}>{STATUS[o.status]?.label}</span></button></li>)}</ul>}</div>
       </div>
     </section>
   );
 }
 
-const FILTERS: Array<[string, string]> = [['new', 'الجديدة'], ['review', 'قيد المراجعة'], ['preparing', 'قيد التجهيز'], ['ready', 'جاهزة للتوصيل'], ['delivering', 'قيد التوصيل'], ['completed', 'المكتملة'], ['cancelled', 'الملغاة'], ['overdue', 'المتأخرة']];
+const FILTERS: Array<[string, string]> = [['today', 'اليوم'], ['all', 'الكل'], ['new', 'الجديدة'], ['review', 'قيد المراجعة'], ['preparing', 'قيد التجهيز'], ['ready', 'جاهزة للتوصيل'], ['delivering', 'قيد التوصيل'], ['completed', 'المكتملة'], ['cancelled', 'الملغاة'], ['overdue', 'المتأخرة']];
 
-function Orders() {
+function Orders({ focus = {} }: { focus?: Focus }) {
   const { api } = useSession();
-  const [filter, setFilter] = useState('new');
+  const [filter, setFilter] = useState(focus.filter ?? 'new');
   const [rows, setRows] = useState<any[] | null>(null);
-  const [open, setOpen] = useState<string | null>(null);
-  const load = () => api.get(`/orders?filter=${filter}`).then((r) => setRows(r.orders));
+  const [open, setOpen] = useState<string | null>(focus.open ?? null);
+  const load = () => api.get(filter === 'all' ? '/orders' : `/orders?filter=${filter}`).then((r) => setRows(r.orders));
   useEffect(() => { setRows(null); void load(); }, [filter]);
   return (
     <section>

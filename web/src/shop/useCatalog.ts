@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Product } from '../../../worker/src/domain/catalog';
 import type { Api } from '../lib/api';
+import { cacheGet } from '../lib/offline';
 
 export interface Catalog {
   products: Array<Product & { images?: Array<{ key: string; thumb: string }>; featured?: boolean; order?: number; description?: string }>;
@@ -8,19 +9,19 @@ export interface Catalog {
   units: Array<{ id: string; name: string }>;
   at: number;
 }
-const KEY = 'mawred.catalog.v1';
 
-/** الكتالوج من الخادم مع نسخة محلية للعمل بلا نت (SRS 17.2). */
+/** الكتالوج من الخادم مع نسخة محلية لكل مستخدم للعمل بلا نت (SRS 17.2): المحل يرى ما يخصه والإدارة ما يخصها. */
 export function useCatalog(api: Api) {
-  const [cat, setCat] = useState<Catalog | null>(() => { try { const r = localStorage.getItem(KEY); return r ? (JSON.parse(r) as Catalog) : null; } catch { return null; } });
+  const [cat, setCat] = useState<Catalog | null>(() => (api.scope ? cacheGet<Catalog>(api.scope, '/catalog')?.data ?? null : null));
   const [offline, setOffline] = useState(false);
   useEffect(() => {
     let live = true;
+    const before = api.scope ? cacheGet<Catalog>(api.scope, '/catalog')?.at : undefined;
     api.get<Catalog>('/catalog').then((c) => {
       if (!live) return;
       setCat(c);
-      setOffline(false);
-      try { localStorage.setItem(KEY, JSON.stringify(c)); } catch { /* لا تخزين */ }
+      const after = api.scope ? cacheGet<Catalog>(api.scope, '/catalog')?.at : undefined;
+      setOffline(before !== undefined && after === before);
     }).catch(() => live && setOffline(true));
     return () => { live = false; };
   }, [api]);

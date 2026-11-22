@@ -1,12 +1,14 @@
 import { useState, type FormEvent } from 'react';
 import { ApiError } from './lib/api';
-import { useSession } from './lib/session';
+import { rememberedLogin, useSession } from './lib/session';
 import { Icon, LogoMark } from './ui/Icons';
 
 /** شاشة الدخول الموحدة لكل المستخدمين (SRS 2.1). */
 export function Login() {
   const { login, api } = useSession();
-  const [identifier, setId] = useState('');
+  const saved = rememberedLogin();
+  const [identifier, setId] = useState(saved.identifier);
+  const [remember, setRemember] = useState(saved.remember);
   const [password, setPw] = useState('');
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -22,7 +24,7 @@ export function Login() {
       if (mode === 'forgot') {
         await api.post('/auth/forgot', { identifier });
         setMode('sent');
-      } else await login(identifier.trim(), password);
+      } else await login(identifier.trim(), password, remember);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'تعذّر الدخول، حاول مرة أخرى');
     } finally {
@@ -49,6 +51,7 @@ export function Login() {
                 </span>
               </label>
             )}
+            {mode === 'login' && <label className="remember"><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> تذكرني على هذا الجهاز</label>}
             {error && <p className="error" role="alert">{error}</p>}
             <button className="btn primary block" disabled={busy}>{busy ? 'جارٍ التحقق…' : mode === 'login' ? 'دخول' : 'إرسال'}</button>
           </form>
@@ -60,18 +63,17 @@ export function Login() {
 }
 
 export function ChangePassword() {
-  const { api, refresh, logout } = useSession();
+  const { api, adopt } = useSession();
   const [pw, setPw] = useState('');
   const [error, setError] = useState('');
   return (
     <main className="login">
       <form className="login-card" onSubmit={async (e) => {
         e.preventDefault();
-        try { await api.post('/auth/change-password', { newPassword: pw }); await logout(); } catch (err) { setError(err instanceof ApiError ? err.message : 'تعذّر الحفظ'); }
-        void refresh;
+        try { const r = await api.post<{ customToken: string }>('/auth/change-password', { newPassword: pw }); await adopt(r.customToken); } catch (err) { setError(err instanceof ApiError ? err.message : 'تعذّر الحفظ'); }
       }}>
         <h1>كلمة مرور جديدة</h1>
-        <p className="mute">كلمة المرور الحالية مؤقتة. اختر كلمة من 8 أحرف على الأقل تحتوي حرفاً ورقماً، ثم ادخل بها.</p>
+        <p className="mute">كلمة المرور الحالية مؤقتة. اختر كلمة من 8 أحرف على الأقل تحتوي حرفاً ورقماً، وتبقى داخلاً بعدها.</p>
         <label>كلمة المرور الجديدة<input type="password" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="new-password" required /></label>
         {error && <p className="error" role="alert">{error}</p>}
         <button className="btn primary block">حفظ</button>

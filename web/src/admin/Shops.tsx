@@ -1,3 +1,4 @@
+import type { Focus } from './AdminApp';
 import { useState } from 'react';
 import { formatMoney } from '../lib/format';
 import { useSession } from '../lib/session';
@@ -7,11 +8,13 @@ import { Field, fromAgorot, Loading, toAgorot, useAction, useLoad } from './kit'
 
 type Shop = { id: string; name: string; ownerName: string; phone: string; phoneAlt?: string; region: string; city: string; address: string; status: string; balance: number; paymentTerms?: string[]; credit?: { enabled: boolean; limit: number }; adminNotes?: string; allowMemberManagement?: boolean };
 
-export function Shops() {
+export function Shops({ focus = {} }: { focus?: Focus }) {
   const { can } = useSession();
   const [q, setQ] = useState('');
-  const [open, setOpen] = useState<string | 'new' | null>(null);
-  const { data, error, reload } = useLoad<{ shops: Shop[] }>(`/admin/shops?q=${encodeURIComponent(q)}`);
+  const [open, setOpen] = useState<string | 'new' | null>(focus.open ?? null);
+  const [dueOnly, setDueOnly] = useState(focus.filter === 'due');
+  const { data: raw, error, reload } = useLoad<{ shops: Shop[] }>(`/admin/shops?q=${encodeURIComponent(q)}`);
+  const data = raw && dueOnly ? { shops: raw.shops.filter((s) => s.balance > 0).sort((a, b) => b.balance - a.balance) } : raw;
   if (open === 'new') return <ShopForm done={() => { setOpen(null); void reload(); }} />;
   if (open) return <ShopDetail id={open} back={() => { setOpen(null); void reload(); }} />;
   return (
@@ -19,6 +22,7 @@ export function Shops() {
       <h1>المحلات</h1>
       <div className="row"><div className="search" style={{ flex: 1 }}><Icon name="search" /><input aria-label="بحث المحلات" placeholder="الاسم أو الهاتف أو المدينة" value={q} onChange={(e) => setQ(e.target.value)} /></div>
         {can('shops.create') && <button className="btn primary" onClick={() => setOpen('new')}>محل جديد</button>}</div>
+      <div className="chips"><button className={!dueOnly ? 'chip on' : 'chip'} onClick={() => setDueOnly(false)}>الكل</button><button className={dueOnly ? 'chip on' : 'chip'} onClick={() => setDueOnly(true)}>عليها مستحقات</button></div>
       {!data ? <Loading error={error} /> : data.shops.length === 0 ? <p className="empty">لا محلات.</p> : (
         <table className="table"><thead><tr><th>المحل</th><th>صاحبه</th><th>الهاتف</th><th>المدينة</th><th>الرصيد</th><th>الحالة</th></tr></thead>
           <tbody>{data.shops.map((s) => <tr key={s.id} tabIndex={0} onClick={() => setOpen(s.id)} onKeyDown={(e) => e.key === 'Enter' && setOpen(s.id)}>

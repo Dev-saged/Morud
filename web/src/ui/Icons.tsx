@@ -10,6 +10,7 @@ const P: Record<string, string> = {
   bell: 'M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0',
   plus: 'M12 5v14M5 12h14',
   minus: 'M5 12h14',
+  close: 'M6 6l12 12M18 6 6 18',
   trash: 'M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13',
   box: 'M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8',
   truck: 'M3 6h11v10H3zM14 9h4l3 3v4h-7M7 18.5a1.5 1.5 0 1 0 0-.01M17 18.5a1.5 1.5 0 1 0 0-.01',
