@@ -3,6 +3,7 @@ import { runBackup } from './backup';
 import { markOverdue } from './delivery';
 import { settleSweep } from './finance';
 import { processDueJobs } from './notify';
+import { computePopular } from './catalog-public';
 
 /**
  * المهام المجدولة. حساب Cloudflare المجاني يسمح بـ5 جداول للحساب كله، فمورد يستخدم جدولاً واحداً
@@ -15,6 +16,7 @@ export async function runScheduled(s: Services, cron: string, at: number = s.now
   const jobs: Array<[string, () => Promise<unknown>]> = [];
   if (every) jobs.push(['notifications', () => processDueJobs(s, s.pusher)]);
   if (cron === '*/5 * * * *' || (every && m % 5 === 0)) jobs.push(['overdue', () => markOverdue(s)]);
+  if (every && m === 30) jobs.push(['popular', () => computePopular(s)]);
   if (cron === '0 1 * * *' || (every && m === 0 && d.getUTCHours() === 1)) {
     jobs.push(['settle', () => settleSweep(s)], ['backup', () => runBackup(s)], ['purge', () => purgeIdempotency(s)]);
   }

@@ -62,6 +62,24 @@ describe('Google JWT', () => {
     const payload = JSON.parse(new TextDecoder().decode(b64urlDecode(ct.split('.')[1]!)));
     expect(payload).toMatchObject({ uid: 'u1', claims: { rp: ['ov'] }, iss: 'sa@p.iam' });
   });
+  it('الرمز يُشارك بين النسخ عبر KV والطلبات المتزامنة تنتظر طلباً واحداً', async () => {
+    resetJwksCache();
+    const { pem } = await keys();
+    const sa = { project_id: 'p', client_email: 'sa@p.iam', private_key: pem };
+    const kv = new Map<string, string>();
+    const store = { get: async (k: string) => kv.get(k) ?? null, put: async (k: string, v: string) => { kv.set(k, v); } };
+    const f = vi.fn(async () => res({ access_token: 'AT2', expires_in: 3600 }));
+    const all = await Promise.all([1, 2, 3].map(() => accessToken(sa, 's', f as never, 0, store)));
+    expect(all).toEqual(['AT2', 'AT2', 'AT2']);
+    expect(f).toHaveBeenCalledTimes(1);
+    expect(kv.size).toBe(1);
+    expect([...kv.values()][0]).not.toContain(pem.slice(40, 80));
+    resetJwksCache(); // نسخة جديدة: ذاكرتها فارغة لكنها تجد الرمز في KV
+    const g = vi.fn(async () => res({ access_token: 'NEW', expires_in: 3600 }));
+    expect(await accessToken(sa, 's', g as never, 10_000, store)).toBe('AT2');
+    expect(g).not.toHaveBeenCalled();
+    expect(await accessToken(sa, 's', g as never, 3_550_000, store)).toBe('NEW');
+  });
 });
 
 describe('Firestore REST', () => {

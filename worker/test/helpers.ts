@@ -72,6 +72,7 @@ export function world(modules: RouteModule[] = []): World {
     customToken: async (uid, claims) => `custom:${uid}:${JSON.stringify(claims)}`,
     loginLimiter: new RateLimiter(new MemoryCounter(), 5, 900, 'login'),
     ipLimiter: new RateLimiter(new MemoryCounter(), 30, 900, 'ip'),
+    cache: new MemoryCounter(),
     now: () => clock.now,
     id: () => `id${String(++seq).padStart(6, '0')}`,
   };

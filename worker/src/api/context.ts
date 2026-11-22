@@ -5,7 +5,7 @@ import type { BlobStore } from '../infra/blobs';
 import type { Pusher } from '../infra/fcm';
 import type { FileStore } from '../infra/files';
 import type { Identity } from '../infra/identity';
-import type { RateLimiter } from '../infra/ratelimit';
+import type { Counter, RateLimiter } from '../infra/ratelimit';
 import { fail } from './http';
 
 export interface Services {
@@ -20,6 +20,8 @@ export interface Services {
   customToken(uid: string, claims: Record<string, unknown>): Promise<string>;
   loginLimiter: RateLimiter;
   ipLimiter: RateLimiter;
+  /** كاش مشترك بين نسخ الخادم (KV) للقراءات الثقيلة المتكررة مثل الكتالوج. */
+  cache?: Counter;
   now(): number;
   id(): string;
 }
@@ -48,20 +50,42 @@ export interface Ctx {
   user: AuthUser | null;
 }
 
+// تعريفات الأدوار والصلاحيات الإضافية تتغير نادراً: تُحفظ في ذاكرة النسخة 15 ثانية وتُمسح فور أي تعديل عليها
+const ROLE_TTL = 15_000;
+const roleCache = new WeakMap<Db, { at: number; roles: Promise<Map<string, RoleDef>>; extra: Promise<string[]> }>();
+function roleEntry(db: Db) {
+  const now = Date.now();
+  let e = roleCache.get(db);
+  if (!e || now - e.at > ROLE_TTL) {
+    const roles = db.query({ collection: 'roles' }).then((rows) => {
+      const m = roleMap();
+      for (const r of rows) m.set(r.id, { id: r.id, ...(r.data as Omit<RoleDef, 'id'>) });
+      return m;
+    });
+    const extra = db.get('system/permissions').then((d) => ((d?.data.extra as Array<{ id: string }>) ?? []).map((p) => p.id));
+    e = { at: now, roles, extra };
+    roleCache.set(db, e);
+    // فشل القراءة لا يُحفظ
+    Promise.all([roles, extra]).catch(() => { if (roleCache.get(db) === e) roleCache.delete(db); });
+  }
+  return e;
+}
+
+export function invalidateRoleCache(db: Db) {
+  roleCache.delete(db);
+}
+
 export async function loadRoles(db: Db): Promise<Map<string, RoleDef>> {
-  const rows = await db.query({ collection: 'roles' });
-  const m = roleMap();
-  for (const r of rows) m.set(r.id, { id: r.id, ...(r.data as Omit<RoleDef, 'id'>) });
-  return m;
+  return new Map(await roleEntry(db).roles);
 }
 
 export async function extraPermissions(db: Db): Promise<string[]> {
-  const d = await db.get('system/permissions');
-  return ((d?.data.extra as Array<{ id: string }>) ?? []).map((p) => p.id);
+  return [...(await roleEntry(db).extra)];
 }
 
 /** يبني المستخدم من وثيقته في كل طلب ويرفض الموقوف والمنتهي والجلسات الملغاة. */
 export async function buildUser(s: Services, uid: string, claims: IdClaims | null): Promise<AuthUser> {
+  roleEntry(s.db); // تبدأ قراءة الأدوار بالتوازي مع وثيقة المستخدم
   const doc = await s.db.get(`users/${uid}`);
   if (!doc) throw fail('UNAUTHENTICATED', 'الحساب غير موجود');
   return userFromDoc(s, doc, claims);
@@ -75,8 +99,8 @@ export async function userFromDoc(s: Services, doc: Doc, claims: IdClaims | null
     throw fail('UNAUTHENTICATED', 'انتهت الجلسة، سجّل الدخول من جديد');
   }
   const roles = (d.roles as string[]) ?? [];
-  const defs = await loadRoles(s.db);
-  const permissions = effectivePermissions({ roles, grant: (d.grant as string[]) ?? [], deny: (d.deny as string[]) ?? [] }, defs, await extraPermissions(s.db));
+  const [defs, extra] = await Promise.all([loadRoles(s.db), extraPermissions(s.db)]);
+  const permissions = effectivePermissions({ roles, grant: (d.grant as string[]) ?? [], deny: (d.deny as string[]) ?? [] }, defs, extra);
   const kinds = new Set(roles.map((r) => defs.get(r)?.kind).filter((k): k is NonNullable<typeof k> => !!k));
   const { home, contexts } = resolveHome(roles, defs);
   return {

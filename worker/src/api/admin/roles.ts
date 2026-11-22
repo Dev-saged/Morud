@@ -1,6 +1,6 @@
 import catalog from '../../../../spec/permissions.json';
 import { DEFAULT_ROLES } from '../../domain/permissions';
-import { auditWrite, loadRoles, requirePerm, requireUser, type Ctx } from '../context';
+import { auditWrite, invalidateRoleCache, loadRoles, requirePerm, requireUser, type Ctx } from '../context';
 import { cleanText, fail, json, readJson, type Router } from '../http';
 
 const SCOPE_FOR_KIND: Record<string, string[]> = { staff: ['staff', 'any'], shop: ['shop', 'any'], agent: ['agent', 'any'] };
@@ -37,6 +37,7 @@ async function upsert(ctx: Ctx, p: Record<string, string>) {
   const before = (await ctx.s.db.get(`roles/${id}`))?.data ?? DEFAULT_ROLES.find((r) => r.id === id) ?? null;
   const data = { label, kind, home, permissions: [...new Set(body.permissions as string[])], updatedAt: ctx.s.now() };
   await ctx.s.db.commit([{ kind: 'set', path: `roles/${id}`, data }, auditWrite(ctx, { action: 'roles.upsert', entity: { kind: 'role', id }, before: before as never, after: data })]);
+  invalidateRoleCache(ctx.s.db);
   return json({ role: { id, ...data } });
 }
 
@@ -48,6 +49,7 @@ async function remove(ctx: Ctx, p: Record<string, string>) {
   const cur = await ctx.s.db.get(`roles/${id}`);
   if (!cur) throw fail('NOT_FOUND', 'الدور غير موجود');
   await ctx.s.db.commit([{ kind: 'delete', path: `roles/${id}` }, auditWrite(ctx, { action: 'roles.delete', entity: { kind: 'role', id }, before: cur.data })]);
+  invalidateRoleCache(ctx.s.db);
   return json({ ok: true });
 }
 
@@ -63,6 +65,7 @@ async function addPermission(ctx: Ctx) {
   if ((await allPermissions(ctx)).some((x) => x.id === id)) throw fail('CONFLICT', 'الصلاحية موجودة');
   const cur = ((await ctx.s.db.get('system/permissions'))?.data.extra as unknown[]) ?? [];
   await ctx.s.db.commit([{ kind: 'set', path: 'system/permissions', data: { extra: [...cur, { id, scope, label }] } }, auditWrite(ctx, { action: 'permissions.add', entity: { kind: 'permission', id }, after: { scope, label } })]);
+  invalidateRoleCache(ctx.s.db);
   return json({ ok: true }, 201);
 }
 

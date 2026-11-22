@@ -3,6 +3,7 @@ import type { Data } from '../infra/db';
 import { auditWrite, idempotent, requirePerm, requireUser, type Ctx } from './context';
 import { cleanText, fail, json, readJson, type Router } from './http';
 import { deliverJob, queueNotice } from './notify';
+import { bumpCatalog } from './catalog-public';
 
 const TYPES: PromotionType[] = ['item_percent', 'item_amount', 'qty_percent', 'bxgy', 'bundle_percent'];
 const int = (v: unknown, min: number, max: number, field: string) => {
@@ -65,6 +66,7 @@ async function create(ctx: Ctx) {
     return { id, job };
   });
   if (value.job) ctx.s.defer(deliverJob(ctx.s, ctx.s.pusher, value.job));
+  await bumpCatalog(ctx);
   return json({ id: value.id }, 201);
 }
 
@@ -74,6 +76,7 @@ async function update(ctx: Ctx, p: Record<string, string>) {
   if (!cur) throw fail('NOT_FOUND', 'العرض غير موجود');
   const data = await parsePromotion(ctx, await readJson(ctx.req), cur.data);
   await ctx.s.db.commit([{ kind: 'update', path: cur.path, data: { ...data, updatedAt: ctx.s.now() } }, auditWrite(ctx, { action: 'promotions.update', entity: { kind: 'promotion', id: cur.id }, before: cur.data, after: data })]);
+  await bumpCatalog(ctx);
   return json({ promotion: { id: cur.id, ...cur.data, ...data } });
 }
 

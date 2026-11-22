@@ -4,6 +4,7 @@ import type { Data, Write } from '../../infra/db';
 import { inspectImage } from '../../infra/files';
 import { auditWrite, idempotent, requirePerm, requireUser, type Ctx } from '../context';
 import { cleanText, fail, json, readJson, type Router } from '../http';
+import { bumpCatalog } from '../catalog-public';
 
 const ID = /^[a-z0-9_-]{2,40}$/;
 
@@ -35,6 +36,7 @@ async function createCategory(ctx: Ctx) {
   const data = { order: 999, hidden: false, parentId: null, icon: '', ...parseCategory(b, false), createdAt: ctx.s.now() };
   if (data.parentId && !(await ctx.s.db.get(`categories/${data.parentId}`))) throw fail('VALIDATION', 'التصنيف الأب غير موجود');
   await ctx.s.db.commit([{ kind: 'create', path: `categories/${id}`, data }, auditWrite(ctx, { action: 'categories.create', entity: { kind: 'category', id }, after: data })]);
+  await bumpCatalog(ctx);
   return json({ category: { id, ...data } }, 201);
 }
 
@@ -45,6 +47,7 @@ async function updateCategory(ctx: Ctx, p: Record<string, string>) {
   const patch = parseCategory(await readJson(ctx.req), true);
   if (patch.parentId === cur.id) throw fail('VALIDATION', 'لا يكون التصنيف أباً لنفسه');
   await ctx.s.db.commit([{ kind: 'update', path: `categories/${cur.id}`, data: { ...patch, updatedAt: ctx.s.now() } }, auditWrite(ctx, { action: 'categories.update', entity: { kind: 'category', id: cur.id }, before: cur.data, after: patch })]);
+  await bumpCatalog(ctx);
   return json({ category: { id: cur.id, ...cur.data, ...patch } });
 }
 
@@ -64,6 +67,7 @@ async function deleteCategory(ctx: Ctx, p: Record<string, string>) {
     { kind: 'delete', path: `categories/${cur.id}` },
     auditWrite(ctx, { action: 'categories.delete', entity: { kind: 'category', id: cur.id }, before: cur.data, after: { movedProducts: products.length, moveTo } }),
   ]);
+  await bumpCatalog(ctx);
   return json({ ok: true, moved: products.length });
 }
 
@@ -77,6 +81,7 @@ async function upsertUnit(ctx: Ctx, p: Record<string, string>) {
   const data = { name: cleanText(b.name, 30, 'اسم الوحدة'), kind, allowFraction: kind !== 'count' && b.allowFraction === true, updatedAt: ctx.s.now() };
   const before = (await ctx.s.db.get(`units/${p.id}`))?.data ?? null;
   await ctx.s.db.commit([{ kind: 'set', path: `units/${p.id}`, data }, auditWrite(ctx, { action: 'units.upsert', entity: { kind: 'unit', id: p.id! }, before, after: data })]);
+  await bumpCatalog(ctx);
   return json({ unit: { id: p.id, ...data } });
 }
 
@@ -86,6 +91,7 @@ async function deleteUnit(ctx: Ctx, p: Record<string, string>) {
   if (!cur) throw fail('NOT_FOUND', 'الوحدة غير موجودة');
   if ((await ctx.s.db.query({ collection: 'products', where: [['unitIds', 'array-contains', cur.id]], limit: 1 })).length) throw fail('CONFLICT', 'الوحدة مستخدمة في منتجات');
   await ctx.s.db.commit([{ kind: 'delete', path: `units/${cur.id}` }, auditWrite(ctx, { action: 'units.delete', entity: { kind: 'unit', id: cur.id }, before: cur.data })]);
+  await bumpCatalog(ctx);
   return json({ ok: true });
 }
 
@@ -154,6 +160,7 @@ async function createProduct(ctx: Ctx) {
     tx.write(auditWrite(ctx, { action: 'products.create', entity: { kind: 'product', id: p.id }, after: doc }));
     return { id: p.id };
   });
+  await bumpCatalog(ctx);
   return json(value, 201);
 }
 
@@ -213,6 +220,7 @@ async function updateProduct(ctx: Ctx, params: Record<string, string>) {
     tx.write({ kind: 'update', path: `products/${cur.id}`, data: doc });
     tx.write(auditWrite(ctx, { action: priceChanged ? 'products.price' : availabilityOnly ? 'products.availability' : 'products.update', entity: { kind: 'product', id: cur.id }, before: cur.data, after: doc }));
   });
+  await bumpCatalog(ctx);
   return json({ product: { ...doc } });
 }
 
@@ -225,6 +233,7 @@ async function archiveProduct(ctx: Ctx, p: Record<string, string>) {
     { kind: 'delete', path: `skus/${cur.data.sku}` },
     auditWrite(ctx, { action: 'products.archive', entity: { kind: 'product', id: cur.id }, before: cur.data }),
   ]);
+  await bumpCatalog(ctx);
   return json({ ok: true });
 }
 

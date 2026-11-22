@@ -42,10 +42,33 @@ export async function signJwt(payload: Record<string, unknown>, privateKeyPem: s
 type Fetch = typeof fetch;
 const tokenCache = new Map<string, { token: string; exp: number }>();
 
-export async function accessToken(sa: ServiceAccount, scope: string, f: Fetch = fetch, now = Date.now()): Promise<string> {
+/** مخزن مشترك بين نسخ الخادم (KV) حتى لا تطلب كل نسخة جديدة رمزاً من Google وتنتظر ~300ms. */
+export interface TokenStore {
+  get(key: string): Promise<string | null>;
+  put(key: string, value: string, opts: { expirationTtl: number }): Promise<void>;
+}
+const pending = new Map<string, Promise<string>>();
+
+export async function accessToken(sa: ServiceAccount, scope: string, f: Fetch = fetch, now = Date.now(), store?: TokenStore): Promise<string> {
   const key = `${sa.client_email}|${scope}`;
   const hit = tokenCache.get(key);
   if (hit && hit.exp - 60_000 > now) return hit.token;
+  const inflight = pending.get(key);
+  if (inflight) return inflight;
+  const p = mintOrShare(sa, scope, key, f, now, store).finally(() => pending.delete(key));
+  pending.set(key, p);
+  return p;
+}
+
+async function mintOrShare(sa: ServiceAccount, scope: string, key: string, f: Fetch, now: number, store?: TokenStore): Promise<string> {
+  const skey = `gtok:${await sha256Hex(key)}`;
+  if (store) {
+    const raw = await store.get(skey).catch(() => null);
+    if (raw) {
+      const c = JSON.parse(raw) as { token: string; exp: number };
+      if (c.exp - 120_000 > now) { tokenCache.set(key, c); return c.token; }
+    }
+  }
   const iat = Math.floor(now / 1000);
   const assertion = await signJwt({ iss: sa.client_email, scope, aud: 'https://oauth2.googleapis.com/token', iat, exp: iat + 3600 }, sa.private_key);
   const res = await f('https://oauth2.googleapis.com/token', {
@@ -55,8 +78,15 @@ export async function accessToken(sa: ServiceAccount, scope: string, f: Fetch = 
   });
   if (!res.ok) throw new Error(`oauth ${res.status}`);
   const j = (await res.json()) as { access_token: string; expires_in: number };
-  tokenCache.set(key, { token: j.access_token, exp: now + j.expires_in * 1000 });
+  const entry = { token: j.access_token, exp: now + j.expires_in * 1000 };
+  tokenCache.set(key, entry);
+  if (store) await store.put(skey, JSON.stringify(entry), { expirationTtl: Math.max(60, j.expires_in - 300) }).catch(() => undefined);
   return j.access_token;
+}
+
+async function sha256Hex(s: string) {
+  const d = new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(s)));
+  return [...d.slice(0, 12)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 /** رمز مخصص يدخل به العميل عبر signInWithCustomToken (صلاحية ساعة). */
@@ -96,6 +126,7 @@ async function loadJwks(f: Fetch, now: number) {
 export function resetJwksCache() {
   jwks = null;
   tokenCache.clear();
+  pending.clear();
 }
 
 /** تحقق Firebase ID token وفق متطلبات Google: التوقيع، iss، aud، exp، iat، sub. يعيد null عند أي خلل. */

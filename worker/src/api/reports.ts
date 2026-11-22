@@ -20,10 +20,12 @@ interface Filters {
   tz: string;
 }
 
+/** الفترة تُطبّق داخل الاستعلام نفسه: لا تحميل لكل السجلات ثم فلترتها، ولا نتائج ناقصة حين تكبر البيانات. */
+const range = (field: string, f: Filters): Array<[string, '>=' | '<', number]> => [[field, '>=', f.from], [field, '<', f.to]];
 const inRange = (t: unknown, f: Filters) => typeof t === 'number' && t >= f.from && t < f.to;
 
 async function invoices(ctx: Ctx, f: Filters): Promise<Doc[]> {
-  const rows = await ctx.s.db.query({ collection: 'invoices', where: f.shopId ? [['shopId', '==', f.shopId]] : [], limit: 5000 });
+  const rows = await ctx.s.db.query({ collection: 'invoices', where: [...(f.shopId ? [['shopId', '==', f.shopId] as [string, '==', string]] : []), ...range('issuedAt', f)], limit: 20000 });
   return rows.filter((r) => r.data.status !== 'void' && inRange(r.data.issuedAt, f));
 }
 
@@ -84,7 +86,7 @@ const REPORTS: Record<string, Report> = {
   'orders-by-status': {
     title: 'الطلبات حسب الحالة', perms: ['reports.view'],
     run: async (ctx, f) => {
-      const rows = (await ctx.s.db.query({ collection: 'orders', where: f.shopId ? [['shopId', '==', f.shopId]] : [], limit: 5000 })).filter((r) => inRange(r.data.createdAt, f));
+      const rows = (await ctx.s.db.query({ collection: 'orders', where: [...(f.shopId ? [['shopId', '==', f.shopId] as [string, '==', string]] : []), ...range('createdAt', f)], limit: 20000 })).filter((r) => inRange(r.data.createdAt, f));
       const m = new Map<string, number>();
       for (const r of rows) m.set(String(r.data.status), (m.get(String(r.data.status)) ?? 0) + 1);
       return { columns: [['status', 'الحالة'], ['count', 'العدد']], rows: [...m.entries()].map(([status, count]) => ({ status, count })) };
@@ -139,7 +141,7 @@ const REPORTS: Record<string, Report> = {
   collections: {
     title: 'المبالغ المحصلة', perms: ['reports.finance'],
     run: async (ctx, f) => {
-      const rows = (await ctx.s.db.query({ collection: 'payments', where: f.shopId ? [['shopId', '==', f.shopId]] : [], limit: 5000 })).filter((p) => p.data.status === 'posted' && inRange(p.data.at, f));
+      const rows = (await ctx.s.db.query({ collection: 'payments', where: [...(f.shopId ? [['shopId', '==', f.shopId] as [string, '==', string]] : []), ...range('at', f)], limit: 20000 })).filter((p) => p.data.status === 'posted' && inRange(p.data.at, f));
       const m = new Map<string, { method: string; source: string; count: number; amount: number }>();
       for (const p of rows) {
         const k = `${p.data.method}|${p.data.source}`;
@@ -162,13 +164,13 @@ const REPORTS: Record<string, Report> = {
     title: 'الدفعات', perms: ['reports.finance'],
     run: async (ctx, f) => ({
       columns: [['number', 'الرقم'], ['shopId', 'المحل'], ['amount', 'المبلغ'], ['method', 'الطريقة'], ['status', 'الحالة'], ['at', 'التاريخ']],
-      rows: (await ctx.s.db.query({ collection: 'payments', where: f.shopId ? [['shopId', '==', f.shopId]] : [], limit: 5000 })).filter((p) => inRange(p.data.at, f)).map((p) => ({ number: String(p.data.number), shopId: String(p.data.shopId), amount: p.data.amount as number, method: String(p.data.method), status: String(p.data.status), at: p.data.at as number })),
+      rows: (await ctx.s.db.query({ collection: 'payments', where: [...(f.shopId ? [['shopId', '==', f.shopId] as [string, '==', string]] : []), ...range('at', f)], limit: 20000 })).filter((p) => inRange(p.data.at, f)).map((p) => ({ number: String(p.data.number), shopId: String(p.data.shopId), amount: p.data.amount as number, method: String(p.data.method), status: String(p.data.status), at: p.data.at as number })),
     }),
   },
   agents: {
     title: 'المندوبون', perms: ['reports.view'],
     run: async (ctx, f) => {
-      const orders = (await ctx.s.db.query({ collection: 'orders', limit: 5000 })).filter((o) => o.data.agentId && inRange(o.data.createdAt, f));
+      const orders = (await ctx.s.db.query({ collection: 'orders', where: range('createdAt', f), limit: 20000 })).filter((o) => o.data.agentId && inRange(o.data.createdAt, f));
       const proofs = await ctx.s.db.getMany(orders.map((o) => `deliveryProofs/${o.id}`));
       const m = new Map<string, { agentId: string; delivered: number; failed: number; collected: number }>();
       orders.forEach((o, i) => {
@@ -185,14 +187,14 @@ const REPORTS: Record<string, Report> = {
     title: 'التأخير في التوصيل', perms: ['reports.view'],
     run: async (ctx, f) => ({
       columns: [['number', 'الطلب'], ['shopName', 'المحل'], ['status', 'الحالة'], ['dueAt', 'الموعد'], ['reason', 'سبب التأخير']],
-      rows: (await ctx.s.db.query({ collection: 'orders', where: [['sla.overdue', '==', true]], limit: 5000 })).filter((o) => inRange(o.data.createdAt, f)).map((o) => ({ number: String(o.data.number), shopName: String(o.data.shopName), status: String(o.data.status), dueAt: (o.data.sla as Data).dueAt as number, reason: String((o.data.sla as Data).delayReason ?? '') })),
+      rows: (await ctx.s.db.query({ collection: 'orders', where: [['sla.overdue', '==', true], ...range('createdAt', f)], limit: 20000 })).filter((o) => inRange(o.data.createdAt, f)).map((o) => ({ number: String(o.data.number), shopName: String(o.data.shopName), status: String(o.data.status), dueAt: (o.data.sla as Data).dueAt as number, reason: String((o.data.sla as Data).delayReason ?? '') })),
     }),
   },
   cancellations: {
     title: 'إلغاء الطلبات', perms: ['reports.view'],
     run: async (ctx, f) => ({
       columns: [['number', 'الطلب'], ['shopName', 'المحل'], ['status', 'الحالة'], ['actor', 'بواسطة'], ['reason', 'السبب']],
-      rows: (await ctx.s.db.query({ collection: 'orders', where: [['status', 'in', ['cancelled', 'rejected']]], limit: 5000 })).filter((o) => inRange(o.data.createdAt, f)).map((o) => ({ number: String(o.data.number), shopName: String(o.data.shopName), status: String(o.data.status), actor: String((o.data.closure as Data)?.actor ?? ''), reason: String((o.data.closure as Data)?.reason ?? '') })),
+      rows: (await ctx.s.db.query({ collection: 'orders', where: [['status', 'in', ['cancelled', 'rejected']], ...range('createdAt', f)], limit: 20000 })).filter((o) => inRange(o.data.createdAt, f)).map((o) => ({ number: String(o.data.number), shopName: String(o.data.shopName), status: String(o.data.status), actor: String((o.data.closure as Data)?.actor ?? ''), reason: String((o.data.closure as Data)?.reason ?? '') })),
     }),
   },
   returns: {
@@ -205,7 +207,7 @@ const REPORTS: Record<string, Report> = {
   'staff-activity': {
     title: 'نشاط الموظفين', perms: ['reports.view', 'audit.view'],
     run: async (ctx, f) => {
-      const logs = (await ctx.s.db.query({ collection: 'auditLogs', limit: 10000 })).filter((l) => inRange(l.data.at, f) && l.data.actorId !== 'anonymous');
+      const logs = (await ctx.s.db.query({ collection: 'auditLogs', where: range('at', f), limit: 20000 })).filter((l) => inRange(l.data.at, f) && l.data.actorId !== 'anonymous');
       const m = new Map<string, { actorId: string; action: string; count: number }>();
       for (const l of logs) {
         const k = `${l.data.actorId}|${l.data.action}`;
@@ -213,7 +215,10 @@ const REPORTS: Record<string, Report> = {
         e.count++;
         m.set(k, e);
       }
-      return { columns: [['actorId', 'الموظف'], ['action', 'العملية'], ['count', 'العدد']], rows: [...m.values()].sort((a, b) => b.count - a.count) };
+      const ids = [...new Set([...m.values()].map((e) => e.actorId).filter((id) => id !== 'system'))];
+      const docs = ids.length ? await ctx.s.db.getMany(ids.map((id) => `users/${id}`)) : [];
+      const names = new Map(ids.map((id, i) => [id, String(docs[i]?.data.displayName ?? id)]));
+      return { columns: [['actorId', 'الموظف'], ['action', 'العملية'], ['count', 'العدد']], rows: [...m.values()].map((e) => ({ ...e, actorId: e.actorId === 'system' ? 'النظام' : names.get(e.actorId) ?? e.actorId })).sort((a, b) => b.count - a.count) };
     },
   },
 };
