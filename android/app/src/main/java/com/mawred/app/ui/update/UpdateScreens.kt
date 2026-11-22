@@ -185,6 +185,8 @@ fun UpdateCenter(vm: UpdateViewModel, close: () -> Unit) {
             SettingsCard(prefs, vm::setPrefs)
             Spacer(Modifier.height(12.dp))
             StorageCard(vm)
+            val ctx = androidx.compose.ui.platform.LocalContext.current
+            TextButton({ runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://mawred.pages.dev/credits.html"))) } }) { Text("مصادر صور المنتجات ورخصها", color = c.mute) }
             Spacer(Modifier.height(24.dp))
         }
     }

@@ -2,6 +2,9 @@
 import json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from photo_queries import Q
+from photo_queries_extra import X
+from photo_queries_retry import R
+HOSTS = {'o': ('world.openfoodfacts.org', 'Open Food Facts'), 'b': ('world.openbeautyfacts.org', 'Open Beauty Facts'), 'p': ('world.openproductsfacts.org', 'Open Products Facts')}
 
 UA = 'MawredCatalogBot/1.0 (https://github.com/Dev-saged/Morud)'
 OUT = os.path.join(os.path.dirname(__file__), 'photos', 'cand')
@@ -37,47 +40,60 @@ def commons(q, n=4):
         if len(out) >= n: break
     return out
 
-def off(q, n=3):
-    s = get('https://world.openfoodfacts.org/cgi/search.pl?' + urllib.parse.urlencode({'search_terms': q, 'json': 1, 'page_size': 12, 'fields': 'code,product_name,image_front_url'}))
+def off(q, n=3, kind='o'):
+    host, name = HOSTS[kind]
+    s = get(f'https://{host}/cgi/search.pl?' + urllib.parse.urlencode({'search_terms': q, 'json': 1, 'page_size': 12, 'fields': 'code,product_name,image_front_url'}))
     out = []
     for p in s.get('products', []):
         u = p.get('image_front_url')
         if not u: continue
-        out.append({'src': 'off', 'title': p.get('product_name', ''), 'thumb': u.replace('.400.jpg', '.full.jpg'), 'thumbSmall': u, 'page': f"https://world.openfoodfacts.org/product/{p['code']}", 'license': 'CC BY-SA 3.0', 'licenseUrl': 'https://creativecommons.org/licenses/by-sa/3.0/', 'author': 'Open Food Facts contributors'})
+        out.append({'src': 'off', 'title': p.get('product_name', ''), 'thumb': u.replace('.400.jpg', '.full.jpg'), 'thumbSmall': u, 'page': f"https://{host}/product/{p['code']}", 'license': 'CC BY-SA 3.0', 'licenseUrl': 'https://creativecommons.org/licenses/by-sa/3.0/', 'author': f'{name} contributors'})
         if len(out) >= n: break
     return out
 
-def one(sku):
+def one(sku, mode='all'):
     d = os.path.join(OUT, sku)
-    mp = os.path.join(d, 'meta.json')
-    if os.path.exists(mp) and len(json.load(open(mp))) >= 3: return sku, 'cached'
     os.makedirs(d, exist_ok=True)
+    mp = os.path.join(d, 'meta.json')
+    keep = json.load(open(mp)) if os.path.exists(mp) else []
+    if len(keep) >= (16 if mode == 'retry' else 8): return sku, len(keep)
     cands = []
-    for q in Q[sku].get('o', []):
-        try: cands += off(q)
-        except Exception as e: print(sku, 'off', e, file=sys.stderr)
-    for q in Q[sku].get('c', []):
-        try: cands += commons(q, 3 if cands else 4)
-        except Exception as e: print(sku, 'commons', e, file=sys.stderr)
-        time.sleep(2.5)
-    seen, keep = set(), []
+    if mode == 'retry':
+        for q in R.get(sku, {}).get('o', []):
+            try: cands += off(q, 4, 'o')
+            except Exception as e: print(sku, 'off', e, file=sys.stderr)
+        for q in R.get(sku, {}).get('c', []):
+            try: cands += commons(q, 4)
+            except Exception as e: print(sku, 'commons', e, file=sys.stderr)
+            time.sleep(2.5)
+    if mode in ('all', 'off'):
+        for kind in ('o', 'b', 'p'):
+            for q in Q[sku].get(kind, []) + X.get(sku, {}).get(kind, []):
+                try: cands += off(q, 3, kind)
+                except Exception as e: print(sku, kind, e, file=sys.stderr)
+    if mode in ('all', 'commons'):
+        for q in Q[sku].get('c', []):
+            try: cands += commons(q, 4)
+            except Exception as e: print(sku, 'commons', e, file=sys.stderr)
+            time.sleep(2.5)
+    seen = {c['thumb'] for c in keep}
     for c in cands:
-        if c['thumb'] in seen: continue
+        if c['thumb'] in seen or len(keep) >= (16 if mode == 'retry' else 8): continue
         seen.add(c['thumb'])
-        try:
-            b = get(c['thumb'], binary=True)
-        except Exception:
-            try: b = get(c.get('thumbSmall', ''), binary=True) if c.get('thumbSmall') else None
-            except Exception: b = None
+        b = None
+        for u in (c['thumb'], c.get('thumbSmall')):
+            if not u: continue
+            try: b = get(u, binary=True); break
+            except Exception: pass
         if not b or len(b) < 8000: continue
         c['file'] = f'{len(keep)}.jpg'
         open(os.path.join(d, c['file']), 'wb').write(b)
         keep.append(c)
-        if len(keep) >= 6: break
-    json.dump(keep, open(os.path.join(d, 'meta.json'), 'w'), ensure_ascii=False, indent=1)
+    json.dump(keep, open(mp, 'w'), ensure_ascii=False, indent=1)
     return sku, len(keep)
 
 if __name__ == '__main__':
-    skus = sys.argv[1:] or list(Q)
-    with ThreadPoolExecutor(1) as ex:
-        for sku, n in ex.map(one, skus): print(sku, n, flush=True)
+    mode = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in ('all', 'off', 'commons', 'retry') else 'all'
+    skus = [a for a in sys.argv[1:] if a not in ('all', 'off', 'commons', 'retry')] or (list(R) if mode == 'retry' else list(Q))
+    with ThreadPoolExecutor(3 if mode == 'off' else 1) as ex:
+        for sku, n in ex.map(lambda k: one(k, mode), skus): print(sku, n, flush=True)

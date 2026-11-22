@@ -264,6 +264,14 @@ function Outbox({ queue, uid, flush, restore }: { queue: Queued[]; uid: string; 
   );
 }
 
+type Credit = { sku: string; src: string; title: string; page: string; license: string; licenseUrl: string; author: string };
+let creditsCache: Promise<Credit[]> | null = null;
+/** إسناد الصور الحرة (CC BY-SA وغيرها) كما تشترط رخصها. */
+export function loadCredits(): Promise<Credit[]> {
+  creditsCache ??= fetch('/credits.json').then((r) => (r.ok ? r.json() : [])).catch(() => []);
+  return creditsCache;
+}
+
 /** تفاصيل المنتج: صورة كبيرة، كل الوحدات وأسعارها وقواعد الكمية، والوصف. */
 function ProductSheet({ p, name, close }: { p: Catalog['products'][number]; name: (id: string) => string; close: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -273,6 +281,8 @@ function ProductSheet({ p, name, close }: { p: Catalog['products'][number]; name
   }, []);
   const big = p.images?.[0]?.key;
   const def = defaultUnit(p)?.unitId;
+  const [credit, setCredit] = useState<Credit | null>(null);
+  useEffect(() => { void loadCredits().then((c) => setCredit(c.find((x) => x.sku === p.sku) ?? null)); }, [p.sku]);
   return (
     <dialog ref={ref} className="sheet" onClose={close} onClick={(e) => { if (e.target === ref.current) ref.current?.close(); }} aria-label={p.name} open={typeof HTMLDialogElement === 'undefined' ? true : undefined}>
       <div className="sheet-body">
@@ -283,6 +293,7 @@ function ProductSheet({ p, name, close }: { p: Catalog['products'][number]; name
         <table className="table"><thead><tr><th>الوحدة</th><th>السعر</th><th>أقل كمية</th></tr></thead>
           <tbody>{p.units.map((u) => <tr key={u.unitId}><td>{name(u.unitId)}{u.unitId === def && p.units.length > 1 && <span className="chip">الأكثر طلباً</span>}</td><td className="num">{formatMoney(u.price)}</td><td className="num">{formatQty(u.minQtyMilli)}{u.allowFraction ? ' (يقبل الكسور)' : ''}</td></tr>)}</tbody></table>
         {p.description && <p className="mute">{p.description}</p>}
+        {credit && <p className="credit">الصورة: <a href={credit.page} target="_blank" rel="noreferrer">{credit.author || credit.src}</a> · <a href={credit.licenseUrl} target="_blank" rel="noreferrer">{credit.license}</a></p>}
       </div>
     </dialog>
   );

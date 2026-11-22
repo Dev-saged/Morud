@@ -155,3 +155,4 @@ dialog.sheet{border:0;padding:0;margin:auto auto 0;width:min(560px,100%);max-hei
 .kpi-sk{height:104px}
 @media (prefers-reduced-motion:no-preference){.dash .kpi{animation:rise .45s cubic-bezier(.22,1,.36,1) both}}
 @media (max-width:520px){.dash .kpis>:last-child:nth-child(odd){grid-column:1/-1}}
+.credit{font-size:var(--fs-sm);color:var(--mute);margin-top:var(--s3)}.credit a{color:inherit}
