@@ -51,7 +51,7 @@ import com.mawred.app.ui.theme.Mawred
 
 /** التوجيه حسب الجلسة والدور (SRS 2.2): كل حساب إلى واجهته مباشرة. */
 @Composable
-fun MawredRoot(openUpdate: kotlinx.coroutines.flow.MutableStateFlow<Boolean> = remember { kotlinx.coroutines.flow.MutableStateFlow(false) }, vm: SessionViewModel = hiltViewModel(), updVm: com.mawred.app.ui.update.UpdateViewModel = hiltViewModel()) {
+fun MawredRoot(openUpdate: kotlinx.coroutines.flow.MutableStateFlow<Boolean> = remember { kotlinx.coroutines.flow.MutableStateFlow(false) }, openRef: kotlinx.coroutines.flow.MutableStateFlow<com.mawred.app.data.NoticeRef?> = remember { kotlinx.coroutines.flow.MutableStateFlow(null) }, vm: SessionViewModel = hiltViewModel(), updVm: com.mawred.app.ui.update.UpdateViewModel = hiltViewModel()) {
     val session by vm.session.collectAsStateWithLifecycle()
     val form by vm.form.collectAsStateWithLifecycle()
     val phase by updVm.phase.collectAsStateWithLifecycle()
@@ -65,10 +65,10 @@ fun MawredRoot(openUpdate: kotlinx.coroutines.flow.MutableStateFlow<Boolean> = r
     AnimatedContent(session, transitionSpec = { fadeIn(spring()) togetherWith fadeOut(spring()) }, contentKey = { it::class to ((it as? SessionState.SignedIn)?.user?.mustChangePassword) }, label = "root") { s ->
         when (s) {
             SessionState.Loading -> Box(Modifier.fillMaxSize().background(Mawred.colors.surface), contentAlignment = Alignment.Center) { LogoMark(72.dp, Mawred.colors.primary, Mawred.colors.accent) }
-            SessionState.SignedOut -> LoginScreen(form, prefs, vm::login, vm::forgot, { secret = true }, vm::clearForm)
+            SessionState.SignedOut -> LoginScreen(form, prefs, vm::login, vm::forgot, { secret = true }, vm::clearForm, vm::loginMfa)
             is SessionState.SignedIn -> if (s.user.mustChangePassword) ChangePasswordScreen(form, vm::changePassword) { vm.logout() }
                 else androidx.compose.runtime.CompositionLocalProvider(com.mawred.app.ui.update.LocalOpenUpdates provides { openUpdate.value = true }) {
-                    AreaShell(s.user, s.offline || stale != null, phase, { openUpdate.value = true }, { if (!updVm.install()) openUpdate.value = true }, { vm.logout() }, { secret = true })
+                    AreaShell(s.user, s.offline || stale != null, phase, { openUpdate.value = true }, { if (!updVm.install()) openUpdate.value = true }, { vm.logout() }, { secret = true }, openRef)
                 }
         }
     }
@@ -78,7 +78,7 @@ private data class Tab(val id: String, val label: String, val icon: ImageVector)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AreaShell(user: SessionUser, offline: Boolean, phase: com.mawred.app.update.UpdatePhase, onOpenUpdate: () -> Unit, onInstall: () -> Unit, onLogout: () -> Unit, onSecret: () -> Unit) {
+private fun AreaShell(user: SessionUser, offline: Boolean, phase: com.mawred.app.update.UpdatePhase, onOpenUpdate: () -> Unit, onInstall: () -> Unit, onLogout: () -> Unit, onSecret: () -> Unit, openRef: kotlinx.coroutines.flow.MutableStateFlow<com.mawred.app.data.NoticeRef?>) {
     val tabs = when (user.area) {
         "shop" -> listOf(Tab("catalog", "الرئيسية", Icons.home), Tab("cart", "السلة", Icons.cart), Tab("orders", "طلباتي", Icons.orders), Tab("account", "حسابي", Icons.wallet))
         "admin" -> listOfNotNull(
@@ -99,13 +99,36 @@ private fun AreaShell(user: SessionUser, offline: Boolean, phase: com.mawred.app
     var logoTaps by rememberSaveable { mutableStateOf(0) }
     var openOrder by rememberSaveable { mutableStateOf<String?>(null) }
     val checkout = shopVm?.checkout?.collectAsStateWithLifecycle()?.value
+    val inboxVm: com.mawred.app.ui.inbox.InboxViewModel = hiltViewModel()
+    val inbox by inboxVm.page.collectAsStateWithLifecycle()
+    var showInbox by rememberSaveable { mutableStateOf(false) }
+    /** كل إشعار يفتح مرجعه حسب دور المستخدم. */
+    val openNotice: (com.mawred.app.data.NoticeRef) -> Unit = { r ->
+        when (user.area) {
+            "shop" -> when (r.kind) { "order" -> { openOrder = r.id; tab = "orders" }; "shop", "ticket" -> tab = "account"; else -> tab = "catalog" }
+            "admin" -> when (r.kind) {
+                "order" -> go("adminOrders", com.mawred.app.ui.admin.Focus("all", r.id))
+                "shop" -> go("adminMore", com.mawred.app.ui.admin.Focus(id = "shops"))
+                "ticket" -> go("adminMore", com.mawred.app.ui.admin.Focus(id = "support"))
+                "backup" -> go("adminMore", com.mawred.app.ui.admin.Focus(id = "backups"))
+                else -> {}
+            }
+            else -> tab = tabs.firstOrNull()?.id.orEmpty()
+        }
+    }
+    val pendingRef by openRef.collectAsStateWithLifecycle()
+    androidx.compose.runtime.LaunchedEffect(pendingRef) { pendingRef?.let { openNotice(it); inboxVm.refresh(); openRef.value = null } }
+    if (showInbox) com.mawred.app.ui.inbox.InboxSheet(inboxVm, { showInbox = false }, openNotice)
     androidx.compose.runtime.LaunchedEffect(checkout?.sentOrderId) { checkout?.sentOrderId?.let { openOrder = it; tab = "orders"; shopVm.consumeSent() } }
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(BrandConfig.NAME, style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = { IconButton({ if (++logoTaps >= 7) { logoTaps = 0; onSecret() } }) { LogoMark(28.dp, Mawred.colors.onPrimary, Mawred.colors.accent) } },
-                actions = { IconButton(onLogout) { Icon(Icons.logout, "تسجيل الخروج") } },
+                actions = {
+                    com.mawred.app.ui.inbox.BellButton(inbox?.unread ?: 0) { showInbox = true }
+                    IconButton(onLogout) { Icon(Icons.logout, "تسجيل الخروج") }
+                },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Mawred.colors.primary, titleContentColor = Mawred.colors.onPrimary, actionIconContentColor = Mawred.colors.onPrimary),
             )
         },

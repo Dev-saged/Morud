@@ -97,8 +97,20 @@ class AuthRepository(private val store: SessionStore, private val identity: Iden
         }
     }
 
-    suspend fun login(identifier: String, password: String, remember: Boolean = true) {
+    /** يرجع تذكرة إن كان الحساب يطلب رمز التحقق بخطوتين، وإلا يُكمل الدخول ويرجع null. */
+    suspend fun login(identifier: String, password: String, remember: Boolean = true): String? {
         val r = api.request("POST", "/auth/login", buildJsonObject { put("identifier", identifier.trim()); put("password", password) }, auth = false)
+        if (r["mfaRequired"]?.jsonPrimitive?.content == "true") return r["ticket"]!!.jsonPrimitive.content
+        complete(r, identifier, remember)
+        return null
+    }
+
+    suspend fun loginMfa(ticket: String, code: String, identifier: String, remember: Boolean) {
+        val r = api.request("POST", "/auth/login/mfa", buildJsonObject { put("ticket", ticket); put("code", code) }, auth = false)
+        complete(r, identifier, remember)
+    }
+
+    private suspend fun complete(r: kotlinx.serialization.json.JsonObject, identifier: String, remember: Boolean) {
         val t = identity.exchange(r["customToken"]!!.jsonPrimitive.content)
         val u = ApiJson.decodeFromJsonElement(SessionUser.serializer(), r["user"]!!)
         tokens = t

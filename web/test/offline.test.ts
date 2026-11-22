@@ -87,3 +87,46 @@ describe('تحديث الموقع', () => {
     expect(typeof APP_VERSION).toBe('string');
   });
 });
+
+describe('صندوق الإشعارات', () => {
+  it('الجرس يعرض غير المقروء، والضغط يعلّمه مقروءاً ويفتح الطلب', async () => {
+    const { mount, json, shopUser, catalog } = await import('./helpers');
+    const { screen, waitFor } = await import('@testing-library/react');
+    const userEvent = (await import('@testing-library/user-event')).default;
+    const { calls } = mount({
+      'GET /auth/me': () => json({ user: shopUser }), 'GET /catalog': () => json(catalog), 'GET /shops/s1/orders': () => json({ orders: [] }),
+      'GET /notifications': () => json({ unread: 1, notifications: [{ id: 'n1', type: 'order.status', title: 'طلبك قيد التجهيز', body: 'الطلب MW-5', ref: { kind: 'order', id: 'o5' }, readAt: null, createdAt: Date.now() }] }),
+      'POST /notifications/n1/read': () => json({ ok: true }),
+      'GET /orders/o5': () => json({ order: { id: 'o5', number: 'MW-5', status: 'preparing', items: [], totals: { subtotal: 0, discount: 0, total: 0 } }, history: [], actions: [] }),
+    }, true);
+    const u = userEvent.setup();
+    await u.click(await screen.findByRole('button', { name: 'الإشعارات، 1 غير مقروء' }));
+    await u.click(await screen.findByRole('button', { name: /طلبك قيد التجهيز/, hidden: true }));
+    await waitFor(() => expect(calls.some(([p, i]) => p === '/notifications/n1/read' && i?.method === 'POST')).toBe(true));
+    expect(await screen.findByText(/MW-5/)).toBeTruthy();
+  });
+});
+
+describe('الدخول بخطوتين', () => {
+  it('بعد كلمة المرور تظهر خانة الرمز، والرمز الصحيح يُدخل المستخدم', async () => {
+    const { mount, json, shopUser, catalog } = await import('./helpers');
+    const { screen } = await import('@testing-library/react');
+    const userEvent = (await import('@testing-library/user-event')).default;
+    const { b } = mount({
+      'POST /auth/login': () => json({ mfaRequired: true, ticket: 'a'.repeat(48) }),
+      'POST /auth/login/mfa': (init) => (JSON.parse(String(init!.body)).code === '123456' ? json({ customToken: 'CT', user: shopUser }) : json({ error: { code: 'INVALID_CODE', message: 'الرمز غير صحيح' } }, 400)),
+      'GET /catalog': () => json(catalog), 'GET /shops/s1/orders': () => json({ orders: [] }),
+    });
+    const u = userEvent.setup();
+    await u.type(await screen.findByLabelText('المعرّف'), 'abu');
+    await u.type(screen.getByLabelText('كلمة المرور', { exact: false, selector: 'input' }), 'Secret123');
+    await u.click(screen.getByRole('button', { name: 'دخول' }));
+    const otp = await screen.findByLabelText('رمز التحقق');
+    await u.type(otp, '111111');
+    await u.click(screen.getByRole('button', { name: 'تأكيد' }));
+    expect(await screen.findByText('الرمز غير صحيح')).toBeTruthy();
+    await u.clear(otp); await u.type(otp, '123456');
+    await u.click(screen.getByRole('button', { name: 'تأكيد' }));
+    expect(b.tokens).toEqual(['CT']);
+  });
+});

@@ -11,6 +11,8 @@ import { useSession } from '../lib/session';
 import { askNotifyPermission, dropQueued, enqueue, useOutbox, type Queued } from '../lib/outbox';
 import { Icon, LogoMark } from '../ui/Icons';
 import { Hero, Ring, Tile } from '../ui/Desk';
+import { Bell } from '../ui/Bell';
+import { SecurityCard } from '../ui/Security';
 import { useCatalog, type Catalog } from './useCatalog';
 
 type Tab = 'home' | 'cart' | 'orders' | 'account';
@@ -47,6 +49,7 @@ export function ShopApp() {
       <header className="shop-head">
         <LogoMark size={30} light />
         <div><b>مورد</b>{offline && <span className="chip warn">بلا اتصال — آخر نسخة محفوظة</span>}</div>
+        <Bell light onOpen={(r) => { if (r.kind === 'order') { setTab('orders'); setOpenOrder(r.id); } else if (r.kind === 'shop' || r.kind === 'ticket') setTab('account'); else setTab('home'); }} />
       </header>
       <main className="shop-main">
         {tab === 'home' && cat && <ShopDesk cat={cat} shopId={shopId} pending={queue.length} openOrders={() => { setTab('orders'); setOpenOrder(null); }} openOrder={(id) => { setTab('orders'); setOpenOrder(id); }} openAccount={() => setTab('account')}
@@ -369,6 +372,7 @@ function Account({ shopId, onLogout }: { shopId: string; onLogout: () => Promise
           <button className="btn ghost" onClick={() => void openPrintable(api, `/shops/${shopId}/statement/print`)}><Icon name="print" /> كشف الحساب</button>
         </div>
       )}
+      <SecurityCard />
       <button className="btn danger block" onClick={() => void onLogout()}><Icon name="logout" /> تسجيل الخروج</button>
     </section>
   );

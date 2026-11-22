@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Api, ApiError } from './api';
 import { cachedUser, cacheUser, clearOffline } from './offline';
+import { unregisterDevice } from './push';
 
 export interface User {
   uid: string;
@@ -11,6 +12,7 @@ export interface User {
   permissions: string[];
   shopIds: string[];
   mustChangePassword: boolean;
+  mfaEnabled?: boolean;
 }
 
 // مزود الهوية (Firebase في الإنتاج) مجرَّد ليُختبر بسهولة
@@ -26,7 +28,9 @@ interface Session {
   api: Api;
   user: User | null;
   ready: boolean;
-  login(identifier: string, password: string, remember?: boolean): Promise<void>;
+  /** يرجع تذكرة إن كان الحساب يطلب رمز التحقق بخطوتين. */
+  login(identifier: string, password: string, remember?: boolean): Promise<{ mfaTicket: string } | void>;
+  loginMfa(ticket: string, code: string, identifier: string, remember?: boolean): Promise<void>;
   adopt(customToken: string): Promise<void>;
   logout(): Promise<void>;
   refresh(): Promise<void>;
@@ -84,7 +88,14 @@ export function SessionProvider({ backend, apiBase, children, fetchImpl }: { bac
   const value: Session = {
     api, user, ready, refresh,
     async login(identifier, password, remember = true) {
-      const r = await api.post<{ customToken: string; user: User }>('/auth/login', { identifier, password });
+      const r = await api.post<{ customToken: string; user: User; mfaRequired?: boolean; ticket?: string }>('/auth/login', { identifier, password });
+      if (r.mfaRequired && r.ticket) return { mfaTicket: r.ticket };
+      await backend.signInWithCustomToken(r.customToken, remember);
+      rememberLogin(remember ? identifier : null);
+      adoptUser(r.user);
+    },
+    async loginMfa(ticket, code, identifier, remember = true) {
+      const r = await api.post<{ customToken: string; user: User }>('/auth/login/mfa', { ticket, code });
       await backend.signInWithCustomToken(r.customToken, remember);
       rememberLogin(remember ? identifier : null);
       adoptUser(r.user);
@@ -96,6 +107,8 @@ export function SessionProvider({ backend, apiBase, children, fetchImpl }: { bac
     },
     async logout() {
       const uid = user?.uid;
+      // جهاز مشترك: لا تصل إشعارات هذا الحساب لمن يدخل بعده
+      await unregisterDevice(api);
       await backend.signOut();
       if (uid) clearOffline(uid);
       adoptUser(null);

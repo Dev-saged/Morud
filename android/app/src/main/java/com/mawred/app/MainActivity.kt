@@ -17,12 +17,14 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var updates: UpdateManager
     /** فتح مركز التحديث من الإشعار. */
     private val openUpdate = MutableStateFlow(false)
+    /** فتح مرجع إشعار (طلب، حساب…) من إشعار الجهاز. */
+    private val openRef = MutableStateFlow<com.mawred.app.data.NoticeRef?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         handle(intent)
-        setContent { MawredTheme { MawredRoot(openUpdate) } }
+        setContent { MawredTheme { MawredRoot(openUpdate, openRef) } }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -34,6 +36,10 @@ class MainActivity : ComponentActivity() {
         when (i?.action) {
             UpdateManager.ACTION_INSTALL -> { updates.restore(); if (!updates.install()) openUpdate.value = true }
             UpdateManager.ACTION_OPEN -> openUpdate.value = true
+            com.mawred.app.data.Notifier.ACTION_OPEN_REF -> {
+                val k = i.getStringExtra("refKind"); val id = i.getStringExtra("refId")
+                if (k != null && id != null) openRef.value = com.mawred.app.data.NoticeRef(k, id)
+            }
         }
     }
 }

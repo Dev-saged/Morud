@@ -74,12 +74,28 @@ private fun AuthFrame(onLogoTaps: () -> Unit = {}, content: @Composable ColumnSc
 }
 
 @Composable
-fun LoginScreen(form: FormState, prefs: LoginPrefs, onLogin: (String, String, Boolean) -> Unit, onForgot: (String) -> Unit, onSecret: () -> Unit, clear: () -> Unit) {
+fun LoginScreen(form: FormState, prefs: LoginPrefs, onLogin: (String, String, Boolean) -> Unit, onForgot: (String) -> Unit, onSecret: () -> Unit, clear: () -> Unit, onMfa: (String, String, Boolean) -> Unit = { _, _, _ -> }) {
     var id by rememberSaveable(prefs.identifier) { mutableStateOf(prefs.identifier) }
     var rememberMe by rememberSaveable(prefs.remember) { mutableStateOf(prefs.remember) }
     var pw by remember { mutableStateOf("") }
     var show by remember { mutableStateOf(false) }
     var forgot by rememberSaveable { mutableStateOf(false) }
+    var code by remember { mutableStateOf("") }
+    if (form.mfaTicket != null) {
+        AuthFrame(onSecret) {
+            Text("التحقق بخطوتين", style = MaterialTheme.typography.titleLarge, color = Mawred.colors.ink)
+            Text("أدخل الرمز المكوّن من 6 أرقام من تطبيق المصادقة. يتغير كل 30 ثانية.", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(code, { v -> code = v.filter(Char::isDigit).take(6) }, Modifier.fillMaxWidth(), label = { Text("رمز التحقق") }, singleLine = true,
+                textStyle = MaterialTheme.typography.headlineSmall.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center, letterSpacing = androidx.compose.ui.unit.TextUnit(8f, androidx.compose.ui.unit.TextUnitType.Sp)),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done))
+            ErrorText(form.error)
+            Spacer(Modifier.height(12.dp))
+            PrimaryButton(if (form.busy) "جارٍ التحقق…" else "تأكيد", { onMfa(id, code, rememberMe) }, enabled = !form.busy && code.length == 6)
+            TextButton({ code = ""; clear() }, Modifier.align(Alignment.CenterHorizontally)) { Text("العودة للدخول", color = Mawred.colors.primary) }
+        }
+        return
+    }
     AuthFrame(onSecret) {
         Text(if (forgot) "استعادة كلمة المرور" else "تسجيل الدخول", style = MaterialTheme.typography.titleLarge, color = Mawred.colors.ink)
         Text("رقم الهاتف أو البريد أو اسم المستخدم", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)

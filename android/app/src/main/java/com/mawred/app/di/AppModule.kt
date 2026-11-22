@@ -62,6 +62,9 @@ object AppModule {
     @Provides @Singleton
     fun downloader(http: OkHttpClient) = com.mawred.app.update.ApkDownloader(http.newBuilder().readTimeout(60, java.util.concurrent.TimeUnit.SECONDS).build())
 
+    @Provides @Singleton
+    fun inbox(api: com.mawred.app.data.api.Api) = com.mawred.app.data.InboxRepository(api)
+
     /** مجلد التحديثات داخل ملفات التطبيق الخاصة (لا يحتاج أذونات تخزين، ويُحذف مع التطبيق). */
     @Provides @Singleton
     fun updates(@ApplicationContext ctx: Context, checker: UpdateChecker) = com.mawred.app.update.UpdateManager(ctx, checker, com.mawred.app.update.UpdateFiles(java.io.File(ctx.filesDir, "updates")))

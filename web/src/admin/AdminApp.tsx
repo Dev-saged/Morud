@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { formatDate, formatMoney, formatQty, STATUS } from '../lib/format';
 import { useSession } from '../lib/session';
+import { Bell } from '../ui/Bell';
+import { SecurityCard } from '../ui/Security';
 import { openPrintable } from '../shop/ShopApp';
 import { Icon, LogoMark, type IconName } from '../ui/Icons';
 import { Finance } from './Finance';
@@ -9,7 +11,7 @@ import { Products } from './Products';
 import { Shops } from './Shops';
 import { Users } from './Users';
 
-type Section = 'dashboard' | 'orders' | 'products' | 'shops' | 'delivery' | 'finance' | 'promotions' | 'reports' | 'users' | 'support' | 'settings' | 'backups';
+type Section = 'dashboard' | 'orders' | 'products' | 'shops' | 'delivery' | 'finance' | 'promotions' | 'reports' | 'users' | 'support' | 'settings' | 'backups' | 'security';
 const SECTIONS: Array<[Section, IconName, string, string[]]> = [
   ['dashboard', 'chart', 'لوحة المعلومات', ['orders.view']],
   ['orders', 'orders', 'الطلبات', ['orders.view']],
@@ -23,11 +25,12 @@ const SECTIONS: Array<[Section, IconName, string, string[]]> = [
   ['support', 'chat', 'الدعم', ['support.manage']],
   ['settings', 'gear', 'الإعدادات', ['settings.manage']],
   ['backups', 'shield', 'النسخ الاحتياطي', ['backups.manage']],
+  ['security', 'lock', 'أمان حسابي', []],
 ];
 
 export function AdminApp() {
   const { user, can, logout } = useSession();
-  const allowed = SECTIONS.filter(([, , , p]) => p.some(can));
+  const allowed = SECTIONS.filter(([, , , p]) => p.length === 0 || p.some(can));
   const home = user!.home.split('.')[1] as Section;
   const [sec, setSec] = useState<Section>(allowed.some(([id]) => id === home) ? home : allowed[0]?.[0] ?? 'dashboard');
   // التنقل من أي بطاقة إلى تفاصيلها: القسم + ما يُفتح فيه (فلتر أو عنصر)
@@ -38,9 +41,16 @@ export function AdminApp() {
       <aside className="side">
         <div className="brand"><LogoMark size={32} /><b>مورد</b></div>
         <nav aria-label="أقسام الإدارة">{allowed.map(([id, icon, label]) => <button key={id} className={sec === id ? 'on' : ''} onClick={() => { setFocus({}); setSec(id); }}><Icon name={icon} />{label}</button>)}</nav>
-        <div className="me"><small>{user!.displayName}</small><button className="icon-btn" aria-label="تسجيل الخروج" onClick={() => void logout()}><Icon name="logout" /></button></div>
+        <div className="me"><small>{user!.displayName}</small><Bell onOpen={(r) => {
+          if (r.kind === 'order') go('orders', { filter: 'all', open: r.id });
+          else if (r.kind === 'shop') go('shops', { open: r.id });
+          else if (r.kind === 'ticket') go('support');
+          else if (r.kind === 'promotion') go('promotions');
+          else if (r.kind === 'backup') go('backups');
+        }} /><button className="icon-btn" aria-label="تسجيل الخروج" onClick={() => void logout()}><Icon name="logout" /></button></div>
       </aside>
       <main className="admin-main">
+        {sec === 'security' && <section><h1>أمان حسابي</h1><SecurityCard /></section>}
         {sec === 'dashboard' && <Dashboard go={go} can={(s) => allowed.some(([id]) => id === s)} />}
         {sec === 'orders' && <Orders key={JSON.stringify(focus)} focus={focus} />}
         {sec === 'delivery' && <Delivery />}

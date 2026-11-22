@@ -5,7 +5,7 @@ import { Icon, LogoMark } from './ui/Icons';
 
 /** شاشة الدخول الموحدة لكل المستخدمين (SRS 2.1). */
 export function Login() {
-  const { login, api } = useSession();
+  const { login, loginMfa, api } = useSession();
   const saved = rememberedLogin();
   const [identifier, setId] = useState(saved.identifier);
   const [remember, setRemember] = useState(saved.remember);
@@ -13,7 +13,9 @@ export function Login() {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [mode, setMode] = useState<'login' | 'forgot' | 'sent'>('login');
+  const [mode, setMode] = useState<'login' | 'forgot' | 'sent' | 'mfa'>('login');
+  const [ticket, setTicket] = useState('');
+  const [code, setCode] = useState('');
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -24,8 +26,14 @@ export function Login() {
       if (mode === 'forgot') {
         await api.post('/auth/forgot', { identifier });
         setMode('sent');
-      } else await login(identifier.trim(), password, remember);
+      } else if (mode === 'mfa') {
+        await loginMfa(ticket, code, identifier.trim(), remember);
+      } else {
+        const r = await login(identifier.trim(), password, remember);
+        if (r?.mfaTicket) { setTicket(r.mfaTicket); setCode(''); setMode('mfa'); }
+      }
     } catch (err) {
+      if (err instanceof ApiError && err.code === 'MFA_EXPIRED') { setMode('login'); setPw(''); }
       setError(err instanceof ApiError ? err.message : 'تعذّر الدخول، حاول مرة أخرى');
     } finally {
       setBusy(false);
@@ -37,8 +45,15 @@ export function Login() {
       <div className="login-card">
         <LogoMark size={64} />
         <h1>مورد</h1>
-        <p className="mute">{mode === 'login' ? 'ادخل باسم المستخدم أو رقم الهاتف أو البريد' : 'أدخل معرّفك لاستعادة كلمة المرور'}</p>
-        {mode === 'sent' ? (
+        <p className="mute">{mode === 'login' ? 'ادخل باسم المستخدم أو رقم الهاتف أو البريد' : mode === 'mfa' ? 'أدخل الرمز المكوّن من 6 أرقام من تطبيق المصادقة' : 'أدخل معرّفك لاستعادة كلمة المرور'}</p>
+        {mode === 'mfa' ? (
+          <form onSubmit={submit}>
+            <label>رمز التحقق<input className="otp num" value={code} onChange={(e) => { const v = e.target.value.replace(/\D/g, '').slice(0, 6); setCode(v); }} inputMode="numeric" autoComplete="one-time-code" pattern="\d{6}" maxLength={6} autoFocus required aria-describedby="otp-hint" /></label>
+            <small id="otp-hint" className="mute">الرمز يتغير كل 30 ثانية. تأكد أن وقت الهاتف تلقائي.</small>
+            {error && <p className="error" role="alert">{error}</p>}
+            <button className="btn primary block" disabled={busy || code.length !== 6}>{busy ? 'جارٍ التحقق…' : 'تأكيد'}</button>
+          </form>
+        ) : mode === 'sent' ? (
           <p className="ok-text" role="status">إن كان الحساب موجوداً فسيصلك رابط الاستعادة أو تتواصل معك الإدارة.</p>
         ) : (
           <form onSubmit={submit}>

@@ -3,6 +3,7 @@ import { formatMoney, formatQty, STATUS } from '../lib/format';
 import { useSession } from '../lib/session';
 import { Icon, LogoMark } from '../ui/Icons';
 import { Hero, Tile } from '../ui/Desk';
+import { Bell } from '../ui/Bell';
 
 /** واجهة المندوب: مهامه بالترتيب، الملاحة، والتسليم بإثبات والمبلغ المطلوب فقط. */
 export function AgentApp() {
@@ -22,7 +23,7 @@ export function AgentApp() {
   const t = tasks?.[0];
   return (
     <div className="shop">
-      <header className="shop-head"><LogoMark size={30} light /><b>مهام التوصيل</b><button className="icon-btn" aria-label="تسجيل الخروج" onClick={() => void logout()}><Icon name="logout" /></button></header>
+      <header className="shop-head"><LogoMark size={30} light /><b>مهام التوصيل</b><Bell light onOpen={() => void load()} /><button className="icon-btn" aria-label="تسجيل الخروج" onClick={() => void logout()}><Icon name="logout" /></button></header>
       <main className="shop-main">
         <Hero name={user!.displayName} title={tasks ? (tasks.length ? `أمامك ${tasks.length} مهمة` : 'لا مهام الآن، يوم موفق') : undefined}>
           {m && <div className="hero-stats"><div><small>سُلّم اليوم</small><b className="num">{m.deliveredToday}</b></div><div><small>حُصّل اليوم</small><b className="num">{formatMoney(m.collectedToday)}</b></div></div>}

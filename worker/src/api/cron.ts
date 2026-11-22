@@ -32,5 +32,8 @@ export async function purgeIdempotency(s: Services, maxBatches = 20): Promise<nu
     removed += old.length;
     if (old.length < 400) break;
   }
+  // تذاكر التحقق بخطوتين المنتهية (لم تُستبدل)
+  const stale = await s.db.query({ collection: 'mfaTickets', where: [['exp', '<', s.now()]], limit: 400 });
+  if (stale.length) await s.db.commit(stale.map((d) => ({ kind: 'delete' as const, path: d.path })));
   return removed;
 }

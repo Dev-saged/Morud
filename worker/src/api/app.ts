@@ -15,7 +15,7 @@ export function createApp(modules: RouteModule[] = []) {
   authRoutes(router);
   for (const m of modules) m(router);
 
-  const PRE_AUTH = new Set(['/health', '/auth/login', '/auth/forgot']);
+  const PRE_AUTH = new Set(['/health', '/auth/login', '/auth/login/mfa', '/auth/forgot']);
   const PASSWORD_CHANGE_ALLOWED = new Set(['/auth/me', '/auth/change-password', '/auth/logout-all']);
 
   return async function handle(req: Request, s: Services, cfg: AppConfig): Promise<Response> {
@@ -36,6 +36,11 @@ export function createApp(modules: RouteModule[] = []) {
       for (const [k, v] of Object.entries(cors)) h.set(k, v);
       h.set('x-request-id', requestId);
       h.set('x-content-type-options', 'nosniff');
+      h.set('strict-transport-security', 'max-age=31536000; includeSubDomains');
+      h.set('x-frame-options', 'DENY');
+      h.set('referrer-policy', 'no-referrer');
+      // بيانات الحساب والمال لا تُخزَّن في أي كاش وسيط؛ الصور لها سياستها الخاصة
+      if (!h.has('cache-control')) h.set('cache-control', 'no-store');
       return new Response(r.body, { status: r.status, headers: h });
     };
     try {

@@ -1,3 +1,4 @@
+import { issueTicket, mfaEnabled, redeemTicket } from './mfa';
 import { loginKey, passwordProblem, ruleClaims } from '../domain/permissions';
 import { auditWrite, buildUser, requireUser, userFromDoc, type AuthUser, type Ctx } from './context';
 import { cleanText, fail, json, readJson, type Router } from './http';
@@ -42,6 +43,13 @@ async function login(ctx: Ctx): Promise<Response> {
   if (!doc) return deny('no_profile');
   const user = await userFromDoc(ctx.s, doc, null);
   await loginLimiter.reset(key);
+  // التحقق بخطوتين: كلمة المرور وحدها لا تكفي، نرجع تذكرة تُستبدل برمز التطبيق
+  if (await mfaEnabled(ctx.s, user.uid)) return json({ mfaRequired: true, ticket: await issueTicket(ctx.s, user.uid) });
+  return finishLogin(ctx, user);
+}
+
+async function finishLogin(ctx: Ctx, user: Awaited<ReturnType<typeof userFromDoc>>): Promise<Response> {
+  const { db } = ctx.s;
   const claims = ruleClaims(user.permissions, user.kinds, user.shopIds);
   const token = await ctx.s.customToken(user.uid, claims);
   ctx.user = user;
@@ -52,8 +60,19 @@ async function login(ctx: Ctx): Promise<Response> {
   return json({ customToken: token, user: publicUser(user) });
 }
 
+async function loginMfa(ctx: Ctx): Promise<Response> {
+  const b = await readJson<{ ticket?: unknown; code?: unknown }>(ctx.req, 1024);
+  if (await ctx.s.ipLimiter.blocked(ctx.ip)) throw fail('RATE_LIMITED', 'محاولات كثيرة، حاول بعد 15 دقيقة');
+  let uid: string;
+  try { uid = await redeemTicket(ctx.s, String(b.ticket ?? ''), String(b.code ?? '')); } catch (e) { await ctx.s.ipLimiter.hit(ctx.ip); throw e; }
+  const doc = await ctx.s.db.get(`users/${uid}`);
+  if (!doc) throw fail('INVALID_CREDENTIALS', GENERIC);
+  return finishLogin(ctx, await userFromDoc(ctx.s, doc, null));
+}
+
 async function me(ctx: Ctx) {
-  return json({ user: publicUser(requireUser(ctx)) });
+  const u = requireUser(ctx);
+  return json({ user: { ...publicUser(u), mfaEnabled: await mfaEnabled(ctx.s, u.uid) } });
 }
 
 async function changePassword(ctx: Ctx) {
@@ -102,7 +121,7 @@ async function forgot(ctx: Ctx) {
 }
 
 export function authRoutes(r: Router<Ctx>) {
-  r.on('POST', '/auth/login', login).on('GET', '/auth/me', me).on('POST', '/auth/change-password', changePassword)
+  r.on('POST', '/auth/login', login).on('POST', '/auth/login/mfa', loginMfa).on('GET', '/auth/me', me).on('POST', '/auth/change-password', changePassword)
     .on('POST', '/auth/logout-all', logoutAll).on('POST', '/auth/forgot', forgot);
 }
 

@@ -1178,5 +1178,75 @@
   "license": "CC0",
   "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
   "author": "Rlsheehan"
+ },
+ {
+  "sku": "FRZ-002",
+  "mode": "full",
+  "src": "off",
+  "title": "Filet de poulet fermier blanc",
+  "page": "https://world.openfoodfacts.org/product/3266980318727",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "FRZ-007",
+  "mode": "full",
+  "src": "off",
+  "title": "Escalopes de Dinde à la milanaise",
+  "page": "https://world.openfoodfacts.org/product/3560070416462",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "HSH-007",
+  "mode": "cut",
+  "src": "off",
+  "title": "Sisal Rope",
+  "page": "https://world.openproductsfacts.org/product/5412156256500",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "HSH-009",
+  "mode": "full",
+  "src": "off",
+  "title": "Plush Jacquard Blanket",
+  "page": "https://world.openproductsfacts.org/product/9341111502139",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
+ },
+ {
+  "sku": "SPC-001",
+  "mode": "full",
+  "src": "off",
+  "title": "Zaatar",
+  "page": "https://world.openfoodfacts.org/product/3166296655465",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "SPC-002",
+  "mode": "cut",
+  "src": "off",
+  "title": "بهارات كباب",
+  "page": "https://world.openfoodfacts.org/product/5281094710074",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Food Facts contributors"
+ },
+ {
+  "sku": "HSH-005",
+  "mode": "full",
+  "src": "off",
+  "title": "Bûche de bois densifié x5",
+  "page": "https://world.openproductsfacts.org/product/3351840241717",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "author": "Open Products Facts contributors"
  }
 ]

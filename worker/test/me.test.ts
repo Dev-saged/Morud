@@ -21,3 +21,13 @@ describe('لوحة لكل دور', () => {
     expect(r.body).toEqual({ area: 'agent', pending: 0, onRoad: 0, deliveredToday: 0, failed: 0, collectedToday: 0 });
   });
 });
+
+describe('ترويسات الأمان', () => {
+  it('كل استجابة تحمل HSTS ومنع التأطير ولا تُخزَّن بيانات الحساب', async () => {
+    const w = setup();
+    const r = await w.call('GET', '/me/summary', { token: T(w, 'so1') });
+    expect(r.headers.get('strict-transport-security')).toContain('max-age=');
+    expect(r.headers.get('x-frame-options')).toBe('DENY');
+    expect(r.headers.get('cache-control')).toBe('no-store');
+  });
+});

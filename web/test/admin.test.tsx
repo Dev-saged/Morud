@@ -38,7 +38,7 @@ describe('لوحة الإدارة الشاملة', () => {
   it('الأقسام تظهر حسب الصلاحيات فقط', async () => {
     mount({ 'GET /auth/me': () => json({ user: { ...adminUser, permissions: ['orders.view'] } }), 'GET /dashboard/summary': () => json(summary) }, true);
     const nav = await screen.findByRole('navigation', { name: 'أقسام الإدارة' });
-    expect(within(nav).getAllByRole('button').map((b) => b.textContent)).toEqual(['لوحة المعلومات', 'الطلبات']);
+    expect(within(nav).getAllByRole('button').map((b) => b.textContent)).toEqual(['لوحة المعلومات', 'الطلبات', 'أمان حسابي']);
   });
   it('الواجهة الافتراضية حسب الدور: موظف المنتجات يبدأ بالمنتجات ويغيّر التوفر', async () => {
     const { calls } = mount({

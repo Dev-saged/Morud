@@ -93,10 +93,13 @@ private val SECTIONS = listOf(
     Section("support", "الدعم الفني", Icons.chat, listOf("support.manage")),
     Section("settings", "الإعدادات", Icons.gear, listOf("settings.manage")),
     Section("backups", "النسخ الاحتياطي", Icons.shield, listOf("backups.manage")),
+    Section("security", "أمان حسابي", Icons.shield, emptyList()),
 )
+/** قسم بلا صلاحيات = متاح لكل موظف (أمان حسابه الشخصي). */
+private fun Section.allowed(user: SessionUser) = perms.isEmpty() || perms.any(user::can)
 
-fun hasMoreSections(user: SessionUser) = SECTIONS.any { s -> s.perms.any(user::can) }
-fun canOpenSection(user: SessionUser, id: String) = SECTIONS.any { s -> s.id == id && s.perms.any(user::can) }
+fun hasMoreSections(user: SessionUser) = SECTIONS.any { s -> s.allowed(user) }
+fun canOpenSection(user: SessionUser, id: String) = SECTIONS.any { s -> s.id == id && s.allowed(user) }
 
 /** «المزيد»: كل أقسام الإدارة المتاحة لصلاحيات المستخدم، مطابقة للوحة الويب. */
 @Composable
@@ -120,11 +123,12 @@ fun AdminMoreScreen(user: SessionUser, padding: PaddingValues, focus: Focus? = n
                 "support" -> SupportSection(vm, pad)
                 "settings" -> SettingsSection(vm, pad)
                 "backups" -> BackupsSection(vm, pad)
+                "security" -> Column(Modifier.padding(pad)) { com.mawred.app.ui.common.SecurityPanel(hiltViewModel<com.mawred.app.ui.common.SecurityViewModel>().api) }
             }
         }
         return
     }
-    val list = SECTIONS.filter { s -> s.perms.any(user::can) }
+    val list = SECTIONS.filter { s -> s.allowed(user) }
     LazyVerticalGrid(GridCells.Adaptive(150.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
             val ph by hiltViewModel<com.mawred.app.ui.update.UpdateViewModel>().phase.collectAsStateWithLifecycle()

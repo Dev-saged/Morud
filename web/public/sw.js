@@ -22,3 +22,24 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(caches.open('mawred-images').then((c) => c.match(req).then((hit) => hit || fetch(req).then((res) => { if (res.ok) c.put(req, res.clone()); return res; }))));
   }
 });
+
+// إشعارات FCM الفورية: تُعرض حتى لو الموقع مسكّر، والضغط يفتح التطبيق على مرجع الإشعار
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { notification: { title: 'مورد', body: e.data ? e.data.text() : '' } }; }
+  const n = d.notification || {}, data = d.data || {};
+  e.waitUntil(Promise.all([
+    self.registration.showNotification(n.title || 'مورد', { body: n.body || '', icon: '/icon-192.png', badge: '/icon-192.png', dir: 'rtl', lang: 'ar', tag: data.refId || undefined, data }),
+    self.clients.matchAll({ type: 'window' }).then((cs) => cs.forEach((c) => c.postMessage({ type: 'mawred:push' }))),
+  ]));
+});
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const d = e.notification.data || {};
+  const url = d.refKind && d.refId ? `/?open=${encodeURIComponent(d.refKind)}:${encodeURIComponent(d.refId)}` : '/';
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((cs) => {
+    const c = cs.find((x) => new URL(x.url).origin === location.origin);
+    if (c) { c.postMessage({ type: 'mawred:open', refKind: d.refKind, refId: d.refId }); return c.focus(); }
+    return self.clients.openWindow(url);
+  }));
+});

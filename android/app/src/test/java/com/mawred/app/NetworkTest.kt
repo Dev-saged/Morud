@@ -190,4 +190,17 @@ class NetworkTest {
         fresh.restore()
         assertTrue("فتح التطبيق بلا جلسة يمسح النسخ المحفوظة", m.isEmpty())
     }
+
+    @Test fun mfaLoginReturnsTicketThenCodeCompletes() = runTest {
+        routes["POST /auth/login"] = { ok("""{"mfaRequired":true,"ticket":"${"a".repeat(48)}"}""") }
+        routes["POST /auth/login/mfa"] = { ok("""{"customToken":"CT","user":$user}""") }
+        routes["POST /v1/accounts:signInWithCustomToken"] = { ok("""{"idToken":"ID1","refreshToken":"R1","expiresIn":"3600"}""") }
+        val r = repo(MemorySessionStore())
+        val ticket = r.login("owner", "Secret123")
+        assertEquals("a".repeat(48), ticket)
+        assertTrue("لا جلسة قبل الرمز", r.state.value !is SessionState.SignedIn)
+        r.loginMfa(ticket!!, "123456", "owner", true)
+        assertTrue(r.state.value is SessionState.SignedIn)
+        assertEquals("ID1", r.idToken())
+    }
 }
