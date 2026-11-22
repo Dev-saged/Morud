@@ -156,13 +156,14 @@ describe('الواجهة', () => {
     await u.click(await screen.findByRole('button', { name: /متأخرة: 1/ }));
     await waitFor(() => expect(calls.some(([p]) => p === '/orders?filter=overdue')).toBe(true));
     expect(screen.getByRole('button', { name: 'المتأخرة' }).className).toContain('on');
+    // اللوحة مربعات فقط: «جديدة» تفتح فلترها، والمنتجات خارج صلاحياته غير قابلة للنقر
     await u.click(screen.getByRole('button', { name: 'لوحة المعلومات' }));
-    await u.click(await screen.findByRole('button', { name: /MW-O-2026-000001/ }));
-    expect(await screen.findByRole('heading', { name: /MW-O-2026-000001 — بقالة النور/ })).toBeTruthy();
-    // المنتجات خارج صلاحيات هذا المستخدم: السطر يظهر لكنه غير قابل للنقر
+    await u.click(await screen.findByRole('button', { name: /^جديدة: 2/ }));
+    await waitFor(() => expect(calls.some(([p]) => p === '/orders?filter=new')).toBe(true));
     await u.click(screen.getByRole('button', { name: 'لوحة المعلومات' }));
-    expect(await screen.findByText('جبنة فيتا')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: /جبنة فيتا/ })).toBeNull();
+    expect(await screen.findByText('محلات نشطة')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /^محلات نشطة/ })).toBeNull();
+    expect(screen.queryByText('أحدث الطلبات')).toBeNull();
   });
   it('كلمة المرور المؤقتة تفرض شاشة التغيير', async () => {
     mount({ 'GET /auth/me': () => json({ user: { ...shopUser, mustChangePassword: true } }) }, true);

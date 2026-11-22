@@ -29,6 +29,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.size
@@ -95,15 +96,21 @@ fun Card(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
 
 @Composable
 fun Kpi(label: String, value: String, modifier: Modifier = Modifier, alert: Boolean = false, onClick: (() -> Unit)? = null) {
-    val m = if (onClick != null) modifier.clip(RoundedCornerShape(16.dp)).clickable(onClickLabel = "عرض التفاصيل", role = androidx.compose.ui.semantics.Role.Button, onClick = onClick) else modifier
-    Card(m) {
-        Row(verticalAlignment = Alignment.Top) {
-            Column(Modifier.weight(1f)) {
-                Text(label, style = MaterialTheme.typography.labelMedium, color = if (alert) Mawred.colors.danger else Mawred.colors.mute)
-                Text(value, style = MaterialTheme.typography.headlineSmall.merge(Tabular), color = if (alert) Mawred.colors.danger else Mawred.colors.ink)
-            }
-            if (onClick != null) androidx.compose.material3.Icon(com.mawred.app.ui.Icons.chevron, null, Modifier.size(14.dp).graphicsLayer { scaleX = -1f; alpha = .45f }, tint = Mawred.colors.mute)
+    val c = Mawred.colors
+    val shape = RoundedCornerShape(16.dp)
+    val press = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val pressed by press.collectIsPressedAsState()
+    val scale by androidx.compose.animation.core.animateFloatAsState(if (pressed && !reducedMotion()) .97f else 1f, androidx.compose.animation.core.spring(stiffness = androidx.compose.animation.core.Spring.StiffnessMedium), label = "kpi")
+    var m = modifier.fillMaxWidth().heightIn(min = 100.dp).graphicsLayer { scaleX = scale; scaleY = scale }.clip(shape)
+        .background(if (alert) c.danger.copy(alpha = .06f) else if (pressed) c.primary.copy(alpha = .06f) else c.raised)
+        .border(1.dp, if (alert) c.danger.copy(alpha = .55f) else c.line, shape)
+    if (onClick != null) m = m.clickable(press, androidx.compose.material3.ripple(), onClickLabel = "عرض التفاصيل", role = androidx.compose.ui.semantics.Role.Button, onClick = onClick)
+    Box(m.padding(16.dp)) {
+        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(label, style = MaterialTheme.typography.bodyMedium, color = if (alert) c.danger else c.mute, maxLines = 1)
+            Text(value, style = MaterialTheme.typography.headlineSmall.merge(Tabular), color = if (alert) c.danger else c.ink, maxLines = 1)
         }
+        if (onClick != null) androidx.compose.material3.Icon(com.mawred.app.ui.Icons.chevron, null, Modifier.align(Alignment.BottomEnd).size(16.dp).graphicsLayer { scaleX = -1f; alpha = .4f }, tint = c.mute)
     }
 }
 

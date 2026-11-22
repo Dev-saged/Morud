@@ -3,7 +3,6 @@ import { formatDate, formatMoney, formatQty, STATUS } from '../lib/format';
 import { useSession } from '../lib/session';
 import { openPrintable } from '../shop/ShopApp';
 import { Icon, LogoMark, type IconName } from '../ui/Icons';
-import { dayLabels, Donut, Hero, Row, Spark, Tile } from '../ui/Desk';
 import { Finance } from './Finance';
 import { Backups, Promotions, Settings, Support } from './More';
 import { Products } from './Products';
@@ -68,47 +67,47 @@ export function Sparkline({ values }: { values: number[] }) {
 export type Focus = { filter?: string; open?: string; q?: string };
 type Go = (to: Section, f?: Focus) => void;
 
-/** كل مؤشر وكل سطر في اللوحة يفتح تفاصيله: القائمة المفلترة نفسها التي حُسب منها العدد. */
+type Card = { label: string; value: number | undefined; to: Section; f?: Focus; money?: boolean; alert?: boolean };
+
+/** لوحة المعلومات البسيطة: مربعات مرتبة في مجموعات، عنوان ورقم فقط، وكل مربع يفتح القائمة التي حُسب منها رقمه. */
 export function Dashboard({ go, can }: { go: Go; can: (s: Section) => boolean }) {
-  const { api, user } = useSession();
+  const { api } = useSession();
   const [d, setD] = useState<any>(null);
   useEffect(() => { void api.get('/dashboard/summary').then(setD); }, [api]);
-  if (!d) return <div className="skeleton-grid" aria-busy="true">{Array.from({ length: 8 }, (_, i) => <div key={i} className="skeleton" />)}</div>;
-  const open = (to: Section, f: Focus = {}) => (can(to) ? () => go(to, f) : undefined);
-  const has = (v: unknown) => v !== undefined && v !== null;
-  const pipeline = [
-    { key: 'new', label: 'جديدة', value: d.new ?? 0, tone: 'accent' as const }, { key: 'review', label: 'قيد المراجعة', value: d.review ?? 0, tone: 'primary' as const },
-    { key: 'preparing', label: 'قيد التجهيز', value: d.preparing ?? 0, tone: 'mute' as const }, { key: 'ready', label: 'جاهزة للتوصيل', value: d.ready ?? 0, tone: 'ok' as const },
-    { key: 'delivering', label: 'قيد التوصيل', value: d.delivering ?? 0, tone: 'danger' as const },
+  if (!d) return <section><h1>لوحة المعلومات</h1><div className="kpis" aria-busy="true">{Array.from({ length: 8 }, (_, i) => <div key={i} className="skeleton kpi-sk" />)}</div></section>;
+  const groups: Array<[string, Card[]]> = [
+    ['الطلبات', [
+      { label: 'طلبات اليوم', value: d.ordersToday, to: 'orders', f: { filter: 'today' } }, { label: 'جديدة', value: d.new, to: 'orders', f: { filter: 'new' } },
+      { label: 'قيد المراجعة', value: d.review, to: 'orders', f: { filter: 'review' } }, { label: 'قيد التجهيز', value: d.preparing, to: 'orders', f: { filter: 'preparing' } },
+      { label: 'جاهزة للتوصيل', value: d.ready, to: 'orders', f: { filter: 'ready' } }, { label: 'قيد التوصيل', value: d.delivering, to: 'orders', f: { filter: 'delivering' } },
+      { label: 'متأخرة', value: d.overdue, to: 'orders', f: { filter: 'overdue' }, alert: (d.overdue ?? 0) > 0 }, { label: 'مكتملة', value: d.completed, to: 'orders', f: { filter: 'completed' } },
+    ]],
+    ['المال', [
+      { label: 'مبيعات اليوم', value: d.salesToday, to: 'reports', money: true }, { label: 'المحصّل اليوم', value: d.collectedToday, to: 'finance', money: true },
+      { label: 'المستحق على المحلات', value: d.totalDue, to: 'shops', f: { filter: 'due' }, money: true },
+    ]],
+    ['المحلات والمنتجات', [
+      { label: 'محلات نشطة', value: d.activeShops, to: 'shops' }, { label: 'منتجات متاحة', value: d.availableProducts, to: 'products', f: { filter: 'available' } },
+      { label: 'غير متوفرة', value: d.unavailableProducts, to: 'products', f: { filter: 'unavailable' } },
+    ]],
   ];
   return (
-    <section className="desk">
-      <Hero name={user!.displayName} title="هذا ما يحدث في مورد اليوم">
-        <div className="hero-stats">
-          <div><small>طلبات اليوم</small><b className="num">{d.ordersToday}</b></div>
-          {has(d.salesToday) && <div><small>مبيعات اليوم</small><b className="num">{formatMoney(d.salesToday)}</b></div>}
-          {(d.overdue ?? 0) > 0 && <div><small>متأخرة الآن</small><b className="num">{d.overdue}</b></div>}
-        </div>
-      </Hero>
-      <div className="tiles">
-        <Tile icon="orders" label="طلبات اليوم" value={d.ordersToday} spark={d.ordersLast7Days} hint="آخر 7 أيام" onClick={open('orders', { filter: 'today' })} />
-        {has(d.overdue) && <Tile icon="clock" label="متأخرة" value={d.overdue} tone="danger" alert={d.overdue > 0} hint={d.overdue > 0 ? 'تحتاج تدخلاً' : 'كل الطلبات في وقتها'} onClick={open('orders', { filter: 'overdue' })} />}
-        {has(d.completed) && <Tile icon="check" label="مكتملة" value={d.completed} tone="ok" onClick={open('orders', { filter: 'completed' })} />}
-        {has(d.salesToday) && <Tile icon="chart" label="مبيعات اليوم" value={formatMoney(d.salesToday)} onClick={open('reports')} />}
-        {has(d.collectedToday) && <Tile icon="wallet" label="المحصّل اليوم" value={formatMoney(d.collectedToday)} tone="ok" onClick={open('finance')} />}
-        {has(d.totalDue) && <Tile icon="alert" label="المستحق على المحلات" value={formatMoney(d.totalDue)} tone="accent" onClick={open('shops', { filter: 'due' })} />}
-        {has(d.activeShops) && <Tile icon="store" label="محلات نشطة" value={d.activeShops} onClick={open('shops')} />}
-        {has(d.availableProducts) && <Tile icon="box" label="منتجات متاحة" value={d.availableProducts} tone="ok" onClick={open('products', { filter: 'available' })} />}
-        {has(d.unavailableProducts) && <Tile icon="box" label="غير متوفرة" value={d.unavailableProducts} tone={d.unavailableProducts ? 'danger' : 'mute'} onClick={open('products', { filter: 'unavailable' })} />}
-      </div>
-      <div className="panels">
-        <div className="panel"><h3>مسار الطلبات المفتوحة</h3><Donut parts={pipeline} onPick={can('orders') ? (k) => go('orders', { filter: k }) : undefined} /></div>
-        <div className="panel"><h3>الطلبات آخر 7 أيام <small className="mute num">{(d.ordersLast7Days as number[]).reduce((a, b) => a + b, 0)}</small></h3><div className="big-spark"><Spark values={d.ordersLast7Days} labels={dayLabels()} /></div></div>
-        <div className="panel"><h3>الأكثر طلباً اليوم</h3>{d.topProducts.length === 0 ? <p className="mute">لا طلبات اليوم بعد.</p> : d.topProducts.map((p: any, i: number) => (
-          <Row key={p.productId ?? p.name} initial={String(i + 1)} title={p.name} sub={`${p.count} طلب`} onClick={open('products', { open: p.productId, q: p.name })} />))}</div>
-        <div className="panel"><h3>أحدث الطلبات</h3>{d.recent.length === 0 ? <p className="mute">لا طلبات بعد.</p> : d.recent.map((o: any) => (
-          <Row key={o.id} initial={o.shopName ?? ''} title={o.shopName} sub={<span className="num">{o.number}</span>} chip={<span className={`chip tone-${STATUS[o.status]?.tone}`}>{STATUS[o.status]?.label}</span>} amount={o.total !== undefined ? formatMoney(o.total) : undefined} onClick={open('orders', { filter: 'all', open: o.id })} />))}</div>
-      </div>
+    <section className="dash">
+      <h1>لوحة المعلومات</h1>
+      {groups.map(([title, cards]) => {
+        const shown = cards.filter((c) => c.value !== undefined && c.value !== null);
+        if (!shown.length) return null;
+        return (
+          <div key={title} className="kgroup">
+            <h2>{title}</h2>
+            <div className="kpis">{shown.map((c) => {
+              const body = <><small>{c.label}</small><b className="num">{c.money ? formatMoney(c.value!) : c.value}</b></>;
+              const cls = `kpi${c.alert ? ' alert' : ''}`;
+              return can(c.to) ? <button key={c.label} className={`${cls} tap`} onClick={() => go(c.to, c.f)} aria-label={`${c.label}: ${c.money ? formatMoney(c.value!) : c.value} — عرض التفاصيل`}>{body}<Icon name="chevron" flip className="kpi-go" /></button> : <div key={c.label} className={cls}>{body}</div>;
+            })}</div>
+          </div>
+        );
+      })}
     </section>
   );
 }

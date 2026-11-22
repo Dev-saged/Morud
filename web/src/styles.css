@@ -141,3 +141,17 @@ dialog.sheet{border:0;padding:0;margin:auto auto 0;width:min(560px,100%);max-hei
 @media (prefers-reduced-motion:no-preference){.upd-bar i{animation:indet 1.2s ease-in-out infinite}}@keyframes indet{from{transform:translateX(160%)}to{transform:translateX(-260%)}}
 .upd-notes{margin-top:var(--s3);padding:var(--s3);border-radius:var(--r-md);background:color-mix(in oklch,var(--primary) 5%,transparent)}.upd-notes p{margin:0 0 var(--s1);font-weight:600}.upd-notes ul{margin:0;padding-inline-start:1.1em;color:var(--mute);font-size:var(--fs-sm)}
 .upd-actions{display:flex;gap:var(--s2);margin-top:var(--s3)}.upd-actions .btn.primary{flex:1}
+/* لوحة المعلومات البسيطة */
+.dash h1{margin-bottom:var(--s4)}.kgroup{margin-bottom:var(--s5)}.kgroup h2{font-size:var(--fs-md);color:var(--mute);font-weight:600;margin:0 0 var(--s2)}
+.dash .kpis{grid-template-columns:repeat(auto-fill,minmax(min(100%,160px),1fr));margin-bottom:0}
+@media (max-width:520px){.dash .kpis{grid-template-columns:1fr 1fr}}
+.dash .kpi{position:relative;min-height:104px;padding:var(--s4);align-content:space-between;text-align:start;font:inherit;color:var(--ink);border-radius:var(--r-md,16px)}
+.dash .kpi small{color:var(--mute);font-size:var(--fs-sm)}.dash .kpi b{font:700 clamp(1.5rem,1.2rem + 1vw,2rem) var(--font-display);white-space:nowrap}
+.dash .kpi.tap{cursor:pointer;transition:transform .18s cubic-bezier(.22,1.2,.36,1),border-color .18s,box-shadow .18s}
+.dash .kpi.tap:hover{border-color:color-mix(in oklch,var(--primary) 45%,var(--line));box-shadow:0 8px 22px -16px color-mix(in oklch,var(--primary) 70%,transparent)}
+.dash .kpi.tap:active{transform:scale(.97);background:color-mix(in oklch,var(--primary) 6%,var(--raised))}
+.dash .kpi-go{position:absolute;inset-inline-end:var(--s3);bottom:var(--s3);width:16px;height:16px;opacity:.35}
+.dash .kpi.alert{border-color:color-mix(in oklch,var(--danger) 55%,transparent);background:color-mix(in oklch,var(--danger) 5%,var(--raised))}.dash .kpi.alert b{color:var(--danger)}
+.kpi-sk{height:104px}
+@media (prefers-reduced-motion:no-preference){.dash .kpi{animation:rise .45s cubic-bezier(.22,1,.36,1) both}}
+@media (max-width:520px){.dash .kpis>:last-child:nth-child(odd){grid-column:1/-1}}
