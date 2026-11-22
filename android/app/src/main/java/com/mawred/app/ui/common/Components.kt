@@ -30,6 +30,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
@@ -90,11 +94,15 @@ fun Card(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
 }
 
 @Composable
-fun Kpi(label: String, value: String, modifier: Modifier = Modifier, alert: Boolean = false) {
-    Card(modifier) {
-        Column {
-            Text(label, style = MaterialTheme.typography.labelMedium, color = if (alert) Mawred.colors.danger else Mawred.colors.mute)
-            Text(value, style = MaterialTheme.typography.headlineSmall.merge(Tabular), color = if (alert) Mawred.colors.danger else Mawred.colors.ink)
+fun Kpi(label: String, value: String, modifier: Modifier = Modifier, alert: Boolean = false, onClick: (() -> Unit)? = null) {
+    val m = if (onClick != null) modifier.clip(RoundedCornerShape(16.dp)).clickable(onClickLabel = "عرض التفاصيل", role = androidx.compose.ui.semantics.Role.Button, onClick = onClick) else modifier
+    Card(m) {
+        Row(verticalAlignment = Alignment.Top) {
+            Column(Modifier.weight(1f)) {
+                Text(label, style = MaterialTheme.typography.labelMedium, color = if (alert) Mawred.colors.danger else Mawred.colors.mute)
+                Text(value, style = MaterialTheme.typography.headlineSmall.merge(Tabular), color = if (alert) Mawred.colors.danger else Mawred.colors.ink)
+            }
+            if (onClick != null) androidx.compose.material3.Icon(com.mawred.app.ui.Icons.chevron, null, Modifier.size(14.dp).graphicsLayer { scaleX = -1f; alpha = .45f }, tint = Mawred.colors.mute)
         }
     }
 }
@@ -134,3 +142,13 @@ fun Notice(text: String, action: String? = null, onAction: () -> Unit = {}) {
     }
 }
 
+
+/** يطلب إذن الإشعارات لحظة حفظ طلب بلا نت فقط (أندرويد 13+)، مرة واحدة لكل مناسبة. */
+@androidx.compose.runtime.Composable
+fun AskNotifyWhen(trigger: Boolean) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { }
+    androidx.compose.runtime.LaunchedEffect(trigger) {
+        if (trigger && !com.mawred.app.data.Notifier.allowed(ctx)) launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    }
+}

@@ -4,6 +4,11 @@ import com.mawred.app.data.CatalogRepository
 import com.mawred.app.data.api.Api
 import com.mawred.app.data.api.ApiException
 import com.mawred.app.data.auth.AuthRepository
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonArray
+import com.mawred.app.data.api.ReadCache
+import com.mawred.app.data.auth.LoginPrefs
 import com.mawred.app.data.auth.IdentityRest
 import com.mawred.app.data.auth.MemorySessionStore
 import com.mawred.app.data.auth.SessionState
@@ -133,6 +138,7 @@ class NetworkTest {
             override suspend fun get(key: String) = m[key]
             override suspend fun put(e: CacheEntry) { m[e.key] = e }
             override suspend fun clear() = m.clear()
+            override suspend fun clearPrefix(prefix: String) { m.keys.removeAll { it.startsWith(prefix) } }
         }
         routes["GET /catalog"] = { ok("""{"products":[{"id":"p","name":"أرز","units":[{"unitId":"kg","factorToBase":1000,"price":500}]}],"categories":[],"units":[],"at":5}""") }
         val api = Api(http, ::base) { "T" }
@@ -142,5 +148,46 @@ class NetworkTest {
         assertTrue(offline.offline); assertEquals(42L, offline.cachedAt); assertEquals(1, offline.data.products.size)
         val empty = runCatching { CatalogRepository(Api(http, { "http://127.0.0.1:1" }) { null }, object : CacheDao by cache { override suspend fun get(key: String): CacheEntry? = null }).load() }
         assertEquals("NETWORK", (empty.exceptionOrNull() as ApiException).code)
+    }
+
+    @Test fun rememberMeOffKeepsSessionInMemoryOnly() = runTest {
+        routes["POST /auth/login"] = { ok("""{"customToken":"CT","user":$user}""") }
+        routes["POST /v1/accounts:signInWithCustomToken"] = { ok("""{"idToken":"ID1","refreshToken":"R1","expiresIn":"3600"}""") }
+        val store = MemorySessionStore()
+        val r = repo(store)
+        r.login("0599888777", "Secret123", remember = false)
+        assertTrue(r.state.value is SessionState.SignedIn)
+        assertEquals("ID1", r.idToken())
+        assertEquals("لا يُحفظ شيء على الجهاز", null to null, store.load())
+        assertEquals(LoginPrefs("", false), store.loginPrefs())
+        val r2 = repo(store)
+        r2.login("0599888777", "Secret123", remember = true)
+        assertEquals(LoginPrefs("0599888777", true), store.loginPrefs())
+        assertEquals("ID1", store.load().first?.idToken)
+    }
+
+    @Test fun readCacheIsPerUserAndClearedOnLogout() = runTest {
+        val m = mutableMapOf<String, Pair<String, Long>>()
+        val cache = object : ReadCache {
+            override suspend fun get(key: String) = m[key]
+            override suspend fun put(key: String, json: String) { m[key] = json to 7L }
+            override suspend fun clearScope(scope: String) { m.keys.removeAll { it.startsWith("$scope|") } }
+            override suspend fun clearAll() = m.clear()
+        }
+        routes["GET /shops/s1/orders"] = { ok("""{"orders":[{"id":"o1"}]}""") }
+        val live = Api(http, ::base) { "T" }.also { it.cache = cache; it.scope = "u1" }
+        live.get("/shops/s1/orders")
+        val dead = Api(http, { "http://127.0.0.1:1" }) { "T" }.also { it.cache = cache; it.scope = "u1" }
+        assertEquals("o1", dead.get("/shops/s1/orders")["orders"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive.content)
+        assertEquals(7L, dead.stale.value)
+        dead.scope = "u2"
+        assertEquals("NETWORK", runCatching { dead.get("/shops/s1/orders") }.exceptionOrNull().let { (it as ApiException).code })
+        cache.clearScope("u1")
+        assertTrue(m.isEmpty())
+        m["u7|/x"] = "{}" to 1L
+        val fresh = repo(MemorySessionStore())
+        fresh.api.cache = cache
+        fresh.restore()
+        assertTrue("فتح التطبيق بلا جلسة يمسح النسخ المحفوظة", m.isEmpty())
     }
 }

@@ -96,11 +96,13 @@ private val SECTIONS = listOf(
 )
 
 fun hasMoreSections(user: SessionUser) = SECTIONS.any { s -> s.perms.any(user::can) }
+fun canOpenSection(user: SessionUser, id: String) = SECTIONS.any { s -> s.id == id && s.perms.any(user::can) }
 
 /** «المزيد»: كل أقسام الإدارة المتاحة لصلاحيات المستخدم، مطابقة للوحة الويب. */
 @Composable
-fun AdminMoreScreen(user: SessionUser, padding: PaddingValues, vm: AdminVm = hiltViewModel()) {
+fun AdminMoreScreen(user: SessionUser, padding: PaddingValues, focus: Focus? = null, consumed: () -> Unit = {}, vm: AdminVm = hiltViewModel()) {
     var open by rememberSaveable { mutableStateOf<String?>(null) }
+    androidx.compose.runtime.LaunchedEffect(focus) { focus?.id?.let { open = it; consumed() } }
     val st by vm.s.collectAsStateWithLifecycle()
     if (open != null) {
         BackHandler { open = null; vm.clearMsg() }

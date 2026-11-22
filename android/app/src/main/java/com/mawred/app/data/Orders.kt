@@ -32,7 +32,7 @@ import kotlinx.serialization.json.put
 
 /** نتيجة الإرسال: تم، أو في الانتظار بلا نت، أو تغيّر السعر بانتظار الموافقة. */
 sealed interface SubmitResult {
-    data class Sent(val orderId: String) : SubmitResult
+    data class Sent(val orderId: String, val number: String = "", val items: Int = 0) : SubmitResult
     data object Queued : SubmitResult
     data class PriceChanged(val key: String, val newTotal: Long) : SubmitResult
 }
@@ -57,7 +57,8 @@ class OrderRepository(private val api: Api, private val outbox: OutboxDao, priva
     suspend fun send(item: OutboxItem): SubmitResult = try {
         val r = api.post(item.path, ApiJson.parseToJsonElement(item.body), item.idempotencyKey)
         outbox.done(item.idempotencyKey)
-        SubmitResult.Sent(r["order"]!!.jsonObject["id"]!!.jsonPrimitive.content)
+        val o = r["order"]!!.jsonObject
+        SubmitResult.Sent(o["id"]!!.jsonPrimitive.content, o["number"]?.jsonPrimitive?.content.orEmpty(), runCatching { ApiJson.parseToJsonElement(item.body).jsonObject["items"]!!.jsonArray.size }.getOrDefault(0))
     } catch (e: ApiException) {
         when {
             e.code == "NETWORK" || e.status >= 500 -> { outbox.failed(item.idempotencyKey, e.message.orEmpty()); SubmitResult.Queued }
@@ -80,12 +81,18 @@ class OrderRepository(private val api: Api, private val outbox: OutboxDao, priva
 
     suspend fun discard(key: String) = outbox.done(key)
 
-    /** يرسل كل المعلّق الذي لا ينتظر قرار المستخدم؛ يُرجع true إن بقي شيء لإعادة المحاولة. */
-    suspend fun flush(): Boolean {
+    /** يرسل كل المعلّق الذي لا ينتظر قرار المستخدم؛ يُرجع true إن بقي شيء لإعادة المحاولة. يُبلغ بكل نجاح أو رفض. */
+    suspend fun flush(onSent: (SubmitResult.Sent) -> Unit = {}, onRejected: (String) -> Unit = {}): Boolean {
         var retry = false
         for (i in outbox.pending()) {
             if (i.lastError?.startsWith(PRICE_PREFIX) == true) continue
-            if (send(i) is SubmitResult.Queued) retry = true
+            try {
+                when (val r = send(i)) {
+                    is SubmitResult.Queued -> retry = true
+                    is SubmitResult.Sent -> onSent(r)
+                    is SubmitResult.PriceChanged -> onRejected("تغيّرت الأسعار؛ افتح طلباتي ووافق على الإجمالي الجديد")
+                }
+            } catch (e: ApiException) { onRejected(e.message ?: "تعذّر إرسال طلب محفوظ") }
         }
         return retry
     }

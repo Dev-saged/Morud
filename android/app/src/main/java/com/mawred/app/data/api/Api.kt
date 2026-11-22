@@ -1,6 +1,7 @@
 package com.mawred.app.data.api
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -21,9 +22,24 @@ fun newIdempotencyKey(): String = UUID.randomUUID().toString().replace("-", "")
 
 val ApiJson = Json { ignoreUnknownKeys = true; explicitNulls = false; encodeDefaults = true }
 
+/** نسخة كل قراءة ناجحة لكل مستخدم للعمل بلا نت. */
+interface ReadCache {
+    suspend fun get(key: String): Pair<String, Long>?
+    suspend fun put(key: String, json: String)
+    suspend fun clearScope(scope: String)
+    suspend fun clearAll()
+}
+
 /** عميل الخادم: Bearer، مفتاح منع التكرار، سياق العمل، وأخطاء عربية موحدة. كل استدعاء آمن من انقطاع الشبكة. */
 class Api(private val client: OkHttpClient, private val base: () -> String, private val token: suspend () -> String?) {
     var workContext: String? = null
+    /** معرّف المستخدم الحالي؛ null = لا حفظ (قبل الدخول وبعد الخروج). */
+    @Volatile var scope: String? = null
+    var cache: ReadCache? = null
+    /** وقت آخر بيانات محفوظة عُرضت بدل الحية؛ null = متصل. */
+    val stale = MutableStateFlow<Long?>(null)
+
+    private fun cacheable(method: String, path: String, auth: Boolean) = method == "GET" && auth && scope != null && cache != null && !path.startsWith("/auth/") && !path.startsWith("/files/")
 
     suspend fun request(method: String, path: String, body: JsonElement? = null, idem: String? = null, auth: Boolean = true): JsonObject = withContext(Dispatchers.IO) {
         val b = Request.Builder().url(base() + path).header("x-device", "android")
@@ -32,7 +48,12 @@ class Api(private val client: OkHttpClient, private val base: () -> String, priv
         workContext?.let { b.header("x-work-context", it) }
         val rb = body?.let { ApiJson.encodeToString(JsonElement.serializer(), it).toRequestBody(JSON) }
         b.method(method, rb ?: if (method == "POST" || method == "PATCH" || method == "PUT") "{}".toRequestBody(JSON) else null)
+        val owner = scope
+        val useCache = cacheable(method, path, auth)
         val res = try { client.newCall(b.build()).execute() } catch (e: IOException) {
+            if (useCache) cache!!.get("$owner|$path")?.let { (json, at) ->
+                runCatching { ApiJson.parseToJsonElement(json).jsonObject }.getOrNull()?.let { stale.value = at; return@withContext it }
+            }
             throw ApiException(0, "NETWORK", "لا يوجد اتصال بالإنترنت، سنحاول مجدداً عند عودته")
         }
         res.use { r ->
@@ -42,6 +63,8 @@ class Api(private val client: OkHttpClient, private val base: () -> String, priv
                 val e = obj["error"] as? JsonObject
                 throw ApiException(r.code, e?.get("code")?.jsonPrimitive?.contentOrNull ?: "ERROR", e?.get("message")?.jsonPrimitive?.contentOrNull ?: "حدث خطأ، حاول مرة أخرى", e?.get("details") as? JsonObject)
             }
+            // لا نحفظ لو تغيّر المستخدم أثناء الطلب
+            if (useCache && owner == scope) { cache!!.put("$owner|$path", text); stale.value = null }
             obj
         }
     }

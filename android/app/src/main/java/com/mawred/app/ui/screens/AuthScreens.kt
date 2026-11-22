@@ -5,6 +5,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Checkbox
+import androidx.compose.ui.semantics.Role
+import com.mawred.app.data.auth.LoginPrefs
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
@@ -69,8 +74,9 @@ private fun AuthFrame(onLogoTaps: () -> Unit = {}, content: @Composable ColumnSc
 }
 
 @Composable
-fun LoginScreen(form: FormState, onLogin: (String, String) -> Unit, onForgot: (String) -> Unit, onSecret: () -> Unit, clear: () -> Unit) {
-    var id by rememberSaveable { mutableStateOf("") }
+fun LoginScreen(form: FormState, prefs: LoginPrefs, onLogin: (String, String, Boolean) -> Unit, onForgot: (String) -> Unit, onSecret: () -> Unit, clear: () -> Unit) {
+    var id by rememberSaveable(prefs.identifier) { mutableStateOf(prefs.identifier) }
+    var rememberMe by rememberSaveable(prefs.remember) { mutableStateOf(prefs.remember) }
     var pw by remember { mutableStateOf("") }
     var show by remember { mutableStateOf(false) }
     var forgot by rememberSaveable { mutableStateOf(false) }
@@ -86,10 +92,14 @@ fun LoginScreen(form: FormState, onLogin: (String, String) -> Unit, onForgot: (S
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                 trailingIcon = { IconButton({ show = !show }, Modifier.semantics { contentDescription = if (show) "إخفاء كلمة المرور" else "إظهار كلمة المرور" }) { Icon(Icons.eye, null) } })
         }
+        if (!forgot) Row(Modifier.fillMaxWidth().toggleable(rememberMe, role = Role.Checkbox) { rememberMe = it }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(rememberMe, null)
+            Text("تذكرني على هذا الجهاز", style = MaterialTheme.typography.bodyMedium, color = Mawred.colors.ink)
+        }
         ErrorText(form.error)
         form.info?.let { Text(it, color = Mawred.colors.ok, style = MaterialTheme.typography.bodyMedium) }
         Spacer(Modifier.height(12.dp))
-        PrimaryButton(if (form.busy) "جارٍ التحقق…" else if (forgot) "إرسال" else "دخول", { if (forgot) onForgot(id) else onLogin(id, pw) }, enabled = !form.busy)
+        PrimaryButton(if (form.busy) "جارٍ التحقق…" else if (forgot) "إرسال" else "دخول", { if (forgot) onForgot(id) else onLogin(id, pw, rememberMe) }, enabled = !form.busy)
         TextButton({ forgot = !forgot; clear() }, Modifier.align(Alignment.CenterHorizontally)) { Text(if (forgot) "العودة للدخول" else "نسيت كلمة المرور؟", color = Mawred.colors.primary) }
     }
 }

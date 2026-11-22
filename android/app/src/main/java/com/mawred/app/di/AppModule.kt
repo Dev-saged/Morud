@@ -36,7 +36,7 @@ object AppModule {
     }
 
     @Provides @Singleton
-    fun api(auth: AuthRepository): Api = auth.api
+    fun api(auth: AuthRepository, db: AppDatabase): Api = auth.api.also { it.cache = com.mawred.app.data.local.RoomReadCache(db.cache()) }
 
     @Provides @Singleton
     fun db(@ApplicationContext ctx: Context): AppDatabase = Room.databaseBuilder(ctx, AppDatabase::class.java, "mawred.db").addMigrations(*Migrations.ALL).build()

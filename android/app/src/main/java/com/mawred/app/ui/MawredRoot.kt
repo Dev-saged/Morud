@@ -26,6 +26,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -55,14 +56,16 @@ fun MawredRoot(vm: SessionViewModel = hiltViewModel()) {
     val session by vm.session.collectAsStateWithLifecycle()
     val form by vm.form.collectAsStateWithLifecycle()
     val update by vm.update.collectAsStateWithLifecycle()
+    val prefs by vm.prefs.collectAsStateWithLifecycle()
+    val stale by vm.stale.collectAsStateWithLifecycle()
     var secret by rememberSaveable { mutableStateOf(false) }
     if (secret) { BackHandler { secret = false }; TestScreen(session, update) { secret = false }; return }
     AnimatedContent(session, transitionSpec = { fadeIn(spring()) togetherWith fadeOut(spring()) }, contentKey = { it::class to ((it as? SessionState.SignedIn)?.user?.mustChangePassword) }, label = "root") { s ->
         when (s) {
             SessionState.Loading -> Box(Modifier.fillMaxSize().background(Mawred.colors.surface), contentAlignment = Alignment.Center) { LogoMark(72.dp, Mawred.colors.primary, Mawred.colors.accent) }
-            SessionState.SignedOut -> LoginScreen(form, vm::login, vm::forgot, { secret = true }, vm::clearForm)
+            SessionState.SignedOut -> LoginScreen(form, prefs, vm::login, vm::forgot, { secret = true }, vm::clearForm)
             is SessionState.SignedIn -> if (s.user.mustChangePassword) ChangePasswordScreen(form, vm::changePassword) { vm.logout() }
-                else AreaShell(s.user, s.offline, update, { vm.downloadUpdate(it) }, { vm.logout() }, { secret = true })
+                else AreaShell(s.user, s.offline || stale != null, update, { vm.downloadUpdate(it) }, { vm.logout() }, { secret = true })
         }
     }
 }
@@ -84,6 +87,9 @@ private fun AreaShell(user: SessionUser, offline: Boolean, update: UpdateInfo?, 
         else -> emptyList()
     }
     var tab by rememberSaveable { mutableStateOf(tabs.firstOrNull()?.id.orEmpty()) }
+    var focus by remember { mutableStateOf<com.mawred.app.ui.admin.Focus?>(null) }
+    val canOpen: (String, com.mawred.app.ui.admin.Focus) -> Boolean = { t, f -> tabs.any { it.id == t } && (t != "adminMore" || f.id == null || com.mawred.app.ui.admin.canOpenSection(user, f.id)) }
+    val go: (String, com.mawred.app.ui.admin.Focus) -> Unit = { t, f -> if (canOpen(t, f)) { focus = f; tab = t } }
     val shopVm: ShopViewModel? = if (user.area == "shop") hiltViewModel() else null
     val cartCount = shopVm?.cartRows?.collectAsStateWithLifecycle()?.value?.size ?: 0
     var logoTaps by rememberSaveable { mutableStateOf(0) }
@@ -119,11 +125,11 @@ private fun AreaShell(user: SessionUser, offline: Boolean, update: UpdateInfo?, 
                     "cart" -> shopVm?.let { CartScreen(it.cartRows.collectAsStateWithLifecycle().value, it.checkout.collectAsStateWithLifecycle().value, it, pad) }
                     "orders" -> com.mawred.app.ui.shop.OrdersScreen(hiltViewModel(), pad, openOrder) { openOrder = null }
                     "account" -> com.mawred.app.ui.shop.AccountScreen(hiltViewModel(), pad)
-                    "dashboard" -> DashboardScreen(hiltViewModel(), pad)
+                    "dashboard" -> DashboardScreen(hiltViewModel(), pad, canOpen, go)
                     "tasks" -> TasksScreen(hiltViewModel(), pad)
-                    "adminOrders" -> com.mawred.app.ui.admin.AdminOrdersScreen(hiltViewModel(), pad)
-                    "adminProducts" -> com.mawred.app.ui.admin.AdminProductsScreen(hiltViewModel(), pad, user.can("products.update"))
-                    "adminMore" -> com.mawred.app.ui.admin.AdminMoreScreen(user, pad)
+                    "adminOrders" -> com.mawred.app.ui.admin.AdminOrdersScreen(hiltViewModel(), pad, focus) { focus = null }
+                    "adminProducts" -> com.mawred.app.ui.admin.AdminProductsScreen(hiltViewModel(), pad, user.can("products.update"), focus) { focus = null }
+                    "adminMore" -> com.mawred.app.ui.admin.AdminMoreScreen(user, pad, focus, { focus = null })
                     else -> com.mawred.app.ui.common.Empty("لا توجد واجهة لحسابك، تواصل مع الإدارة")
                 }
             }

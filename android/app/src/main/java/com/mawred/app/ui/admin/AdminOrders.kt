@@ -65,7 +65,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-private val FILTERS = listOf("new" to "الجديدة", "review" to "قيد المراجعة", "preparing" to "قيد التجهيز", "ready" to "جاهزة", "delivering" to "قيد التوصيل", "overdue" to "المتأخرة", "completed" to "المكتملة", "cancelled" to "الملغاة")
+private val FILTERS = listOf("today" to "اليوم", "all" to "الكل", "new" to "الجديدة", "review" to "قيد المراجعة", "preparing" to "قيد التجهيز", "ready" to "جاهزة", "delivering" to "قيد التوصيل", "overdue" to "المتأخرة", "completed" to "المكتملة", "cancelled" to "الملغاة")
 
 data class AdminOrdersUi(val filter: String = "new", val list: List<AdminOrder>? = null, val open: OrderDetail? = null, val agents: List<Agent> = emptyList(), val busy: Boolean = false, val error: String? = null, val info: String? = null)
 
@@ -76,6 +76,11 @@ class AdminOrdersViewModel @Inject constructor(private val admin: AdminRepositor
     init { load() }
 
     fun filter(f: String) { _ui.update { it.copy(filter = f, list = null) }; load() }
+    /** فتح من بطاقة في اللوحة: فلتر محدد و/أو طلب بعينه. */
+    fun focus(filter: String?, id: String?) {
+        if (filter != null && filter != _ui.value.filter) filter(filter)
+        if (id != null) open(id)
+    }
     fun load() = viewModelScope.launch {
         try { _ui.update { it.copy(list = admin.orders(it.filter), error = null) } } catch (e: ApiException) { _ui.update { it.copy(error = e.message, list = it.list ?: emptyList()) } }
     }
@@ -99,8 +104,9 @@ class AdminOrdersViewModel @Inject constructor(private val admin: AdminRepositor
 }
 
 @Composable
-fun AdminOrdersScreen(vm: AdminOrdersViewModel, padding: PaddingValues) {
+fun AdminOrdersScreen(vm: AdminOrdersViewModel, padding: PaddingValues, focus: Focus? = null, consumed: () -> Unit = {}) {
     val ui by vm.ui.collectAsStateWithLifecycle()
+    LaunchedEffect(focus) { focus?.let { vm.focus(it.filter, it.id); consumed() } }
     val d = ui.open
     if (d != null) { BackHandler { vm.open(null) }; AdminOrderDetail(vm, ui, d, padding); return }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -152,7 +158,14 @@ private fun AdminOrderDetail(vm: AdminOrdersViewModel, ui: AdminOrdersUi, d: Ord
     }
 }
 
-data class AdminProductsUi(val products: List<Product>? = null, val query: String = "", val busyId: String? = null, val error: String? = null, val info: String? = null, val draftsOnly: Boolean = false)
+data class AdminProductsUi(val products: List<Product>? = null, val query: String = "", val busyId: String? = null, val error: String? = null, val info: String? = null, val show: String = "all") {
+    val draftsOnly get() = show == "drafts"
+}
+
+/** ما يُفتح عند الانتقال من بطاقة: فلتر، عنصر، أو بحث. */
+data class Focus(val filter: String? = null, val id: String? = null, val query: String? = null)
+
+val PRODUCT_SHOW: Map<String, (Product) -> Boolean> = linkedMapOf("all" to { _ -> true }, "drafts" to { p -> !p.visible }, "available" to { p -> p.available }, "unavailable" to { p -> !p.available })
 
 @HiltViewModel
 class AdminProductsViewModel @Inject constructor(private val catalog: CatalogRepository, private val admin: AdminRepository) : ViewModel() {
@@ -163,7 +176,8 @@ class AdminProductsViewModel @Inject constructor(private val catalog: CatalogRep
         try { _ui.update { it.copy(products = catalog.load().data.products, error = null) } } catch (e: ApiException) { _ui.update { it.copy(error = e.message, products = it.products ?: emptyList()) } }
     }
     fun query(q: String) = _ui.update { it.copy(query = q) }
-    fun draftsOnly(v: Boolean) = _ui.update { it.copy(draftsOnly = v) }
+    fun show(v: String) = _ui.update { it.copy(show = v) }
+    fun focus(f: Focus) = _ui.update { it.copy(show = f.filter?.takeIf { k -> k in PRODUCT_SHOW } ?: it.show, query = f.query ?: it.query) }
     fun publish(items: List<Product>) = run("all", "نُشر ${items.size} منتج") { items.forEach { admin.setVisible(it.id, true) } }
     fun publishOne(p: Product) = run(p.id, "نُشر المنتج") { admin.setVisible(p.id, true) }
     fun toggle(p: Product) = run(p.id, if (p.available) "صار غير متوفر" else "صار متوفراً") { admin.setAvailability(p.id, !p.available) }
@@ -177,8 +191,9 @@ class AdminProductsViewModel @Inject constructor(private val catalog: CatalogRep
 }
 
 @Composable
-fun AdminProductsScreen(vm: AdminProductsViewModel, padding: PaddingValues, canEdit: Boolean) {
+fun AdminProductsScreen(vm: AdminProductsViewModel, padding: PaddingValues, canEdit: Boolean, focus: Focus? = null, consumed: () -> Unit = {}) {
     val ui by vm.ui.collectAsStateWithLifecycle()
+    LaunchedEffect(focus) { focus?.let { vm.focus(it); consumed() } }
     val ctx = LocalContext.current
     var target by remember { mutableStateOf<Product?>(null) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -188,15 +203,15 @@ fun AdminProductsScreen(vm: AdminProductsViewModel, padding: PaddingValues, canE
             withContext(Dispatchers.Default) { Cutout.toPng(bmp) }
         }
     }
-    val list = ui.products?.filter { (!ui.draftsOnly || !it.visible) }?.filter { ui.query.isBlank() || com.mawred.app.schema.SchemaEngine.normalize(it.name).contains(com.mawred.app.schema.SchemaEngine.normalize(ui.query)) || it.sku.contains(ui.query, true) }
+    val list = ui.products?.filter(PRODUCT_SHOW[ui.show] ?: { true })?.filter { ui.query.isBlank() || com.mawred.app.schema.SchemaEngine.normalize(it.name).contains(com.mawred.app.schema.SchemaEngine.normalize(ui.query)) || it.sku.contains(ui.query, true) }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         item {
             Text("المنتجات", style = MaterialTheme.typography.headlineMedium)
             OutlinedTextField(ui.query, vm::query, Modifier.fillMaxWidth(), placeholder = { Text("بحث بالاسم أو الرمز") }, singleLine = true)
             val draftCount = ui.products?.count { !it.visible } ?: 0
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(!ui.draftsOnly, { vm.draftsOnly(false) }, { Text("الكل") })
-                FilterChip(ui.draftsOnly, { vm.draftsOnly(true) }, { Text("المسودات ($draftCount)") })
+            val offCount = ui.products?.count { !it.available } ?: 0
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(listOf("all" to "الكل", "drafts" to "المسودات ($draftCount)", "available" to "المتوفرة", "unavailable" to "غير المتوفرة ($offCount)")) { (k, l) -> FilterChip(ui.show == k, { vm.show(k) }, { Text(l) }) }
             }
             if (ui.draftsOnly && canEdit && list?.isNotEmpty() == true) {
                 Text("راجع الأسعار أولاً (السعر المرجعي في وصف كل منتج)، ثم انشر.", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)

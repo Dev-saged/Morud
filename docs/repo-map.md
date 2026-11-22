@@ -189,3 +189,24 @@
 - علامة مورد: `web/src/lib/cutout.ts` (markRect/stampMark) و`android/.../data/Watermark.kt` و`catalog/packshots.py` — نفس قاعدة المكان.
 - الكتالوج: `catalog/build_seed.py` → `seed.json`، `catalog/packshots.py` → `images/`، `worker/scripts/import-catalog.ts` يستورد عبر createApp الحقيقي (R2 عبر Cloudflare REST، مفتاح idempotency حتمي لكل SKU) كمسودات.
 - إدارة Android الكاملة: `ui/admin/AdminVm.kt` (نموذج JSON عام) + `ui/admin/AdminMore.kt` (9 أقسام) تحت تبويب «المزيد».
+
+## v0.3.0 — العمل بلا نت والتنقل للتفاصيل
+- تذكرني ويب: `web/src/lib/session.tsx` (`rememberLogin`/`rememberedLogin`، `login(id,pw,remember)`، `adopt(customToken)`) + `firebase.ts` (local/session persistence) + `Login.tsx`.
+- تذكرني أندرويد: `data/auth/SessionStore.kt` (`LoginPrefs`)، `DataStoreSessionStore` (login_id, remember)، `AuthRepository.login(remember)` و`persist()`؛ الشاشة `AuthScreens.LoginScreen(prefs)`.
+- النسخة المحلية لكل مستخدم ويب: `web/src/lib/offline.ts` (`cachePut/cacheGet/clearOffline/useStale`، مفتاح `mawred.c.<uid>.<path>`)، و`Api.scope` في `api.ts` يحفظ كل GET ناجح ويعيده عند NETWORK؛ `App.tsx StaleBanner`.
+- أندرويد: `ReadCache` في `data/api/Api.kt` + `RoomReadCache` في `data/local/Database.kt` (مفتاح `r:<uid>|<path>`)؛ `Api.stale` → شريط بلا اتصال في `MawredRoot`.
+- صادر الويب: `web/src/lib/outbox.ts` (`enqueue/flushOutbox/useOutbox/systemNotify`)؛ الواجهة `ShopApp.tsx Outbox` و`CartView.send` (NETWORK ← حفظ بنفس المفتاح).
+- صادر أندرويد: `OrderRepository.flush(onSent, onRejected)` + `OutboxWorker` + `data/Notifier.kt` (قناة orders) + `Components.AskNotifyWhen`.
+- التنقل للتفاصيل ويب: `AdminApp.tsx` (`Focus`, `go`, `Dashboard`) → `Orders/Products/Shops({focus})`، `Products.ProductPeek`، `ShopApp.ProductSheet`.
+- أندرويد: `AdminScreens.KPIS/KpiDef` + `DashboardScreen(canOpen, go)` + `Focus` في `AdminOrders.kt` + `AdminMoreScreen(focus)` + `canOpenSection`.
+- الخادم: فلتر `today` و`ready` و`productId/shopId` في `/dashboard/summary`؛ `purgeIdempotency` في `api/cron.ts` (01:00 UTC).
+
+### قرارات
+- D14: تذكرني يحفظ المعرّف فقط؛ بدون تذكر لا يُكتب أي رمز على القرص (ويب session persistence، أندرويد ذاكرة فقط)، والبيانات المحفوظة تُمسح عند فتح التطبيق بلا جلسة — لأن أجهزة المحلات في غزة غالباً مشتركة.
+- D15: نسخة القراءة عامة في طبقة Api (لا كود لكل شاشة)، مفصولة بـ uid؛ مسارات `/auth/` و`/files/` لا تُحفظ.
+- D16: الطلب المرفوض من الخادم بعد الحفظ لا يُحذف بصمت على الويب: يبقى «يحتاج مراجعة» مع «رجّعه للسلة».
+- D17: كل رقم في اللوحة يفتح القائمة التي حُسب منها، واختبار الخادم يتحقق أن العدد = طول القائمة.
+
+### أخطاء محلولة
+- «المتأخرة» في اللوحة ≠ قائمتها (القائمة شملت المغلقة) ← استبعاد المغلقة في `listOrders`.
+- «قيد التجهيز» شمل ready_for_pickup بينما فلتره لا ← فصل مؤشر «جاهزة للتوصيل».

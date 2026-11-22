@@ -28,6 +28,7 @@
 | M13c | Playwright على بناء الإنتاج الحقيقي (Firebase SDK حقيقي، الشبكة مُحاكاة على الحافة): رحلة المحل كاملة، المدير والصلاحيات، توافق الجوال والخط الكبير؛ Chrome/جوال محلياً + Firefox/WebKit في CI | مغلقة | Playwright 6 محلياً |
 | M15 | الإنتاج يعمل: https://mawred.pages.dev والخادم mawred-api.dev-mr07.workers.dev، Firebase mawred-gaza | مغلقة | دخول حقيقي مُختبر |
 | M16 | v0.2.0: لوحة الإدارة الكاملة على Android، الطلب السريع ووحدة الطلب المعتادة، علامة مورد على الصور، كتالوج 131 صنفاً مسودات | مغلقة | خادم 179، ويب 23 + Playwright 6، Android 31 |
+| M17 | v0.3.0: تذكرني، نسخة محلية لكل مستخدم، الطلب المحفوظ يُرسل وحده مع إشعار، كل بطاقة تفتح تفاصيلها | مغلقة | خادم 179، ويب 32 + Playwright، Android 34 |
 | M14 | QA شامل، Web Push وFCM، تقرير الأمان، اختبار استعادة، الأدلة، v1.0.0، MFA | قادمة | — |
 
 التفاصيل وشروط إغلاق كل وحدة: [`docs/roadmap.md`](docs/roadmap.md) · المتطلبات وحالتها: [`docs/requirements-checklist.md`](docs/requirements-checklist.md)

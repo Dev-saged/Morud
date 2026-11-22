@@ -55,13 +55,24 @@ class AuthRepository(private val store: SessionStore, private val identity: Iden
     private var tokens: Tokens? = null
     private val lock = Mutex()
     lateinit var api: Api
+    /** false = الجلسة في الذاكرة فقط وتنتهي بإغلاق التطبيق. */
+    private var remember = true
+
+    private suspend fun persist(t: Tokens?, u: SessionUser?) { if (remember) store.save(t, u) else store.save(null, null) }
+
+    private fun signedIn(u: SessionUser, offline: Boolean = false) {
+        api.scope = u.uid
+        _state.value = SessionState.SignedIn(u, offline)
+    }
+
+    suspend fun loginPrefs() = store.loginPrefs()
 
     /** رمز صالح لدقيقة على الأقل؛ يُحدَّث تلقائياً. */
     suspend fun idToken(): String? = lock.withLock {
         val t = tokens ?: return null
         if (t.expiresAt - now() > 60_000) return t.idToken
         return try {
-            identity.refresh(t.refreshToken).also { tokens = it; store.save(it, (state.value as? SessionState.SignedIn)?.user) }.idToken
+            identity.refresh(t.refreshToken).also { tokens = it; persist(it, (state.value as? SessionState.SignedIn)?.user) }.idToken
         } catch (e: ApiException) {
             if (e.code == "NETWORK") t.idToken else { signOutLocal(); null }
         }
@@ -70,28 +81,31 @@ class AuthRepository(private val store: SessionStore, private val identity: Iden
     suspend fun restore() {
         val (t, u) = store.load()
         tokens = t
-        if (t == null || u == null) { _state.value = SessionState.SignedOut; return }
-        _state.value = SessionState.SignedIn(u, offline = true)
+        // بلا جلسة محفوظة (خروج أو «بدون تذكر»): لا تبقى بيانات أي حساب سابق على جهاز قد يكون مشتركاً
+        if (t == null || u == null) { api.cache?.clearAll(); _state.value = SessionState.SignedOut; return }
+        signedIn(u, offline = true)
         refreshUser()
     }
 
     suspend fun refreshUser() {
         try {
             val u = ApiJson.decodeFromJsonElement(SessionUser.serializer(), api.get("/auth/me")["user"]!!)
-            store.save(tokens, u)
-            _state.value = SessionState.SignedIn(u)
+            persist(tokens, u)
+            signedIn(u)
         } catch (e: ApiException) {
             if (e.status == 401 || e.status == 403) signOutLocal()
         }
     }
 
-    suspend fun login(identifier: String, password: String) {
+    suspend fun login(identifier: String, password: String, remember: Boolean = true) {
         val r = api.request("POST", "/auth/login", buildJsonObject { put("identifier", identifier.trim()); put("password", password) }, auth = false)
         val t = identity.exchange(r["customToken"]!!.jsonPrimitive.content)
         val u = ApiJson.decodeFromJsonElement(SessionUser.serializer(), r["user"]!!)
         tokens = t
-        store.save(t, u)
-        _state.value = SessionState.SignedIn(u)
+        this.remember = remember
+        store.saveLoginPrefs(LoginPrefs(if (remember) identifier.trim() else "", remember))
+        persist(t, u)
+        signedIn(u)
     }
 
     suspend fun changePassword(newPassword: String) {
@@ -105,8 +119,12 @@ class AuthRepository(private val store: SessionStore, private val identity: Iden
     suspend fun logout() = signOutLocal()
 
     private suspend fun signOutLocal() {
+        val uid = (state.value as? SessionState.SignedIn)?.user?.uid
         tokens = null
+        api.scope = null
         store.save(null, null)
+        uid?.let { api.cache?.clearScope(it) }
+        api.stale.value = null
         _state.value = SessionState.SignedOut
     }
 }

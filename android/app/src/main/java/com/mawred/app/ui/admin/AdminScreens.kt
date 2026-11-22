@@ -33,6 +33,9 @@ import com.mawred.app.ui.theme.Tabular
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.Alignment
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
@@ -54,26 +57,50 @@ class DashboardViewModel @Inject constructor(private val api: Api, val states: O
     }
 }
 
-private val KPIS = listOf(
-    "ordersToday" to "طلبات اليوم", "new" to "جديدة", "review" to "قيد المراجعة", "preparing" to "قيد التجهيز", "overdue" to "متأخرة", "delivering" to "قيد التوصيل",
-    "completed" to "مكتملة", "salesToday" to "مبيعات اليوم", "collectedToday" to "المحصّل اليوم", "totalDue" to "المستحق على المحلات", "activeShops" to "محلات نشطة",
+/** المؤشر ← (التبويب، ما يُفتح فيه): كل رقم يفتح القائمة نفسها التي حُسب منها. */
+data class KpiDef(val key: String, val label: String, val tab: String, val focus: Focus)
+val KPIS = listOf(
+    KpiDef("ordersToday", "طلبات اليوم", "adminOrders", Focus("today")), KpiDef("new", "جديدة", "adminOrders", Focus("new")),
+    KpiDef("review", "قيد المراجعة", "adminOrders", Focus("review")), KpiDef("preparing", "قيد التجهيز", "adminOrders", Focus("preparing")),
+    KpiDef("ready", "جاهزة للتوصيل", "adminOrders", Focus("ready")), KpiDef("overdue", "متأخرة", "adminOrders", Focus("overdue")),
+    KpiDef("delivering", "قيد التوصيل", "adminOrders", Focus("delivering")), KpiDef("completed", "مكتملة", "adminOrders", Focus("completed")),
+    KpiDef("salesToday", "مبيعات اليوم", "adminMore", Focus(id = "reports")), KpiDef("collectedToday", "المحصّل اليوم", "adminMore", Focus(id = "finance")),
+    KpiDef("totalDue", "المستحق على المحلات", "adminMore", Focus(id = "finance")), KpiDef("activeShops", "محلات نشطة", "adminMore", Focus(id = "shops")),
+    KpiDef("availableProducts", "منتجات متاحة", "adminProducts", Focus("available")), KpiDef("unavailableProducts", "غير متوفرة", "adminProducts", Focus("unavailable")),
 )
 private val MONEY = setOf("salesToday", "collectedToday", "totalDue")
 
 @Composable
-fun DashboardScreen(vm: DashboardViewModel, padding: PaddingValues) {
+fun DashboardScreen(vm: DashboardViewModel, padding: PaddingValues, canOpen: (String, Focus) -> Boolean = { _, _ -> false }, go: (String, Focus) -> Unit = { _, _ -> }) {
     val ui by vm.ui.collectAsStateWithLifecycle()
     val d = ui.data
     LazyVerticalGrid(GridCells.Adaptive(150.dp), Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item(span = { GridItemSpan(maxLineSpan) }) { Column { Text("لوحة المعلومات", style = MaterialTheme.typography.headlineMedium); ErrorText(ui.error) } }
         if (d == null) items(List(6) { it }) { Skeleton() }
         else {
-            items(KPIS.filter { d[it.first] != null }, key = { it.first }) { (k, label) ->
-                val v = d[k]!!.jsonPrimitive.longOrNull ?: 0
-                Kpi(label, if (k in MONEY) Money.format(v) else v.toString(), alert = k == "overdue" && v > 0)
+            items(KPIS.filter { d[it.key] != null }, key = { it.key }) { k ->
+                val v = d[k.key]!!.jsonPrimitive.longOrNull ?: 0
+                Kpi(k.label, if (k.key in MONEY) Money.format(v) else v.toString(), alert = k.key == "overdue" && v > 0, onClick = if (canOpen(k.tab, k.focus)) ({ go(k.tab, k.focus) }) else null)
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Card { Column { Text("الطلبات آخر 7 أيام", style = MaterialTheme.typography.labelMedium, color = Mawred.colors.mute); Sparkline(d["ordersLast7Days"]?.jsonArray?.map { it.jsonPrimitive.long }.orEmpty()) } }
+                val m = if (canOpen("adminMore", Focus(id = "reports"))) Modifier.clickable(onClickLabel = "فتح التقارير") { go("adminMore", Focus(id = "reports")) } else Modifier
+                Card(m) { Column { Text("الطلبات آخر 7 أيام", style = MaterialTheme.typography.labelMedium, color = Mawred.colors.mute); Sparkline(d["ordersLast7Days"]?.jsonArray?.map { it.jsonPrimitive.long }.orEmpty()) } }
+            }
+            val top = d["topProducts"]?.jsonArray.orEmpty()
+            if (top.isNotEmpty()) item(span = { GridItemSpan(maxLineSpan) }) {
+                Card {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text("الأكثر طلباً اليوم", style = MaterialTheme.typography.titleMedium)
+                        top.forEach { e ->
+                            val p = e.jsonObject
+                            val name = p["name"]?.jsonPrimitive?.content.orEmpty()
+                            Row(Modifier.fillMaxWidth().heightIn(min = 44.dp).then(if (canOpen("adminProducts", Focus())) Modifier.clickable { go("adminProducts", Focus(query = name)) } else Modifier), verticalAlignment = Alignment.CenterVertically) {
+                                Text(name, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                                Text(p["count"]?.jsonPrimitive?.content.orEmpty(), style = MaterialTheme.typography.bodySmall.merge(Tabular), color = Mawred.colors.mute)
+                            }
+                        }
+                    }
+                }
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Card {
@@ -81,7 +108,8 @@ fun DashboardScreen(vm: DashboardViewModel, padding: PaddingValues) {
                         Text("أحدث الطلبات", style = MaterialTheme.typography.titleMedium)
                         d["recent"]?.jsonArray?.forEach { e ->
                             val o = e.jsonObject
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            val id = o["id"]?.jsonPrimitive?.content
+                            Row(Modifier.fillMaxWidth().heightIn(min = 44.dp).then(if (id != null && canOpen("adminOrders", Focus())) Modifier.clickable(onClickLabel = "فتح الطلب") { go("adminOrders", Focus("all", id)) } else Modifier), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Text(o["number"]?.jsonPrimitive?.content.orEmpty(), style = MaterialTheme.typography.bodySmall.merge(Tabular))
                                 Text(o["shopName"]?.jsonPrimitive?.content.orEmpty(), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
                                 Text(vm.states.label(o["status"]?.jsonPrimitive?.content.orEmpty()), style = MaterialTheme.typography.labelMedium, color = Mawred.colors.primary)

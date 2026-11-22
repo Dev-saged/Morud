@@ -68,7 +68,7 @@ class OrdersTest {
     @Test fun sentClearsOutboxWithKey() = runTest {
         val ob = FakeOutbox(); val r = repo(ob)
         val res = r.submit(r.body("s1", lines, "cash", "", null), "KEY1")
-        assertEquals(SubmitResult.Sent("o1"), res)
+        assertEquals("o1", (res as SubmitResult.Sent).orderId)
         assertTrue(ob.items.isEmpty())
         val req = seen.last()
         assertEquals("KEY1", req.getHeader("idempotency-key"))
@@ -86,9 +86,21 @@ class OrdersTest {
         mode = "down"
         assertTrue(repo(ob).flush())
         mode = "ok"
-        assertFalse(repo(ob).flush())
+        val sent = mutableListOf<SubmitResult.Sent>()
+        assertFalse(repo(ob).flush(onSent = { sent += it }))
+        assertEquals("الإشعار يحمل رقم الطلب وعدد الأصناف", listOf("o1"), sent.map { it.orderId })
+        assertEquals(lines.size, sent[0].items)
         assertTrue(ob.items.isEmpty())
         assertTrue(seen.filter { it.requestUrl!!.encodedPath == "/orders" }.all { it.getHeader("idempotency-key") == "KEY2" })
+    }
+
+    @Test fun flushReportsServerRejection() = runTest {
+        val ob = FakeOutbox()
+        ob.add(OutboxItem("KEY9", "/orders", repo(ob).body("s1", lines, "credit", "", null).toString(), 1))
+        mode = "limit"
+        val rejected = mutableListOf<String>()
+        assertFalse(repo(ob).flush(onRejected = { rejected += it }))
+        assertEquals(listOf("يتجاوز الحد"), rejected)
     }
 
     @Test fun priceChangeWaitsForUserThenSendsSeenTotalSameKey() = runTest {
@@ -99,7 +111,7 @@ class OrdersTest {
         assertFalse(r.flush())
         assertEquals("flush يتخطى ما ينتظر قرار المستخدم", before, seen.size)
         mode = "ok"
-        assertEquals(SubmitResult.Sent("o1"), r.acceptPrice("KEY3", 900))
+        assertEquals("o1", (r.acceptPrice("KEY3", 900) as SubmitResult.Sent).orderId)
         val req = seen.last()
         assertEquals("KEY3", req.getHeader("idempotency-key"))
         val b = Json.parseToJsonElement(req.body.readUtf8()).jsonObject

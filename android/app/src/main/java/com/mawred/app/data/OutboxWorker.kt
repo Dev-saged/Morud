@@ -23,7 +23,14 @@ interface OutboxEntry { fun orders(): OrderRepository }
 class OutboxWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
     override suspend fun doWork(): Result {
         val repo = EntryPointAccessors.fromApplication(applicationContext, OutboxEntry::class.java).orders()
-        return runCatching { if (repo.flush()) Result.retry() else Result.success() }.getOrElse { Result.retry() }
+        val ctx = applicationContext
+        return runCatching {
+            val retry = repo.flush(
+                onSent = { s -> Notifier.show(ctx, s.orderId.hashCode(), "أُرسل طلبك", "طلبك المحفوظ${if (s.items > 0) " (${s.items} صنف)" else ""} وصل للمورد${if (s.number.isNotBlank()) " برقم ${s.number}" else ""}.") },
+                onRejected = { m -> Notifier.show(ctx, m.hashCode(), "طلب يحتاج مراجعة", m) },
+            )
+            if (retry) Result.retry() else Result.success()
+        }.getOrElse { Result.retry() }
     }
 
     companion object {

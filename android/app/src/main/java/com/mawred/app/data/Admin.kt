@@ -15,7 +15,7 @@ import kotlinx.serialization.json.put
 
 /** عمليات الإدارة والمندوب على Android؛ كل كتابة عبر الخادم بصلاحياته. */
 class AdminRepository(private val api: Api) {
-    suspend fun orders(filter: String): List<AdminOrder> = api.get("/orders?filter=$filter")["orders"]!!.jsonArray.map { ApiJson.decodeFromJsonElement(AdminOrder.serializer(), it) }
+    suspend fun orders(filter: String): List<AdminOrder> = api.get(if (filter == "all") "/orders" else "/orders?filter=$filter")["orders"]!!.jsonArray.map { ApiJson.decodeFromJsonElement(AdminOrder.serializer(), it) }
 
     suspend fun agents(): List<Agent> = api.get("/delivery/board")["agents"]?.jsonArray?.map { ApiJson.decodeFromJsonElement(Agent.serializer(), it) }.orEmpty()
 

@@ -28,6 +28,15 @@ interface CacheDao {
     @Query("SELECT * FROM cache WHERE `key` = :key") suspend fun get(key: String): CacheEntry?
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun put(e: CacheEntry)
     @Query("DELETE FROM cache") suspend fun clear()
+    @Query("DELETE FROM cache WHERE `key` LIKE :prefix || '%'") suspend fun clearPrefix(prefix: String)
+}
+
+/** النسخ المحفوظة في Room؛ المفتاح «uid|path» فلا يرى حساب بيانات حساب آخر على جهاز مشترك. */
+class RoomReadCache(private val dao: CacheDao, private val now: () -> Long = System::currentTimeMillis) : com.mawred.app.data.api.ReadCache {
+    override suspend fun get(key: String) = dao.get("r:$key")?.let { it.json to it.at }
+    override suspend fun put(key: String, json: String) = dao.put(CacheEntry("r:$key", json, now()))
+    override suspend fun clearScope(scope: String) = dao.clearPrefix("r:$scope|")
+    override suspend fun clearAll() = dao.clearPrefix("r:")
 }
 
 @Dao

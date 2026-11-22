@@ -118,7 +118,8 @@ fun CartScreen(rows: List<CartRow>, checkout: CheckoutUi, vm: ShopViewModel, pad
             confirmButton = { TextButton(vm::acceptPrice) { Text("موافق، أرسل") } },
             dismissButton = { TextButton(vm::rejectPrice) { Text("إلغاء") } })
     }
-    if (rows.isEmpty()) { if (checkout.queued) Box(Modifier.padding(16.dp)) { Notice("حُفظ الطلب وسيُرسل تلقائياً عند عودة الاتصال") } else Empty("السلة فارغة"); return }
+    com.mawred.app.ui.common.AskNotifyWhen(checkout.queued)
+    if (rows.isEmpty()) { if (checkout.queued) Box(Modifier.padding(16.dp)) { Notice("حُفظ الطلب وسيُرسل تلقائياً عند عودة الاتصال، وبيوصلك إشعار لما يوصل") } else Empty("السلة فارغة"); return }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, padding.calculateBottomPadding() + 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         item { Notice("مسودة محفوظة على الجهاز — تبقى حتى بلا نت") }
         items(rows, key = { "${it.line.productId}|${it.line.unitId}" }) { r ->
