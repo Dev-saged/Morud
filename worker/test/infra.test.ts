@@ -79,6 +79,19 @@ describe('Google JWT', () => {
     expect(await accessToken(sa, 's', g as never, 10_000, store)).toBe('AT2');
     expect(g).not.toHaveBeenCalled();
     expect(await accessToken(sa, 's', g as never, 3_550_000, store)).toBe('NEW');
+    // KV معطّل قراءةً وكتابةً: يُطلب رمز جديد ويعمل كل شيء
+    resetJwksCache();
+    const broken = { get: async () => { throw new Error('down'); }, put: async () => { throw new Error('down'); } };
+    const h = vi.fn(async () => res({ access_token: 'B', expires_in: 3600 }));
+    expect(await accessToken(sa, 's', h as never, 0, broken)).toBe('B');
+    // رمز منتهٍ في KV يُتجاهل
+    resetJwksCache();
+    kv.clear();
+    const k = vi.fn(async () => res({ access_token: 'C', expires_in: 3600 }));
+    await accessToken(sa, 's', k as never, 0, store);
+    resetJwksCache();
+    expect(await accessToken(sa, 's', k as never, 3_590_000, store)).toBe('C');
+    expect(k).toHaveBeenCalledTimes(2);
   });
 });
 
