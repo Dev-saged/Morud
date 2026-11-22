@@ -1,13 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Api } from '../src/lib/api';
-import { cacheGet, clearOffline } from '../src/lib/offline';
+import { cleanup as cleanupAll } from '@testing-library/react';
+import { cacheGet, clearOffline, resetMemCache } from '../src/lib/offline';
 import { enqueue, flushOutbox, readOutbox } from '../src/lib/outbox';
 import { rememberedLogin, rememberLogin } from '../src/lib/session';
 
 const ok = (b: unknown) => new Response(JSON.stringify(b), { status: 200, headers: { 'content-type': 'application/json' } });
 const down = () => Promise.reject(new TypeError('Failed to fetch'));
 
-beforeEach(() => localStorage.clear());
+beforeEach(() => { localStorage.clear(); resetMemCache(); });
 
 describe('تذكرني', () => {
   it('يحفظ المعرّف فقط ويمسحه عند عدم التذكر', () => {
@@ -78,6 +79,27 @@ describe('الجهاز المشترك', () => {
     const { waitFor } = await import('@testing-library/react');
     await waitFor(() => expect(cacheGet('u9', '/shops/s/orders')).toBeNull());
     expect(localStorage.getItem('mawred.user.v1')).toBeNull();
+  });
+});
+
+describe('الفتح الفوري', () => {
+  it('من اختار «تذكرني» تظهر واجهته فوراً بآخر بيانات قبل رد الخادم، ولو انتهت جلسته يعود للدخول', async () => {
+    const { cacheUser, cachePut } = await import('../src/lib/offline');
+    const { mount, json, shopUser, catalog } = await import('./helpers');
+    const { screen, waitFor } = await import('@testing-library/react');
+    cacheUser(shopUser);
+    cachePut(shopUser.uid, '/catalog', catalog);
+    localStorage.setItem('mawred.login.v1', JSON.stringify({ identifier: 'abu', remember: true }));
+    mount({ 'GET /auth/me': () => json({ user: shopUser }), 'GET /catalog': () => json(catalog) }, true);
+    // قبل أي رد: الكتالوج المحفوظ ظاهر
+    expect(await screen.findByRole('button', { name: 'تفاصيل جبنة فيتا' }, { timeout: 300 })).toBeTruthy();
+    cleanupAll();
+    // جلسة منتهية عند مزود الهوية: يرجع لشاشة الدخول ويمسح المحفوظ
+    cacheUser(shopUser);
+    localStorage.setItem('mawred.login.v1', JSON.stringify({ identifier: 'abu', remember: true }));
+    mount({}, false);
+    expect(await screen.findByLabelText('المعرّف')).toBeTruthy();
+    await waitFor(() => expect(localStorage.getItem('mawred.user.v1')).toBeNull());
   });
 });
 

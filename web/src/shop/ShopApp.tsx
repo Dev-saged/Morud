@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { defaultUnit, findUnit, type Product } from '../../../worker/src/domain/catalog';
 import { parseQuickOrder, type QuickResult } from '../../../worker/src/domain/quickorder';
 import { priceCart } from '../../../worker/src/domain/pricing';
@@ -8,6 +8,7 @@ import { ApiError, type Api } from '../lib/api';
 import { cartCount, cartReducer, loadCart, saveCart } from '../lib/cart';
 import { formatDate, formatDuration, formatMoney, formatQty, STAGES, STATUS, stageIndex } from '../lib/format';
 import { useSession } from '../lib/session';
+import { openPrintable } from '../lib/print';
 import { askNotifyPermission, dropQueued, enqueue, useOutbox, type Queued } from '../lib/outbox';
 import { Icon, LogoMark } from '../ui/Icons';
 import { Hero, Ring, Tile } from '../ui/Desk';
@@ -44,6 +45,12 @@ export function ShopApp() {
     navigator.vibrate?.(12);
   };
 
+  // دوال ثابتة: بطاقات المنتجات لا يُعاد رسمها كلها مع كل تغيير في السلة
+  const flyRef = useRef(fly);
+  flyRef.current = fly;
+  const onAdd = useCallback((p: string, u: string, q: number, el: HTMLElement) => { dispatch({ type: 'add', productId: p, unitId: u, qtyMilli: q }); flyRef.current(el); setToast('أُضيف إلى السلة'); }, []);
+  const onAddMany = useCallback((lines: QuickResult['lines']) => { for (const l of lines) dispatch({ type: 'add', productId: l.productId, unitId: l.unitId, qtyMilli: l.qtyMilli }); setToast(`أُضيف ${lines.length} صنف إلى السلة`); }, []);
+
   return (
     <div className="shop">
       <header className="shop-head">
@@ -52,10 +59,9 @@ export function ShopApp() {
         <Bell light onOpen={(r) => { if (r.kind === 'order') { setTab('orders'); setOpenOrder(r.id); } else if (r.kind === 'shop' || r.kind === 'ticket') setTab('account'); else setTab('home'); }} />
       </header>
       <main className="shop-main">
-        {tab === 'home' && cat && <ShopDesk cat={cat} shopId={shopId} pending={queue.length} openOrders={() => { setTab('orders'); setOpenOrder(null); }} openOrder={(id) => { setTab('orders'); setOpenOrder(id); }} openAccount={() => setTab('account')}
-          reorder={(p, u, q) => { dispatch({ type: 'add', productId: p, unitId: u, qtyMilli: q }); setToast('أُضيف إلى السلة'); }} />}
-        {tab === 'home' && cat && <Home cat={cat} onAdd={(p, u, q, el) => { dispatch({ type: 'add', productId: p, unitId: u, qtyMilli: q }); fly(el); setToast('أُضيف إلى السلة'); }}
-          onAddMany={(lines) => { for (const l of lines) dispatch({ type: 'add', productId: l.productId, unitId: l.unitId, qtyMilli: l.qtyMilli }); setToast(`أُضيف ${lines.length} صنف إلى السلة`); }} />}
+        {cat && <div hidden={tab !== 'home'}><ShopDesk cat={cat} shopId={shopId} pending={queue.length} openOrders={() => { setTab('orders'); setOpenOrder(null); }} openOrder={(id) => { setTab('orders'); setOpenOrder(id); }} openAccount={() => setTab('account')}
+          reorder={(p, u, q) => { dispatch({ type: 'add', productId: p, unitId: u, qtyMilli: q }); setToast('أُضيف إلى السلة'); }} />
+        <Home cat={cat} onAdd={onAdd} onAddMany={onAddMany} /></div>}
         {tab === 'cart' && cat && <CartView cat={cat} cart={cart} dispatch={dispatch} shopId={shopId} onDone={(id) => { setTab('orders'); setOpenOrder(id); }} onQueued={() => { setTab('orders'); setToast('حُفظ الطلب وسيُرسل تلقائياً عند عودة النت'); }} />}
         {tab === 'orders' && (openOrder ? <OrderDetail id={openOrder} back={() => setOpenOrder(null)} /> : <>
           {queue.length > 0 && <Outbox queue={queue} uid={user!.uid} flush={flush} restore={(q) => { for (const l of q.body.items as Array<{ productId: string; unitId: string; qtyMilli: number }>) dispatch({ type: 'add', ...l }); dropQueued(user!.uid, q.key); setTab('cart'); }} />}
@@ -136,11 +142,43 @@ export function QuickOrder({ cat, onAddMany }: { cat: Catalog; onAddMany: (lines
   );
 }
 
+/** وصف قصير للعرض يظهر على البطاقة وفي شريط العروض. */
+export function promoLabel(p: NonNullable<Catalog['promotions']>[number]): string {
+  const pct = p.percentBp ? `${(p.percentBp / 100).toLocaleString('ar-EG')}٪` : '';
+  switch (p.type) {
+    case 'item_percent': return `خصم ${pct}`;
+    case 'item_amount': return `خصم ${formatMoney(p.amountPerUnit ?? 0)} للوحدة`;
+    case 'qty_percent': return `${pct} عند ${formatQty(p.minQtyMilli ?? 0)} فأكثر`;
+    case 'bxgy': return `اشترِ ${p.buyQty} واحصل على ${p.getQty}`;
+    case 'bundle_percent': return `${pct} على المجموعة`;
+    default: return 'عرض';
+  }
+}
+
+type CatProduct = Catalog['products'][number];
+
 function Home({ cat, onAdd, onAddMany }: { cat: Catalog; onAdd: (p: string, u: string, q: number, el: HTMLElement) => void; onAddMany: (lines: QuickResult['lines']) => void }) {
   const [q, setQ] = useState('');
+  // الكتابة في البحث فورية؛ فلترة المنتجات تلحقها دون أن تعطّل لوحة المفاتيح
+  const query = useDeferredValue(q);
   const [category, setCategory] = useState<string | null>(null);
   const [onlyAvailable, setOnlyAvailable] = useState(false);
-  const list = useMemo(() => cat.products.filter((p) => (!category || p.categoryId === category) && (!onlyAvailable || p.available) && matches(q, p)).sort((a, b) => Number(b.available) - Number(a.available) || (a.order ?? 999) - (b.order ?? 999)), [cat, q, category, onlyAvailable]);
+  const [promoFilter, setPromoFilter] = useState<string | null>(null);
+  const now = Date.now();
+  const promos = useMemo(() => (cat.promotions ?? []).filter((p) => p.startsAt <= now && p.endsAt > now), [cat, Math.floor(now / 60_000)]);
+  const promoOf = useMemo(() => { const m = new Map<string, string>(); for (const p of promos) for (const id of p.productIds) if (!m.has(id)) m.set(id, promoLabel(p)); return m; }, [promos]);
+  const byId = useMemo(() => new Map(cat.products.map((p) => [p.id, p])), [cat]);
+  const activePromo = promos.find((p) => p.id === promoFilter) ?? null;
+  const list = useMemo(() => cat.products.filter((p) => (!category || p.categoryId === category) && (!onlyAvailable || p.available) && (!activePromo || activePromo.productIds.includes(p.id)) && matches(query, p)).sort((a, b) => Number(b.available) - Number(a.available) || (a.order ?? 999) - (b.order ?? 999)), [cat, query, category, onlyAvailable, activePromo]);
+  const browsing = !query && !category && !activePromo;
+  const featured = useMemo(() => cat.products.filter((p) => p.featured && p.available).slice(0, 12), [cat]);
+  const popular = useMemo(() => (cat.popular ?? []).map((id) => byId.get(id)).filter((p): p is CatProduct => !!p && p.available), [cat, byId]);
+  const rail = (title: string, items: CatProduct[]) => items.length > 0 && (
+    <section className="rail-block" aria-label={title}>
+      <h2 className="rail-title">{title}</h2>
+      <div className="rail">{items.map((p) => <ProductCard key={p.id} p={p} units={cat.units} promo={promoOf.get(p.id)} onAdd={onAdd} />)}</div>
+    </section>
+  );
   return (
     <>
       <QuickOrder cat={cat} onAddMany={onAddMany} />
@@ -150,14 +188,27 @@ function Home({ cat, onAdd, onAddMany }: { cat: Catalog; onAdd: (p: string, u: s
         {cat.categories.map((c) => <button key={c.id} className={category === c.id ? 'chip on' : 'chip'} onClick={() => setCategory(c.id)}>{c.name}</button>)}
         <label className="chip"><input type="checkbox" checked={onlyAvailable} onChange={(e) => setOnlyAvailable(e.target.checked)} /> المتوفر فقط</label>
       </div>
+      {promos.length > 0 && !query && (
+        <section className="offers" aria-label="العروض والخصومات">
+          {promos.map((p) => (
+            <button key={p.id} className={`offer tap${promoFilter === p.id ? ' on' : ''}`} onClick={() => setPromoFilter(promoFilter === p.id ? null : p.id)} aria-pressed={promoFilter === p.id}>
+              <Icon name="tag" /><span><b>{p.name}</b><small>{promoLabel(p)} · حتى {formatDate(p.endsAt)}</small></span>
+            </button>
+          ))}
+        </section>
+      )}
+      {browsing && rail('منتجات مميزة', featured)}
+      {browsing && rail('الأكثر طلباً', popular)}
+      {browsing && (featured.length > 0 || popular.length > 0) && <h2 className="rail-title">كل المنتجات</h2>}
+      {activePromo && <p className="mute">منتجات عرض «{activePromo.name}» — {activePromo.productIds.length} صنف. {activePromo.terms}</p>}
       {list.length === 0 ? <p className="empty">لا توجد منتجات مطابقة. جرّب كلمة أقصر أو تصنيفاً آخر.</p> : (
-        <div className="grid">{list.map((p, i) => <ProductCard key={p.id} p={p} units={cat.units} style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }} onAdd={onAdd} />)}</div>
+        <div className="grid">{list.map((p, i) => <ProductCard key={p.id} p={p} units={cat.units} promo={promoOf.get(p.id)} delay={Math.min(i, 12) * 30} onAdd={onAdd} />)}</div>
       )}
     </>
   );
 }
 
-function ProductCard({ p, units, onAdd, style }: { p: Catalog['products'][number]; units: Catalog['units']; onAdd: (p: string, u: string, q: number, el: HTMLElement) => void; style?: React.CSSProperties }) {
+const ProductCard = memo(function ProductCard({ p, units, onAdd, delay, promo }: { p: Catalog['products'][number]; units: Catalog['units']; onAdd: (p: string, u: string, q: number, el: HTMLElement) => void; delay?: number; promo?: string }) {
   const [unitId, setUnit] = useState(defaultUnit(p)?.unitId ?? p.baseUnitId);
   const u = findUnit(p, unitId) ?? p.units[0]!;
   const [qty, setQty] = useState(u.minQtyMilli);
@@ -165,7 +216,8 @@ function ProductCard({ p, units, onAdd, style }: { p: Catalog['products'][number
   const img = p.images?.[0]?.thumb;
   const [details, setDetails] = useState(false);
   return (
-    <article className={`card product${p.available ? '' : ' off'}`} style={style}>
+    <article className={`card product${p.available ? '' : ' off'}`} style={delay ? { animationDelay: `${delay}ms` } : undefined}>
+      {promo && <span className="promo-badge">{promo}</span>}
       <button className="shelf tap" onClick={() => setDetails(true)} aria-label={`تفاصيل ${p.name}`}>{img ? <img src={`${API}/files/${img}`} alt="" loading="lazy" /> : <Icon name="box" size={48} />}</button>
       <h3><button className="name-btn" onClick={() => setDetails(true)}>{p.name}</button></h3>
       {details && <ProductSheet p={p} name={name} close={() => setDetails(false)} />}
@@ -181,7 +233,7 @@ function ProductCard({ p, units, onAdd, style }: { p: Catalog['products'][number
       ) : <p className="chip danger">غير متوفر حالياً</p>}
     </article>
   );
-}
+});
 
 function CartView({ cat, cart, dispatch, shopId, onDone, onQueued }: { cat: Catalog; cart: ReturnType<typeof loadCart>; dispatch: React.Dispatch<Parameters<typeof cartReducer>[1]>; shopId: string; onDone: (id: string) => void; onQueued: () => void }) {
   const { api, user } = useSession();
@@ -189,7 +241,8 @@ function CartView({ cat, cart, dispatch, shopId, onDone, onQueued }: { cat: Cata
   const [error, setError] = useState('');
   const [changed, setChanged] = useState<number | null>(null);
   const products = useMemo(() => new Map(cat.products.map((p) => [p.id, p])), [cat]);
-  const preview = priceCart(cart.lines, products, new Map(cat.units.map((u) => [u.id, u.name])), [], Date.now());
+  // نفس محرك الخادم ونفس العروض الفعالة: الإجمالي المعروض هو ما سيُعتمد، فلا «تغيّرت الأسعار» كاذبة
+  const preview = priceCart(cart.lines, products, new Map(cat.units.map((u) => [u.id, u.name])), cat.promotions ?? [], Date.now());
   if (cart.lines.length === 0) return <p className="empty">السلة فارغة. أضف منتجات من الرئيسية.</p>;
   const total = preview.ok ? preview.value.total : null;
   async function send(accepted?: number) {
@@ -236,7 +289,11 @@ function CartView({ cat, cart, dispatch, shopId, onDone, onQueued }: { cat: Cata
         <label><input type="radio" checked={cart.paymentMethod === 'credit'} onChange={() => dispatch({ type: 'method', value: 'credit' })} /> آجل على الحساب</label>
       </fieldset>
       <label>ملاحظات<textarea value={cart.notes} onChange={(e) => dispatch({ type: 'notes', value: e.target.value })} rows={2} /></label>
-      <div className="total"><span>الإجمالي التقديري</span><b className="num">{total !== null ? formatMoney(total) : '—'}</b></div>
+      {preview.ok && preview.value.discount > 0 && <>
+        <div className="total sub"><span>قبل الخصم</span><span className="num">{formatMoney(preview.value.subtotal)}</span></div>
+        <div className="total sub ok-text"><span>خصم العروض</span><span className="num">− {formatMoney(preview.value.discount)}</span></div>
+      </>}
+      <div className="total"><span>الإجمالي</span><b className="num">{total !== null ? formatMoney(total) : '—'}</b></div>
       {changed !== null && (
         <div className="notice" role="alert"><p>تغيّرت الأسعار منذ إعداد السلة. الإجمالي الجديد <b className="num">{formatMoney(changed)}</b>.</p>
           <button className="btn primary" onClick={() => { const v = changed; setChanged(null); void send(v); }}>موافق، أرسل بالسعر الجديد</button></div>
@@ -318,17 +375,23 @@ function OrderList({ shopId, open }: { shopId: string; open: (id: string) => voi
 
 function OrderDetail({ id, back }: { id: string; back: () => void }) {
   const { api } = useSession();
-  const [d, setD] = useState<any>(null);
+  const [d, setD] = useState<any>(() => api.cached(`/orders/${id}`));
   const [reason, setReason] = useState('');
   const [now, setNow] = useState(Date.now());
-  const load = () => api.get(`/orders/${id}`).then(setD);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const load = () => api.get(`/orders/${id}`).then((v) => { setD(v); setError(''); }).catch((e: Error) => setError(e.message));
   useEffect(() => { void load(); const t = setInterval(() => setNow(Date.now()), 30_000); return () => clearInterval(t); }, [id]);
-  if (!d) return <div className="skeleton" aria-busy="true" />;
+  if (!d) return error ? <section><button className="link" onClick={back}><Icon name="chevron" flip /> طلباتي</button><p className="error" role="alert">{error}</p><button className="btn" onClick={() => void load()}>إعادة المحاولة</button></section> : <div className="skeleton" aria-busy="true" />;
   const o = d.order;
   const sla = o.sla;
   const prog = sla ? slaProgress(sla, now) : null;
   const idx = stageIndex(o.status);
-  const act = async (to: string, extra: object = {}) => { await api.post(`/orders/${id}/transition`, { to, reason, ...extra }, crypto.randomUUID().replace(/-/g, '')); setReason(''); await load(); };
+  const act = async (to: string, extra: object = {}) => {
+    if (busy) return;
+    setBusy(true); setError('');
+    try { await api.post(`/orders/${id}/transition`, { to, reason, ...extra }, crypto.randomUUID().replace(/-/g, '')); setReason(''); await load(); } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
+  };
   return (
     <section>
       <button className="link" onClick={back}><Icon name="chevron" flip /> طلباتي</button>
@@ -348,9 +411,10 @@ function OrderDetail({ id, back }: { id: string; back: () => void }) {
       {d.actions.length > 0 && (
         <div className="actions">
           {d.actions.some((a: any) => a.reason) && <input placeholder="السبب" value={reason} onChange={(e) => setReason(e.target.value)} />}
-          {d.actions.map((a: any) => <button key={a.to} className={a.to === 'confirmed' ? 'btn primary' : 'btn'} onClick={() => void act(a.to)}>{a.to === 'confirmed' ? 'موافقة على التعديل' : a.to === 'under_review' ? 'رفض التعديل' : a.to === 'cancelled' ? 'إلغاء الطلب' : STATUS[a.to]?.label}</button>)}
+          {d.actions.map((a: any) => <button key={a.to} disabled={busy} className={a.to === 'confirmed' ? 'btn primary' : 'btn'} onClick={() => void act(a.to)}>{a.to === 'confirmed' ? 'موافقة على التعديل' : a.to === 'under_review' ? 'رفض التعديل' : a.to === 'cancelled' ? 'إلغاء الطلب' : STATUS[a.to]?.label}</button>)}
         </div>
       )}
+      {error && <p className="error" role="alert">{error}</p>}
       {o.invoiceId && <button className="btn ghost" onClick={() => void openPrintable(api, `/invoices/${o.invoiceId}/print`)}><Icon name="print" /> الفاتورة</button>}
       <details><summary>سجل الطلب</summary><ul>{d.history.map((h: any, i: number) => <li key={i}>{STATUS[h.to]?.label} — {formatDate(h.at)}{h.reason ? ` — ${h.reason}` : ''}</li>)}</ul></details>
     </section>
@@ -379,9 +443,3 @@ function Account({ shopId, onLogout }: { shopId: string; onLogout: () => Promise
 }
 
 /** صفحات الطباعة تتطلب الجلسة: تُجلب بالرمز وتُفتح كملف محلي للطباعة/الحفظ PDF/المشاركة. */
-export async function openPrintable(api: Api, path: string) {
-  const html = await api.request<string>('GET', path, undefined, { raw: true });
-  const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-  window.open(url, '_blank', 'noopener');
-  setTimeout(() => URL.revokeObjectURL(url), 60_000);
-}

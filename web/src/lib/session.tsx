@@ -57,8 +57,15 @@ export function rememberedLogin(): { identifier: string; remember: boolean } {
 
 export function SessionProvider({ backend, apiBase, children, fetchImpl }: { backend: AuthBackend; apiBase: string; children: ReactNode; fetchImpl?: typeof fetch }) {
   const api = useMemo(() => new Api(apiBase, () => backend.idToken(), fetchImpl), [apiBase, backend, fetchImpl]);
-  const [user, setUser] = useState<User | null>(null);
-  const [ready, setReady] = useState(false);
+  // فتح فوري: من اختار «تذكرني» يرى واجهته مباشرة بآخر بيانات معروفة، والتحقق من الخادم يجري بالخلفية
+  // (الخادم يفرض الصلاحيات في كل طلب؛ لو أُوقف الحساب أو انتهت الجلسة يخرج فوراً عند أول رد)
+  const optimistic = useMemo(() => {
+    const u = cachedUser<User>();
+    const r = (() => { try { return JSON.parse(localStorage.getItem(REMEMBER_KEY) ?? 'null'); } catch { return null; } })();
+    return u && r?.remember === true ? u : null;
+  }, []);
+  const [user, setUser] = useState<User | null>(() => { if (optimistic) api.scope = optimistic.uid; return optimistic; });
+  const [ready, setReady] = useState(optimistic !== null);
 
   const adoptUser = (u: User | null) => { api.scope = u?.uid ?? null; if (u) cacheUser(u); setUser(u); };
   const refresh = async () => {
@@ -77,6 +84,7 @@ export function SessionProvider({ backend, apiBase, children, fetchImpl }: { bac
 
   useEffect(() => backend.onReady(async (signedIn) => {
     if (signedIn) await refresh();
+    else if (optimistic) { clearOffline(optimistic.uid); adoptUser(null); }
     else {
       // جلسة «بدون تذكر» انتهت بإغلاق المتصفح: لا نُبقي بيانات صاحبها المحفوظة على جهاز قد يكون مشتركاً
       const stale = cachedUser<User>();

@@ -1,17 +1,29 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useSession } from '../lib/session';
 
 /** تحميل بيانات مع حالة خطأ وإعادة تحميل. */
+/**
+ * تحميل بيانات شاشة: تظهر آخر نسخة محفوظة فوراً (بلا انتظار ولا هيكل تحميل)،
+ * ثم تُستبدل بالحديثة بصمت عند وصولها. شاشة لم تُفتح من قبل تعرض هيكل التحميل.
+ */
 export function useLoad<T>(path: string | null) {
   const { api } = useSession();
-  const [data, setData] = useState<T | null>(null);
+  const [data, setData] = useState<T | null>(() => (path ? api.cached<T>(path) : null));
   const [error, setError] = useState('');
+  const current = useRef(path);
   const reload = useCallback(async () => {
     if (!path) return;
     setError('');
-    try { setData(await api.get<T>(path)); } catch (e: any) { setError(e.message); }
+    try {
+      const fresh = await api.get<T>(path);
+      if (current.current === path) setData(fresh);
+    } catch (e: any) { if (current.current === path) setError(e.message); }
   }, [api, path]);
-  useEffect(() => { setData(null); void reload(); }, [reload]);
+  useEffect(() => {
+    current.current = path;
+    setData(path ? api.cached<T>(path) : null);
+    void reload();
+  }, [reload, api, path]);
   return { data, error, reload };
 }
 

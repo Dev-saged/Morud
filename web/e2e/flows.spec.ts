@@ -28,7 +28,7 @@ test('صاحب المحل: دخول، بحث، سلة، إرسال بمنع ال
   await page.getByRole('button', { name: 'أضف جبنة فيتا بلدية إلى السلة' }).click();
   await expect(page.locator('.dot-badge')).toHaveText('1');
   await page.locator('.bottom-nav').getByRole('button', { name: /السلة/ }).click();
-  await expect(page.getByText('90.00 ₪').first()).toBeVisible();
+  await expect(page.locator('.total b')).toHaveText('90.00 ₪');
   await page.getByRole('button', { name: 'تأكيد وإرسال الطلب' }).click();
   await expect(page.getByText('MW-O-2026-000123')).toBeVisible();
   await expect(page.getByText(/متبقٍ/)).toBeVisible();
@@ -58,7 +58,7 @@ test('المدير: لوحة المعلومات ثم الطلبات والتقا
   await page.waitForTimeout(900);
   await page.screenshot({ path: 'test-results/admin-desk.png', fullPage: true });
   const nav = page.getByRole('navigation', { name: 'أقسام الإدارة' });
-  await expect(nav.getByRole('button')).toHaveText(['لوحة المعلومات', 'الطلبات', 'المحلات', 'التوصيل', 'التقارير']);
+  await expect(nav.getByRole('button')).toHaveText(['لوحة المعلومات', 'الطلبات', 'المحلات', 'التوصيل', 'التقارير', 'أمان حسابي']);
   await nav.getByRole('button', { name: 'الطلبات' }).click();
   await expect(page.getByRole('cell', { name: 'بقالة النور' })).toBeVisible();
   await nav.getByRole('button', { name: 'التقارير' }).click();

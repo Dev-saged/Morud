@@ -2,7 +2,7 @@ import type { Focus } from './AdminApp';
 import { useState } from 'react';
 import { formatMoney } from '../lib/format';
 import { useSession } from '../lib/session';
-import { openPrintable } from '../shop/ShopApp';
+import { openPrintable } from '../lib/print';
 import { Icon } from '../ui/Icons';
 import { Field, fromAgorot, Loading, toAgorot, useAction, useLoad } from './kit';
 

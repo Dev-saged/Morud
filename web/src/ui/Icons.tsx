@@ -1,7 +1,7 @@
 // عائلة أيقونات مورد: شبكة 24، خط 1.75، زوايا مدورة. الاتجاهية تنعكس في RTL عبر الصنف flip.
 import type { SVGProps } from 'react';
 
-const P: Record<string, string> = {
+const P = {
   home: 'M4 11.5 12 5l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1z',
   search: 'M11 4.5a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13zM16 16l4 4',
   cart: 'M3.5 5h2l2 10h10l2-7H7M9.5 19.5h.01M16.5 19.5h.01',
@@ -35,7 +35,9 @@ const P: Record<string, string> = {
   pin: 'M12 21s-6-5.5-6-10.5a6 6 0 1 1 12 0C18 15.5 12 21 12 21zM12 8.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
   phone: 'M6.5 4h3l1.5 4-2 1.5a10 10 0 0 0 5.5 5.5l1.5-2 4 1.5v3a1.5 1.5 0 0 1-1.5 1.5A15.5 15.5 0 0 1 5 5.5 1.5 1.5 0 0 1 6.5 4z',
   share: 'M12 4v11M8 8l4-4 4 4M5 13v6h14v-6',
-};
+  lock: 'M6.5 11h11a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1zM8.5 11V8a3.5 3.5 0 0 1 7 0v3M12 14.5v2',
+  list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
+} as const satisfies Record<string, string>;
 
 export type IconName = keyof typeof P;
 

@@ -257,6 +257,52 @@ describe('لوحة صاحب المحل', () => {
     await u.click(within(screen.getByText('اطلب مجدداً').closest('.panel') as HTMLElement).getByRole('button', { name: /جبنة فيتا/ }));
     expect(loadCart().lines).toEqual([{ productId: 'feta', unitId: 'carton', qtyMilli: 1000 }]);
     await u.click(screen.getByRole('button', { name: 'آخر طلب MW-7' }));
-    expect(await screen.findByText(/MW-7/)).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'MW-7' })).toBeTruthy();
+  });
+});
+
+describe('الرئيسية والعروض', () => {
+  it('تعرض العروض والمميزة والأكثر طلباً، والسلة تحسب الخصم كالخادم فيرسل الإجمالي الصحيح', async () => {
+    const now = Date.now();
+    const cat2 = {
+      ...catalog, ver: 'v1', popular: ['feta'],
+      products: catalog.products.map((p) => (p.id === 'feta' ? { ...p, featured: true } : p)),
+      promotions: [{ id: 'pr1', name: 'أسبوع الأجبان', type: 'item_percent', productIds: ['feta'], percentBp: 1000, startsAt: now - 1000, endsAt: now + 86_400_000, active: true, usedCount: 0 }],
+    };
+    let sent: any = null;
+    mount({ 'GET /auth/me': () => json({ user: shopUser }), 'GET /catalog': () => json(cat2), 'POST /orders': (init) => { sent = JSON.parse(String(init?.body)); return json({ order: { id: 'o1' } }, 201); } }, true);
+    const u = userEvent.setup();
+    expect(await screen.findByRole('button', { name: /أسبوع الأجبان/ })).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'منتجات مميزة' })).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'الأكثر طلباً' })).toBeTruthy();
+    expect(screen.getAllByText(/خصم ١٠٪/).length).toBeGreaterThan(0);
+    await u.click(screen.getByRole('button', { name: /أسبوع الأجبان/ }));
+    expect(screen.queryByRole('region', { name: 'منتجات مميزة' })).toBeNull();
+    await u.click(screen.getAllByRole('button', { name: 'أضف جبنة فيتا إلى السلة' })[0]!);
+    await u.click(within(screen.getByRole('navigation', { name: 'التنقل' })).getByRole('button', { name: /السلة/ }));
+    expect(screen.getByText('خصم العروض')).toBeTruthy();
+    await u.click(screen.getByRole('button', { name: 'تأكيد وإرسال الطلب' }));
+    await waitFor(() => expect(sent).not.toBeNull());
+    expect(sent.seenTotal).toBe(720);
+  });
+});
+
+describe('سجل العمليات', () => {
+  it('يعرض من عدّل السعر وما تغيّر، والضغط على العنصر يفلتر عملياته', async () => {
+    const log = { id: 'l1', at: Date.now(), action: 'products.price', actor: 'سامي', actorId: 'u9', entity: { kind: 'product', id: 'feta' }, result: 'ok', before: { price: 800, name: 'فيتا' }, after: { price: 900, name: 'فيتا' }, ip: '1.1.1.1', device: 'web' };
+    const { calls } = mount({
+      'GET /auth/me': () => json({ user: { ...adminUser, permissions: [...adminUser.permissions, 'audit.view'] } }),
+      'GET /dashboard/summary': () => json({}),
+      'GET /admin/users': () => json({ users: [{ uid: 'u9', displayName: 'سامي' }] }),
+      'GET /admin/audit': () => json({ logs: [log], next: null }),
+    }, true);
+    const u = userEvent.setup();
+    await u.click(await screen.findByRole('button', { name: /سجل العمليات/ }));
+    const item = (await screen.findByText('سامي', { selector: '.audit-head span' })).closest('li')!;
+    expect(within(item).getByText('تعديل سعر')).toBeTruthy();
+    await u.click(within(item).getByText('ما تغيّر (1)'));
+    expect(within(item).getByText('900')).toBeTruthy();
+    await u.click(within(item).getByRole('button', { name: /منتج feta/ }));
+    await waitFor(() => expect(calls.some(([p]) => p === '/admin/audit?entity=feta')).toBe(true));
   });
 });

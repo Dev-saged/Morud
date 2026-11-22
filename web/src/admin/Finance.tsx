@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { formatDate, formatMoney } from '../lib/format';
 import { useSession } from '../lib/session';
-import { openPrintable } from '../shop/ShopApp';
+import { openPrintable } from '../lib/print';
 import { Field, Loading, toAgorot, useAction, useLoad } from './kit';
 
 const INV_STATUS: Record<string, string> = { open: 'غير مدفوعة', partial: 'مدفوعة جزئياً', paid: 'مدفوعة', void: 'ملغاة' };

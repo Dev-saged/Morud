@@ -1,8 +1,17 @@
-import { AdminApp } from './admin/AdminApp';
-import { AgentApp } from './agent/AgentApp';
+import { lazy, Suspense } from 'react';
 import { useSession } from './lib/session';
 import { ChangePassword, Login } from './Login';
-import { ShopApp } from './shop/ShopApp';
+import { cachedUser } from './lib/offline';
+
+// كل واجهة في ملف منفصل: صاحب المحل لا ينزّل كود لوحة الإدارة، والملف يبدأ تنزيله فور فتح الموقع
+const load = { admin: () => import('./admin/AdminApp'), agent: () => import('./agent/AgentApp'), shop: () => import('./shop/ShopApp') };
+const AdminApp = lazy(() => load.admin().then((m) => ({ default: m.AdminApp })));
+const AgentApp = lazy(() => load.agent().then((m) => ({ default: m.AgentApp })));
+const ShopApp = lazy(() => load.shop().then((m) => ({ default: m.ShopApp })));
+{
+  const area = cachedUser<{ home?: string }>()?.home?.split('.')[0];
+  if (area === 'admin' || area === 'agent' || area === 'shop') void load[area]().catch(() => undefined);
+}
 import { InstallPrompt } from './ui/InstallPrompt';
 import { LogoMark } from './ui/Icons';
 import { useStale } from './lib/offline';
@@ -21,5 +30,5 @@ export function App() {
   if (!user) return <Login />;
   if (user.mustChangePassword) return <ChangePassword />;
   const area = user.home.split('.')[0];
-  return <>{area !== 'shop' && <StaleBanner />}{area === 'admin' ? <AdminApp /> : area === 'agent' ? <AgentApp /> : area === 'shop' ? <ShopApp /> : <p className="empty">لا توجد واجهة لحسابك، تواصل مع الإدارة.</p>}<InstallPrompt /></>;
+  return <>{area !== 'shop' && <StaleBanner />}<Suspense fallback={<div className="splash"><LogoMark size={72} /></div>}>{area === 'admin' ? <AdminApp /> : area === 'agent' ? <AgentApp /> : area === 'shop' ? <ShopApp /> : <p className="empty">لا توجد واجهة لحسابك، تواصل مع الإدارة.</p>}</Suspense><InstallPrompt /></>;
 }

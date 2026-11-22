@@ -45,8 +45,19 @@ export class Api {
     return data as T;
   }
 
+  private inflight = new Map<string, Promise<unknown>>();
+  /** قراءات متطابقة متزامنة (مثل الجرس واللوحة) تشترك في طلب واحد. */
   get<T = any>(path: string) {
-    return this.request<T>('GET', path);
+    const k = `${this.workContext ?? ''}|${path}`;
+    const hit = this.inflight.get(k);
+    if (hit) return hit as Promise<T>;
+    const p = this.request<T>('GET', path).finally(() => this.inflight.delete(k));
+    this.inflight.set(k, p);
+    return p;
+  }
+  /** آخر نسخة محفوظة لهذا المسار (للعرض الفوري قبل وصول الحديثة). */
+  cached<T = any>(path: string): T | null {
+    return this.scope ? cacheGet<T>(this.scope, path)?.data ?? null : null;
   }
   post<T = any>(path: string, body?: unknown, idem?: string) {
     return this.request<T>('POST', path, body ?? {}, idem ? { idem } : {});

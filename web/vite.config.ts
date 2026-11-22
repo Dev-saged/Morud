@@ -27,6 +27,10 @@ export default defineConfig({
   plugins: [react(), versionFile()],
   define: { __APP_VERSION__: JSON.stringify(version), __APP_BUILD__: JSON.stringify(build) },
   server: { fs: { allow: ['..'] } },
-  build: { target: 'es2022', sourcemap: false },
+  build: {
+    target: 'es2022', sourcemap: false,
+    // Firebase وReact في ملفات ثابتة تبقى في كاش المتصفح بين الإصدارات؛ التحديث ينزّل كود مورد فقط
+    rollupOptions: { output: { manualChunks(id) { if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) return 'firebase'; if (id.includes('node_modules/react')) return 'react'; return undefined; } } },
+  },
   test: { environment: 'jsdom', include: ['test/**/*.test.{ts,tsx}'], setupFiles: ['test/setup.ts'] },
 });

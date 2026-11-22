@@ -3,15 +3,17 @@ import { formatDate, formatMoney, formatQty, STATUS } from '../lib/format';
 import { useSession } from '../lib/session';
 import { Bell } from '../ui/Bell';
 import { SecurityCard } from '../ui/Security';
-import { openPrintable } from '../shop/ShopApp';
+import { openPrintable } from '../lib/print';
 import { Icon, LogoMark, type IconName } from '../ui/Icons';
 import { Finance } from './Finance';
 import { Backups, Promotions, Settings, Support } from './More';
 import { Products } from './Products';
 import { Shops } from './Shops';
 import { Users } from './Users';
+import { useLoad } from './kit';
+import { Audit } from './Audit';
 
-type Section = 'dashboard' | 'orders' | 'products' | 'shops' | 'delivery' | 'finance' | 'promotions' | 'reports' | 'users' | 'support' | 'settings' | 'backups' | 'security';
+type Section = 'dashboard' | 'orders' | 'products' | 'shops' | 'delivery' | 'finance' | 'promotions' | 'reports' | 'users' | 'support' | 'settings' | 'backups' | 'audit' | 'security';
 const SECTIONS: Array<[Section, IconName, string, string[]]> = [
   ['dashboard', 'chart', 'لوحة المعلومات', ['orders.view']],
   ['orders', 'orders', 'الطلبات', ['orders.view']],
@@ -25,6 +27,7 @@ const SECTIONS: Array<[Section, IconName, string, string[]]> = [
   ['support', 'chat', 'الدعم', ['support.manage']],
   ['settings', 'gear', 'الإعدادات', ['settings.manage']],
   ['backups', 'shield', 'النسخ الاحتياطي', ['backups.manage']],
+  ['audit', 'list', 'سجل العمليات', ['audit.view']],
   ['security', 'lock', 'أمان حسابي', []],
 ];
 
@@ -63,6 +66,7 @@ export function AdminApp() {
         {sec === 'support' && <Support />}
         {sec === 'settings' && <Settings />}
         {sec === 'backups' && <Backups />}
+        {sec === 'audit' && <Audit />}
       </main>
     </div>
   );
@@ -81,10 +85,8 @@ type Card = { label: string; value: number | undefined; to: Section; f?: Focus; 
 
 /** لوحة المعلومات البسيطة: مربعات مرتبة في مجموعات، عنوان ورقم فقط، وكل مربع يفتح القائمة التي حُسب منها رقمه. */
 export function Dashboard({ go, can }: { go: Go; can: (s: Section) => boolean }) {
-  const { api } = useSession();
-  const [d, setD] = useState<any>(null);
-  useEffect(() => { void api.get('/dashboard/summary').then(setD); }, [api]);
-  if (!d) return <section><h1>لوحة المعلومات</h1><div className="kpis" aria-busy="true">{Array.from({ length: 8 }, (_, i) => <div key={i} className="skeleton kpi-sk" />)}</div></section>;
+  const { data: d, error } = useLoad<any>('/dashboard/summary');
+  if (!d) return <section><h1>لوحة المعلومات</h1>{error && <p className="error" role="alert">{error}</p>}<div className="kpis" aria-busy="true">{Array.from({ length: 8 }, (_, i) => <div key={i} className="skeleton kpi-sk" />)}</div></section>;
   const groups: Array<[string, Card[]]> = [
     ['الطلبات', [
       { label: 'طلبات اليوم', value: d.ordersToday, to: 'orders', f: { filter: 'today' } }, { label: 'جديدة', value: d.new, to: 'orders', f: { filter: 'new' } },
@@ -148,15 +150,16 @@ function Orders({ focus = {} }: { focus?: Focus }) {
 
 function AdminOrder({ id, back }: { id: string; back: () => void }) {
   const { api, can } = useSession();
-  const [d, setD] = useState<any>(null);
+  const { data: d, error: loadError, reload: load } = useLoad<any>(`/orders/${id}`);
   const [reason, setReason] = useState('');
   const [agent, setAgent] = useState('');
   const [error, setError] = useState('');
-  const load = () => api.get(`/orders/${id}`).then(setD);
-  useEffect(() => { void load(); }, [id]);
-  if (!d) return <div className="skeleton" aria-busy="true" />;
+  const [busy, setBusy] = useState(false);
+  const canAssign = can('delivery.assign');
+  const board = useLoad<any>(canAssign ? '/delivery/board' : null);
+  if (!d) return loadError ? <div className="card"><button className="link" onClick={back}><Icon name="chevron" flip /> الطلبات</button><p className="error" role="alert">{loadError}</p><button className="btn" onClick={() => void load()}>إعادة المحاولة</button></div> : <div className="skeleton" aria-busy="true" />;
   const o = d.order;
-  const act = async (fn: () => Promise<unknown>) => { setError(''); try { await fn(); setReason(''); await load(); } catch (e: any) { setError(e.message); } };
+  const act = async (fn: () => Promise<unknown>) => { if (busy) return; setBusy(true); setError(''); try { await fn(); setReason(''); await load(); } catch (e: any) { setError(e.message); } finally { setBusy(false); } };
   return (
     <div className="card">
       <button className="link" onClick={back}><Icon name="chevron" flip /> الطلبات</button>
@@ -166,11 +169,15 @@ function AdminOrder({ id, back }: { id: string; back: () => void }) {
       <p className="total"><span>الإجمالي</span><b className="num">{formatMoney(o.totals.total)}</b></p>
       {d.actions.length > 0 && <div className="actions">
         <input placeholder="السبب (للرفض والإلغاء)" value={reason} onChange={(e) => setReason(e.target.value)} />
-        {d.actions.map((a: any) => <button key={a.to} className={a.to === 'confirmed' || a.to === 'under_review' ? 'btn primary' : a.reason ? 'btn danger' : 'btn'} onClick={() => void act(() => api.post(`/orders/${id}/transition`, { to: a.to, reason }, crypto.randomUUID().replace(/-/g, '')))}>{STATUS[a.to]?.label}</button>)}
+        {d.actions.map((a: any) => <button key={a.to} disabled={busy} className={a.to === 'confirmed' || a.to === 'under_review' ? 'btn primary' : a.reason ? 'btn danger' : 'btn'} onClick={() => void act(() => api.post(`/orders/${id}/transition`, { to: a.to, reason }, crypto.randomUUID().replace(/-/g, '')))}>{STATUS[a.to]?.label}</button>)}
       </div>}
-      {can('delivery.assign') && ['confirmed', 'preparing', 'ready_for_pickup', 'delivery_failed'].includes(o.status) && <div className="actions">
-        <input placeholder="معرّف المندوب" value={agent} onChange={(e) => setAgent(e.target.value)} />
-        <button className="btn" onClick={() => void act(() => api.post(`/orders/${id}/assign-agent`, { agentId: agent }))}>إسناد للمندوب</button>
+      {canAssign && ['confirmed', 'preparing', 'ready_for_pickup', 'delivery_failed'].includes(o.status) && <div className="actions">
+        <label>المندوب<select value={agent || o.agentId || ''} onChange={(e) => setAgent(e.target.value)}>
+          <option value="" disabled>اختر المندوب</option>
+          {(board.data?.agents ?? []).map((a: any) => <option key={a.uid} value={a.uid}>{a.displayName} — {a.activeTasks} مهمة</option>)}
+        </select></label>
+        <button className="btn" disabled={busy || !(agent || o.agentId) || agent === o.agentId} onClick={() => void act(() => api.post(`/orders/${id}/assign-agent`, { agentId: agent }))}>{o.agentId ? 'تغيير المندوب' : 'إسناد للمندوب'}</button>
+        {board.data && board.data.agents.length === 0 && <p className="mute">لا يوجد مندوبون نشطون. أضف مستخدماً بدور «مندوب توصيل» من قسم المستخدمين.</p>}
       </div>}
       {error && <p className="error" role="alert">{error}</p>}
       {o.invoiceId && can('invoices.view') && <button className="btn ghost" onClick={() => void openPrintable(api, `/invoices/${o.invoiceId}/print`)}><Icon name="print" /> الفاتورة</button>}
@@ -181,10 +188,8 @@ function AdminOrder({ id, back }: { id: string; back: () => void }) {
 }
 
 function Delivery() {
-  const { api } = useSession();
-  const [d, setD] = useState<any>(null);
-  useEffect(() => { void api.get('/delivery/board').then(setD); }, [api]);
-  if (!d) return <div className="skeleton" aria-busy="true" />;
+  const { data: d, error } = useLoad<any>('/delivery/board');
+  if (!d) return error ? <p className="error" role="alert">{error}</p> : <div className="skeleton" aria-busy="true" />;
   return (
     <section>
       <h1>التوصيل <span className="chip danger">{d.overdue} متأخر</span></h1>
@@ -198,24 +203,34 @@ function Delivery() {
 
 function Reports() {
   const { api } = useSession();
-  const [list, setList] = useState<any[]>([]);
+  const all = useLoad<any>('/reports');
+  const list: any[] = (all.data?.reports ?? []).filter((x: any) => x.allowed);
   const [rep, setRep] = useState<any>(null);
+  const [loading, setLoading] = useState<string | null>(null);
+  const [error, setError] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
-  useEffect(() => { void api.get('/reports').then((r) => setList(r.reports.filter((x: any) => x.allowed))); }, [api]);
   const q = () => `${from ? `from=${Date.parse(from)}&` : ''}${to ? `to=${Date.parse(to) + 86_400_000}` : ''}`;
+  const open = async (id: string) => {
+    setLoading(id); setError('');
+    try { setRep(await api.get(`/reports/${id}?${q()}`)); } catch (e: any) { setError(e.message); } finally { setLoading(null); }
+  };
   const csv = async (id: string) => {
-    const text = await api.request<string>('GET', `/reports/${id}?format=csv&${q()}`, undefined, { raw: true });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv' }));
-    a.download = `mawred-${id}.csv`;
-    a.click();
+    try {
+      const text = await api.request<string>('GET', `/reports/${id}?format=csv&${q()}`, undefined, { raw: true });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob(['\ufeff' + text], { type: 'text/csv;charset=utf-8' }));
+      a.download = `mawred-${id}.csv`;
+      a.click();
+    } catch (e: any) { setError(e.message); }
   };
   return (
     <section>
       <h1>التقارير</h1>
       <div className="row"><label>من<input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></label><label>إلى<input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></label></div>
-      <div className="chips">{list.map((r) => <button key={r.id} className={rep?.report === r.id ? 'chip on' : 'chip'} onClick={() => void api.get(`/reports/${r.id}?${q()}`).then(setRep)}>{r.title}</button>)}</div>
+      <div className="chips">{list.map((r) => <button key={r.id} aria-busy={loading === r.id} className={rep?.report === r.id ? 'chip on' : 'chip'} onClick={() => void open(r.id)}>{r.title}</button>)}</div>
+      {(error || all.error) && <p className="error" role="alert">{error || all.error}</p>}
+      {loading && <div className="skeleton" aria-busy="true" />}
       {rep && <div className="card">
         <h3>{rep.title}</h3>{rep.note && <p className="mute">{rep.note}</p>}
         <button className="btn ghost" onClick={() => void csv(rep.report)}>تصدير Excel</button>
