@@ -89,8 +89,8 @@ export function Audit() {
               <div className="audit-head">
                 <b>{ACTIONS[l.action] ?? l.action}</b>
                 <span>{l.actor}</span>
-                <button className="link num" onClick={() => setFilter({ k: 'entity', v: l.entity.id })} title="كل عمليات هذا العنصر">{KINDS[l.entity.kind] ?? l.entity.kind} {l.entity.id.slice(0, 10)}</button>
-                <time className="mute num">{formatDate(l.at)}</time>
+                <button className="link entity" onClick={() => setFilter({ k: 'entity', v: l.entity.id })} title="كل عمليات هذا العنصر" aria-label={`${KINDS[l.entity.kind] ?? l.entity.kind} ${l.entity.id}`}><span>{KINDS[l.entity.kind] ?? l.entity.kind}</span> <bdi className="num" dir="ltr">{l.entity.id.slice(0, 10)}</bdi></button>
+                <time className="mute">{formatDate(l.at)}</time>
                 {l.result !== 'ok' && <span className="chip danger">{l.result === 'denied' ? 'مرفوض' : 'فشل'}</span>}
               </div>
               {diff.length > 0 && <details><summary>ما تغيّر ({diff.length})</summary>

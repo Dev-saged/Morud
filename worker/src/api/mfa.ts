@@ -1,3 +1,4 @@
+import { loadSettings } from './admin/settings';
 import { base32Decode, base32Encode, otpauthUri, verifyTotp } from '../domain/totp';
 import { auditWrite, requireUser, type Ctx, type Services } from './context';
 import { fail, json, readJson, type Router } from './http';
@@ -18,8 +19,15 @@ async function open(s: Services, sealed: string) {
   return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b.slice(0, 12) }, await mfaKey(s), b.slice(12) as BufferSource));
 }
 
+/** الميزة نفسها تُشغَّل وتُوقف من الإعدادات العامة (موقوفة افتراضياً). */
+export async function mfaFeature(s: Services) {
+  return (await loadSettings(s.db)).mfaFeature === true;
+}
+
+/** موقوفة من الإعدادات = لا تُطلب عند الدخول لأحد، حتى من فعّلها سابقاً (ويعود طلبها عند تشغيلها). */
 export async function mfaEnabled(s: Services, uid: string) {
-  return (await s.db.get(`mfa/${uid}`))?.data.enabled === true;
+  const [on, d] = await Promise.all([mfaFeature(s), s.db.get(`mfa/${uid}`)]);
+  return on && d?.data.enabled === true;
 }
 
 /** يتحقق من رمز مستخدم ويحفظ آخر خطوة (لا يُقبل نفس الرمز مرتين). */
@@ -34,8 +42,13 @@ export async function checkCode(s: Services, uid: string, code: string, pending 
 }
 
 /** بدء التفعيل: سر جديد معلّق حتى يُثبت المستخدم أنه أضافه بإدخال رمز صحيح. */
+async function requireFeature(ctx: Ctx) {
+  if (!(await mfaFeature(ctx.s))) throw fail('FORBIDDEN', 'التحقق بخطوتين موقوف من إعدادات النظام');
+}
+
 async function setup(ctx: Ctx) {
   const u = requireUser(ctx);
+  await requireFeature(ctx);
   if (await mfaEnabled(ctx.s, u.uid)) throw fail('CONFLICT', 'التحقق بخطوتين مفعّل مسبقاً');
   const secret = crypto.getRandomValues(new Uint8Array(20));
   const b32 = base32Encode(secret);
@@ -46,6 +59,7 @@ async function setup(ctx: Ctx) {
 
 async function enable(ctx: Ctx) {
   const u = requireUser(ctx);
+  await requireFeature(ctx);
   const b = await readJson<{ code?: string }>(ctx.req, 512);
   if (!(await checkCode(ctx.s, u.uid, String(b.code ?? ''), true))) throw fail('INVALID_CODE', 'الرمز غير صحيح، تأكد من وقت الهاتف وحاول مجدداً');
   const d = (await ctx.s.db.get(`mfa/${u.uid}`))!;

@@ -5,7 +5,7 @@ import { Sparkline } from '../src/admin/AdminApp';
 import { Api, ApiError } from '../src/lib/api';
 import { cartReducer, EMPTY, loadCart, saveCart } from '../src/lib/cart';
 import { formatDuration, stageIndex, STATUS } from '../src/lib/format';
-import { isIosSafari } from '../src/ui/InstallPrompt';
+import { iosBrowser, isIosSafari } from '../src/ui/InstallPrompt';
 
 import { adminUser, catalog, json, mount, shopUser } from './helpers';
 
@@ -55,6 +55,12 @@ describe('المكتبات', () => {
     expect(isIosSafari('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0) AppleWebKit Version/18.0 Mobile Safari/604.1', false)).toBe(true);
     expect(isIosSafari('Mozilla/5.0 (iPhone) CriOS/120 Safari/604.1', false)).toBe(false);
     expect(isIosSafari('Mozilla/5.0 (iPhone) Safari/604.1', true)).toBe(false);
+    // كروم وإيدج على آيفون يدعمان الإضافة للشاشة أيضاً، وفايرفوكس يُوجَّه لسفاري، وآيباد الحديث يظهر كماك باللمس
+    expect(iosBrowser('Mozilla/5.0 (iPhone) CriOS/120 Safari/604.1', false)).toBe('chrome');
+    expect(iosBrowser('Mozilla/5.0 (iPhone) FxiOS/120 Safari/604.1', false)).toBe('other');
+    expect(iosBrowser('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Version/18.0 Safari/605.1', false, true)).toBe('safari');
+    expect(iosBrowser('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Version/18.0 Safari/605.1', false, false)).toBeNull();
+    expect(iosBrowser('Mozilla/5.0 (Linux; Android 14) Chrome/120 Mobile Safari/537.36', false)).toBeNull();
     render(<Sparkline values={[1, 3, 2]} />);
   });
 });
@@ -177,18 +183,26 @@ describe('الواجهة', () => {
 });
 
 describe('نافذة التثبيت', () => {
-  it('لا تظهر في شاشة الدخول، وتظهر بعد المهلة لمستخدم آيفون ويمكن تأجيلها', async () => {
+  it('تظهر لزائر آيفون من شاشة الدخول بخطوات واضحة، و«فهمت» تؤجلها 3 أيام، وزر التثبيت يعيدها', async () => {
     const { render } = await import('@testing-library/react');
-    const { InstallPrompt } = await import('../src/ui/InstallPrompt');
+    const { InstallPrompt, InstallButton } = await import('../src/ui/InstallPrompt');
+    const orig = navigator.userAgent;
     Object.defineProperty(navigator, 'userAgent', { value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0) AppleWebKit Version/18.0 Mobile Safari/604.1', configurable: true });
+    const u = userEvent.setup();
     mount({});
     await screen.findByLabelText('المعرّف');
-    expect(screen.queryByRole('dialog', { name: 'تثبيت مورد' })).toBeNull();
-    render(<InstallPrompt delayMs={0} />);
-    expect(await screen.findByRole('dialog', { name: 'تثبيت مورد' })).toBeTruthy();
-    await userEvent.setup().click(screen.getByRole('button', { name: 'لاحقاً' }));
-    expect(screen.queryByRole('dialog', { name: 'تثبيت مورد' })).toBeNull();
-  });
+    const sheet = await screen.findByRole('dialog', { name: 'ثبّت مورد على جوالك' }, { timeout: 6000 });
+    expect(within(sheet).getByText(/في الشريط السفلي/)).toBeTruthy();
+    expect(within(sheet).getByText('إضافة إلى الشاشة الرئيسية')).toBeTruthy();
+    await u.click(within(sheet).getByRole('button', { name: 'فهمت' }));
+    expect(screen.queryByRole('dialog', { name: 'ثبّت مورد على جوالك' })).toBeNull();
+    expect(Number(localStorage.getItem('mawred.install.snooze'))).toBeGreaterThan(0);
+    render(<><InstallPrompt delayMs={0} /><InstallButton /></>);
+    expect(screen.queryByRole('dialog', { name: 'ثبّت مورد على جوالك' })).toBeNull();
+    await u.click(screen.getByRole('button', { name: /تثبيت التطبيق على الجهاز/ }));
+    expect(screen.getByRole('dialog', { name: 'خطوات التثبيت' })).toBeTruthy();
+    Object.defineProperty(navigator, 'userAgent', { value: orig, configurable: true });
+  }, 15000);
 });
 
 describe('الطلب السريع على الويب', () => {

@@ -127,6 +127,12 @@ describe('الجلسة والصلاحيات على كل طلب', () => {
     w.clock.now += 1000;
     expect((await w.call('GET', '/t/x', { token: w.tokenFor('u1') })).status).toBe(200);
     expect((await login(w, 'shop1', 'NewPass2026')).status).toBe(200);
+    // بعد ذلك أي تغيير اختياري يحتاج كلمة المرور الحالية (جلسة مسروقة لا تكفي)
+    w.clock.now += 1000;
+    const t2 = w.tokenFor('u1');
+    expect((await w.call('POST', '/auth/change-password', { token: t2, body: { newPassword: 'Other2026x' } })).body.error.details.field).toBe('currentPassword');
+    expect((await w.call('POST', '/auth/change-password', { token: t2, body: { newPassword: 'Other2026x', currentPassword: 'wrong' } })).status).toBe(400);
+    expect((await w.call('POST', '/auth/change-password', { token: t2, body: { newPassword: 'Other2026x', currentPassword: 'NewPass2026' } })).status).toBe(200);
   });
   it('سياق العمل يُقبل فقط من سياقات المستخدم', async () => {
     let seen = '';

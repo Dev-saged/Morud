@@ -103,4 +103,11 @@ class AdminTest {
         api.forgetMemory(); api.scope = "u2"
         org.junit.Assert.assertNull(api.cached("/orders"))
     }
+
+    @Test fun permissionsGroupedLikeWeb() {
+        val g = com.mawred.app.ui.admin.groupPerms(listOf("orders.view" to "عرض الطلبات", "products.edit" to "تعديل", "promotions.manage" to "العروض", "payments.create" to "دفعة", "audit.view" to "السجل", "weird.x" to "غريب"))
+        assertEquals(listOf("orders", "catalog", "finance", "team", "other"), g.map { it.id })
+        assertEquals(listOf("products.edit", "promotions.manage"), g[1].perms.map { it.first })
+        assertEquals("أخرى", g.last().label)
+    }
 }

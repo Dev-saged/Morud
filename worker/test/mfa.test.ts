@@ -27,6 +27,11 @@ describe('التحقق بخطوتين', () => {
     const tok = (await login(w)).body.customToken as string;
     expect(tok).toBeTruthy();
     const T1 = w.tokenFor('a1');
+    // موقوفة افتراضياً من الإعدادات: لا إعداد ولا ظهور
+    expect((await w.call('POST', '/auth/mfa/setup', { token: T1 })).status).toBe(403);
+    expect((await w.call('GET', '/auth/me', { token: T1 })).body.user.mfaAvailable).toBe(false);
+    w.db.seed('settings/system', { mfaFeature: true });
+    expect((await w.call('GET', '/auth/me', { token: T1 })).body.user.mfaAvailable).toBe(true);
     const st = await w.call('POST', '/auth/mfa/setup', { token: T1 });
     expect(st.body.uri).toMatch(/^otpauth:\/\/totp\//);
     const secret = base32Decode(st.body.secret);
@@ -48,9 +53,15 @@ describe('التحقق بخطوتين', () => {
     expect(again.body.error.code).toBe('MFA_EXPIRED');
     const audit = (await w.db.query({ collection: 'auditLogs' })).map((a) => a.data.action);
     expect(audit).toContain('auth.mfa.enable');
+    // إيقاف الميزة من الإعدادات: الدخول بلا رمز حتى لمن فعّلها، وتشغيلها يعيد طلبه
+    w.db.seed('settings/system', { mfaFeature: false });
+    expect((await login(w)).body.customToken).toBeTruthy();
+    w.db.seed('settings/system', { mfaFeature: true });
+    expect((await login(w)).body.mfaRequired).toBe(true);
   });
   it('التذكرة تنتهي بعد 5 دقائق وبعد 5 محاولات خاطئة', async () => {
     const w = world([authRoutes, mfaRoutes]);
+    w.db.seed('settings/system', { mfaFeature: true });
     addUser(w, 'a1', { username: 'owner', roles: ['super_admin'] });
     const T1 = w.tokenFor('a1');
     const secret = base32Decode((await w.call('POST', '/auth/mfa/setup', { token: T1 })).body.secret);

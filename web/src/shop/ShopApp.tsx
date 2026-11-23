@@ -13,7 +13,7 @@ import { askNotifyPermission, dropQueued, enqueue, useOutbox, type Queued } from
 import { Icon, LogoMark } from '../ui/Icons';
 import { Hero, Ring, Tile } from '../ui/Desk';
 import { Bell } from '../ui/Bell';
-import { SecurityCard } from '../ui/Security';
+import { AccountSecurity } from '../ui/Security';
 import { useCatalog, type Catalog } from './useCatalog';
 
 type Tab = 'home' | 'cart' | 'orders' | 'account';
@@ -436,7 +436,7 @@ function Account({ shopId, onLogout }: { shopId: string; onLogout: () => Promise
           <button className="btn ghost" onClick={() => void openPrintable(api, `/shops/${shopId}/statement/print`)}><Icon name="print" /> كشف الحساب</button>
         </div>
       )}
-      <SecurityCard />
+      <AccountSecurity />
       <button className="btn danger block" onClick={() => void onLogout()}><Icon name="logout" /> تسجيل الخروج</button>
     </section>
   );

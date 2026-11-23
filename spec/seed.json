@@ -33,6 +33,7 @@
   ],
   "settings": {
     "platformName": "مورد",
+    "mfaFeature": false,
     "currency": "ILS",
     "currencyDecimals": 2,
     "timezone": "Asia/Gaza",

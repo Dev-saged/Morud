@@ -42,6 +42,7 @@ object Icons {
     val tag: ImageVector by lazy { icon("tag", "M4 4h7l9 9-7 7-9-9zM8.5 8.5h.01") }
     val gear: ImageVector by lazy { icon("gear", "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8") }
     val lock: ImageVector by lazy { icon("lock", "M6.5 11h11a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1zM8.5 11V8a3.5 3.5 0 0 1 7 0v3M12 14.5v2") }
+    val close: ImageVector by lazy { icon("close", "M6 6l12 12M18 6L6 18") }
     val list: ImageVector by lazy { icon("list", "M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01") }
     val shield: ImageVector by lazy { icon("shield", "M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6zM9 12l2 2 4-4") }
     val chat: ImageVector by lazy { icon("chat", "M4 5h16v11H9l-5 4z") }
@@ -59,7 +60,7 @@ object Icons {
         .addPath(pathData = addPathNodes(d), fill = null, stroke = SolidColor(Color.Black), strokeLineWidth = 1.75f, strokeLineCap = StrokeCap.Round, strokeLineJoin = StrokeJoin.Round)
         .build()
 
-    val all: Map<String, ImageVector> get() = mapOf("home" to home, "search" to search, "cart" to cart, "orders" to orders, "user" to user, "bell" to bell, "plus" to plus, "minus" to minus, "trash" to trash, "box" to box, "truck" to truck, "logout" to logout, "chevron" to chevron, "clock" to clock, "check" to check, "alert" to alert, "wallet" to wallet, "chart" to chart, "store" to store, "users" to users, "tag" to tag, "gear" to gear, "shield" to shield, "chat" to chat, "print" to print, "eye" to eye, "pin" to pin, "phone" to phone, "share" to share, "download" to download, "pause" to pause, "folder" to folder, "sparkle" to sparkle, "lock" to lock, "list" to list)
+    val all: Map<String, ImageVector> get() = mapOf("home" to home, "search" to search, "cart" to cart, "orders" to orders, "user" to user, "bell" to bell, "plus" to plus, "minus" to minus, "trash" to trash, "box" to box, "truck" to truck, "logout" to logout, "chevron" to chevron, "clock" to clock, "check" to check, "alert" to alert, "wallet" to wallet, "chart" to chart, "store" to store, "users" to users, "tag" to tag, "gear" to gear, "shield" to shield, "chat" to chat, "print" to print, "eye" to eye, "pin" to pin, "phone" to phone, "share" to share, "download" to download, "pause" to pause, "folder" to folder, "sparkle" to sparkle, "lock" to lock, "list" to list, "close" to close)
 }
 
 private val logoPath = PathParser().parsePathString("M43 59V191a15 15 0 0 0 30 0V100l42 47a15 15 0 0 0 22 0l42-47v41a15 15 0 0 0 30 0V59a15 15 0 0 0-26-10l-57 64-57-64a15 15 0 0 0-26 10z").toPath()

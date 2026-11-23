@@ -13,6 +13,8 @@ export interface User {
   shopIds: string[];
   mustChangePassword: boolean;
   mfaEnabled?: boolean;
+  /** الميزة مشغّلة من إعدادات النظام */
+  mfaAvailable?: boolean;
 }
 
 // مزود الهوية (Firebase في الإنتاج) مجرَّد ليُختبر بسهولة

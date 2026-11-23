@@ -120,8 +120,9 @@ class AuthRepository(private val store: SessionStore, private val identity: Iden
         signedIn(u)
     }
 
-    suspend fun changePassword(newPassword: String) {
-        val r = api.post("/auth/change-password", buildJsonObject { put("newPassword", newPassword) })
+    /** التغيير الاختياري يحتاج كلمة المرور الحالية؛ الإجباري (أول دخول) بدونها. */
+    suspend fun changePassword(newPassword: String, currentPassword: String? = null) {
+        val r = api.post("/auth/change-password", buildJsonObject { put("newPassword", newPassword); currentPassword?.let { put("currentPassword", it) } })
         tokens = identity.exchange(r["customToken"]!!.jsonPrimitive.content)
         refreshUser()
     }
@@ -129,6 +130,9 @@ class AuthRepository(private val store: SessionStore, private val identity: Iden
     suspend fun forgot(identifier: String) { api.request("POST", "/auth/forgot", buildJsonObject { put("identifier", identifier.trim()) }, auth = false) }
 
     suspend fun logout() = signOutLocal()
+
+    /** خروج من كل الأجهزة (بما فيها هذا). */
+    suspend fun logoutAll() { api.post("/auth/logout-all", buildJsonObject { }); signOutLocal() }
 
     private suspend fun signOutLocal() {
         val uid = (state.value as? SessionState.SignedIn)?.user?.uid

@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { fromAgorot, toAgorot } from '../src/admin/kit';
@@ -110,8 +110,12 @@ describe('لوحة الإدارة الشاملة', () => {
     await u.click(await screen.findByRole('button', { name: 'الإعدادات' }));
     await u.click(await screen.findByRole('button', { name: 'الجمعة' }));
     await u.click(screen.getByRole('button', { name: 'حفظ الإعدادات' }));
-    expect(await screen.findByText('تم الحفظ')).toBeTruthy();
-    expect(body(calls.find(([p]) => p === '/admin/settings')![1]).workDays).toEqual([0, 1, 2, 3, 4, 6]);
+    expect(await screen.findByText('حُفظت الإعدادات')).toBeTruthy();
+    expect(body(calls.find(([p]) => p === '/admin/settings')![1])).toEqual({ workDays: [0, 1, 2, 3, 4, 6] });
+    await u.click(screen.getByRole('switch', { name: /التحقق بخطوتين/ }));
+    await u.click(screen.getByRole('button', { name: 'حفظ الإعدادات' }));
+    await waitFor(() => expect(calls.filter(([p]) => p === '/admin/settings').length).toBe(2));
+    expect(body(calls.filter(([p]) => p === '/admin/settings')[1]![1])).toEqual({ mfaFeature: true });
   });
   it('خطأ الخادم يظهر بالعربية داخل القسم', async () => {
     mount({ 'GET /auth/me': () => json({ user: owner }), 'GET /dashboard/summary': () => json(summary), 'GET /admin/backups': () => json({ backups: [{ id: 'b1', at: 1, docs: 10, bytes: 2048, status: 'ok' }] }), 'POST /admin/backups/run': () => json({ error: { code: 'BACKUP_FAILED', message: 'تعذّر إنشاء النسخة' } }, 500) }, true);
@@ -147,5 +151,42 @@ describe('مراجعة المسودات ونشرها', () => {
     expect(await screen.findByText('نُشر 2 منتج')).toBeTruthy();
     const pubs = calls.filter(([p, i]) => p.startsWith('/admin/products/') && i?.method === 'PATCH');
     expect(pubs.map(([, i]) => JSON.parse(String(i!.body)))).toEqual([{ visible: true }, { visible: true }]);
+  });
+});
+
+describe('المستخدمون والأدوار', () => {
+  const roles = [
+    { id: 'orders_employee', label: 'موظف الطلبات', kind: 'staff', home: 'admin.orders', permissions: ['orders.view'] },
+    { id: 'accountant', label: 'الموظف المالي', kind: 'staff', home: 'admin.finance', permissions: ['payments.create'] },
+  ];
+  const permissions = [{ id: 'orders.view', scope: 'staff', label: 'عرض الطلبات' }, { id: 'orders.cancel', scope: 'staff', label: 'إلغاء طلب' }, { id: 'payments.create', scope: 'staff', label: 'تسجيل دفعة' }, { id: 'products.view', scope: 'any', label: 'عرض المنتجات' }];
+  const users = [
+    { uid: 'u1', displayName: 'محمد أبو سلمية', username: 'mo', phone: null, email: null, status: 'active', roles: ['orders_employee'], grant: [], deny: [], lastLoginAt: null },
+    { uid: 'u2', displayName: 'سماح الشوا', username: 'samah', phone: null, email: null, status: 'active', roles: ['accountant'], grant: [], deny: [], lastLoginAt: null },
+  ];
+  it('تصفية بالدور، منح صلاحية خاصة بثلاث حالات، وتحرير دور بمجموعات وتحديد الكل', async () => {
+    const own = { ...owner, permissions: [...owner.permissions, 'users.manage', 'roles.manage'] };
+    const { calls } = mount({ 'GET /auth/me': () => json({ user: own }), 'GET /dashboard/summary': () => json(summary), 'GET /admin/roles': () => json({ roles, permissions }), 'GET /admin/users': () => json({ users }), 'PATCH /admin/users/u1': () => json({ ok: true }), 'PUT /admin/roles/orders_employee': () => json({ ok: true }) }, true);
+    const u = userEvent.setup();
+    await u.click(await screen.findByRole('button', { name: /المستخدمون/ }));
+    expect(await screen.findByRole('button', { name: /سماح الشوا/ })).toBeTruthy();
+    await u.click(screen.getByRole('button', { name: /^موظف الطلبات/ }));
+    expect(screen.queryByRole('button', { name: /سماح الشوا/ })).toBeNull();
+    await u.click(screen.getByRole('button', { name: /محمد أبو سلمية/ }));
+    await u.click(screen.getByText('تخصيص صلاحيات هذا المستخدم'));
+    const cancel = screen.getByRole('radiogroup', { name: 'إلغاء طلب' });
+    await u.click(within(cancel).getByRole('radio', { name: 'منح' }));
+    await u.click(within(screen.getByRole('radiogroup', { name: 'عرض الطلبات' })).getByRole('radio', { name: 'حجب' }));
+    await u.click(screen.getByRole('button', { name: 'حفظ التعديلات' }));
+    await waitFor(() => expect(calls.some(([p]) => p === '/admin/users/u1')).toBe(true));
+    expect(body(calls.find(([p]) => p === '/admin/users/u1')![1])).toMatchObject({ grant: ['orders.cancel'], deny: ['orders.view'], roles: ['orders_employee'] });
+    await u.click(await screen.findByRole('tab', { name: /الأدوار/ }));
+    await u.click(screen.getByRole('button', { name: /^موظف الطلبات/ }));
+    expect(screen.getByText('عرض المنتجات')).toBeTruthy();
+    const group = screen.getByRole('group', { name: /الطلبات/ });
+    await u.click(within(group).getByRole('button', { name: 'تحديد الكل' }));
+    await u.click(screen.getByRole('button', { name: 'حفظ الدور' }));
+    await waitFor(() => expect(calls.some(([p]) => p === '/admin/roles/orders_employee')).toBe(true));
+    expect(body(calls.find(([p]) => p === '/admin/roles/orders_employee')![1]).permissions.sort()).toEqual(['orders.cancel', 'orders.view']);
   });
 });

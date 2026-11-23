@@ -34,7 +34,48 @@ import kotlinx.serialization.json.put
 
 /** يوفّر عميل الخادم لشاشة الأمان. */
 @dagger.hilt.android.lifecycle.HiltViewModel
-class SecurityViewModel @javax.inject.Inject constructor(val api: Api) : androidx.lifecycle.ViewModel()
+class SecurityViewModel @javax.inject.Inject constructor(val api: Api, val auth: com.mawred.app.data.auth.AuthRepository) : androidx.lifecycle.ViewModel()
+
+/** أمان الحساب كاملاً: كلمة المرور، الخروج من كل الأجهزة، والتحقق بخطوتين فقط إن شُغّل من إعدادات النظام. */
+@Composable
+fun AccountSecurity(vm: SecurityViewModel) {
+    var available by remember { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        available = runCatching { (vm.api.get("/auth/me")["user"] as kotlinx.serialization.json.JsonObject)["mfaAvailable"]?.jsonPrimitive?.content == "true" }.getOrDefault(false)
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        PasswordPanel(vm)
+        if (available) SecurityPanel(vm.api)
+    }
+}
+
+@Composable
+private fun PasswordPanel(vm: SecurityViewModel) {
+    val scope = rememberCoroutineScope()
+    var cur by remember { mutableStateOf("") }
+    var next by remember { mutableStateOf("") }
+    var again by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var msg by remember { mutableStateOf<String?>(null) }
+    var err by remember { mutableStateOf<String?>(null) }
+    val weak = next.isNotEmpty() && (next.length < 8 || next.none(Char::isDigit) || next.none(Char::isLetter))
+    val pw = KeyboardOptions(keyboardType = KeyboardType.Password)
+    val hide = androidx.compose.ui.text.input.PasswordVisualTransformation()
+    Panel("كلمة المرور", null) {
+        OutlinedTextField(cur, { cur = it }, Modifier.fillMaxWidth(), label = { Text("كلمة المرور الحالية") }, singleLine = true, keyboardOptions = pw, visualTransformation = hide)
+        OutlinedTextField(next, { next = it }, Modifier.fillMaxWidth(), label = { Text("كلمة المرور الجديدة") }, singleLine = true, keyboardOptions = pw, visualTransformation = hide, isError = weak, supportingText = { if (weak) Text("8 أحرف على الأقل وفيها حرف ورقم") })
+        OutlinedTextField(again, { again = it }, Modifier.fillMaxWidth(), label = { Text("تأكيد الجديدة") }, singleLine = true, keyboardOptions = pw, visualTransformation = hide, isError = again.isNotEmpty() && again != next)
+        PrimaryButton(if (busy) "جارٍ الحفظ…" else "تغيير كلمة المرور", {
+            scope.launch {
+                busy = true; err = null; msg = null
+                try { vm.auth.changePassword(next, cur); cur = ""; next = ""; again = ""; msg = "تغيّرت كلمة المرور، وخرجت أجهزتك الأخرى" } catch (e: ApiException) { err = e.message } finally { busy = false }
+            }
+        }, Modifier.fillMaxWidth(), enabled = !busy && cur.isNotEmpty() && next.isNotEmpty() && !weak && again == next)
+        msg?.let { Text(it, color = Mawred.colors.ok) }
+        ErrorText(err)
+        OutlinedButton({ scope.launch { try { vm.auth.logoutAll() } catch (e: ApiException) { err = e.message } } }, Modifier.fillMaxWidth(), enabled = !busy) { Text("الخروج من كل الأجهزة") }
+    }
+}
 
 /** أمان الحساب: تفعيل التحقق بخطوتين (فتح تطبيق المصادقة مباشرة أو إدخال المفتاح يدوياً) وإيقافه برمز. */
 @Composable

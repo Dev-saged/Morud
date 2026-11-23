@@ -53,12 +53,14 @@ class AdminVmTest {
         assertEquals("سُجّلت الدفعة", vm.s.value.info); assertTrue(after)
         val pay = reqs.first { it.path == "/payments" }
         assertEquals(32, pay.getHeader("idempotency-key")!!.length)
-        wait { reqs.count { it.path == "/admin/shops" } == 2 }
+        wait { reqs.count { it.path == "/admin/shops" } == 2 && vm.s.value.loading.isEmpty() }
         assertEquals(2, reqs.count { it.path == "/admin/shops" })
         vm.act("x", "PATCH", "/admin/settings", buildJsonObject { })
         wait { vm.s.value.error != null }
         assertEquals("ساعات العمل غير صالحة", vm.s.value.error)
         assertNull(reqs.last { it.path == "/admin/settings" }.getHeader("idempotency-key"))
         vm.clearMsg(); assertNull(vm.s.value.error)
+        // لا يبقى عمل معلّق يعود لخيط الواجهة بعد انتهاء الاختبار (كان يُسقط اختباراً لاحقاً عشوائياً)
+        wait { !vm.s.value.busy && vm.s.value.loading.isEmpty() }
     }
 }

@@ -1,4 +1,4 @@
-import { issueTicket, mfaEnabled, redeemTicket } from './mfa';
+import { issueTicket, mfaEnabled, mfaFeature, redeemTicket } from './mfa';
 import { loginKey, passwordProblem, ruleClaims } from '../domain/permissions';
 import { auditWrite, buildUser, requireUser, userFromDoc, type AuthUser, type Ctx } from './context';
 import { cleanText, fail, json, readJson, type Router } from './http';
@@ -72,13 +72,21 @@ async function loginMfa(ctx: Ctx): Promise<Response> {
 
 async function me(ctx: Ctx) {
   const u = requireUser(ctx);
-  return json({ user: { ...publicUser(u), mfaEnabled: await mfaEnabled(ctx.s, u.uid) } });
+  const [mfaOn, mfaAvailable] = await Promise.all([mfaEnabled(ctx.s, u.uid), mfaFeature(ctx.s)]);
+  return json({ user: { ...publicUser(u), mfaEnabled: mfaOn, mfaAvailable } });
 }
 
 async function changePassword(ctx: Ctx) {
   const u = requireUser(ctx);
-  const body = await readJson<{ newPassword?: unknown }>(ctx.req, 4096);
+  const body = await readJson<{ newPassword?: unknown; currentPassword?: unknown }>(ctx.req, 4096);
   const pw = typeof body.newPassword === 'string' ? body.newPassword : '';
+  // تغيير اختياري (ليس أول دخول): كلمة المرور الحالية مطلوبة، فمن سرق جلسة مفتوحة لا يستولي على الحساب
+  const doc = await ctx.s.db.get(`users/${u.uid}`);
+  if (doc?.data.mustChangePassword !== true) {
+    const cur = typeof body.currentPassword === 'string' ? body.currentPassword : '';
+    const ok = cur && typeof doc?.data.loginEmail === 'string' ? await ctx.s.identity.signInWithPassword(doc.data.loginEmail, cur).then((r) => r.ok, () => false) : false;
+    if (!ok) throw fail('VALIDATION', 'كلمة المرور الحالية غير صحيحة', { field: 'currentPassword' });
+  }
   const problem = passwordProblem(pw);
   if (problem) throw fail(problem, 'كلمة المرور يجب أن تكون 8 أحرف على الأقل وتحتوي حرفاً ورقماً');
   await ctx.s.identity.updateUser(u.uid, { password: pw, revokeSessions: true });

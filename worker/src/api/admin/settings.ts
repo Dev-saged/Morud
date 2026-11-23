@@ -84,7 +84,7 @@ export function validateSettings(b: Data): Data {
     }
     out.timezone = b.timezone;
   }
-  for (const k of ['creditBlocksDeferredOrders', 'newOrderSound']) if (has(k)) out[k] = b[k] === true;
+  for (const k of ['creditBlocksDeferredOrders', 'newOrderSound', 'mfaFeature']) if (has(k)) out[k] = b[k] === true;
   if (has('creditWarnPercent')) {
     if (!Number.isInteger(b.creditWarnPercent) || (b.creditWarnPercent as number) < 1 || (b.creditWarnPercent as number) > 100) throw fail('VALIDATION', 'نسبة التنبيه 1–100');
     out.creditWarnPercent = b.creditWarnPercent;

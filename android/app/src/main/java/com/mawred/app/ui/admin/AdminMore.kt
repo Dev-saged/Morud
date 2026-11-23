@@ -2,6 +2,7 @@ package com.mawred.app.ui.admin
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -116,7 +117,7 @@ fun AdminMoreScreen(user: SessionUser, padding: PaddingValues, focus: Focus? = n
             val pad = PaddingValues(16.dp, 8.dp, 16.dp, padding.calculateBottomPadding() + 16.dp)
             when (open) {
                 "shops" -> ShopsSection(vm, user, pad)
-                "users" -> UsersSection(vm, pad)
+                "users" -> TeamSection(vm, user.can("roles.manage"), pad)
                 "finance" -> FinanceSection(vm, user, pad)
                 "promotions" -> PromotionsSection(vm, pad)
                 "reports" -> ReportsSection(vm, pad)
@@ -125,7 +126,7 @@ fun AdminMoreScreen(user: SessionUser, padding: PaddingValues, focus: Focus? = n
                 "settings" -> SettingsSection(vm, pad)
                 "backups" -> BackupsSection(vm, pad)
                 "audit" -> AuditSection(vm, pad)
-                "security" -> Column(Modifier.padding(pad)) { com.mawred.app.ui.common.SecurityPanel(hiltViewModel<com.mawred.app.ui.common.SecurityViewModel>().api) }
+                "security" -> Column(Modifier.padding(pad).padding(16.dp).verticalScroll(androidx.compose.foundation.rememberScrollState())) { com.mawred.app.ui.common.AccountSecurity(hiltViewModel()) }
             }
         }
         return
@@ -281,82 +282,6 @@ private fun ShopDetail(vm: AdminVm, user: SessionUser, id: String, back: () -> U
             val active = shop.s("status") == "active"
             OutlinedButton({ vm.act(if (active) "أُوقف المحل" else "فُعّل المحل", "POST", "/admin/shops/$id/status", buildJsonObject { put("status", if (active) "suspended" else "active"); put("reason", reason) }, reload = listOf(path)) },
                 Modifier.fillMaxWidth(), enabled = !st.busy && reason.trim().length >= 3) { Text(if (active) "إيقاف المحل" else "تفعيل المحل", color = if (active) Mawred.colors.danger else Mawred.colors.primary) }
-        }
-    }
-}
-
-// ===== المستخدمون والأدوار =====
-@Composable
-private fun UsersSection(vm: AdminVm, pad: PaddingValues) {
-    val st by vm.s.collectAsStateWithLifecycle()
-    var q by rememberSaveable { mutableStateOf("") }
-    var open by rememberSaveable { mutableStateOf<String?>(null) }
-    var temp by remember { mutableStateOf<String?>(null) }
-    val path = "/admin/users?q=${enc(q)}"
-    LaunchedEffect(path) { vm.load(path); vm.load("/admin/roles") }
-    val roles = st.data["/admin/roles"].a("roles").filter { it.s("kind") != "shop" }
-    val roleName = roles.associate { it.s("id") to it.s("label") }
-    if (open != null) {
-        val u = st.data[path].a("users").firstOrNull { it.s("uid") == open } 
-        UserForm(vm, u, roles, path) { open = null }
-        return
-    }
-    SectionList(pad) {
-        item { TempPassword(temp) { temp = null } }
-        item {
-            OutlinedTextField(q, { q = it }, Modifier.fillMaxWidth(), placeholder = { Text("الاسم أو المعرّف") }, singleLine = true, leadingIcon = { Icon(Icons.search, null) })
-            PrimaryButton("مستخدم جديد", { open = "" })
-        }
-        items(st.data[path].a("users"), key = { it.s("uid") }) { u ->
-            Card(Modifier.clickable { open = u.s("uid") }) {
-                Column {
-                    Row { Text(u.s("displayName"), Modifier.weight(1f), style = MaterialTheme.typography.titleSmall); if (u.s("status") != "active") Text("موقوف", color = Mawred.colors.danger) }
-                    Text("${u.s("username")} · ${u.strs("roles").joinToString("، ") { roleName[it] ?: it }}", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun UserForm(vm: AdminVm, u: JsonObject?, roles: List<JsonObject>, listPath: String, done: () -> Unit) {
-    val st by vm.s.collectAsStateWithLifecycle()
-    var name by remember { mutableStateOf(u.s("displayName")) }
-    var username by remember { mutableStateOf(u.s("username")) }
-    var phone by remember { mutableStateOf(u.s("phone")) }
-    val sel = remember { mutableStateListOf<String>().apply { addAll(u.strs("roles")) } }
-    var reason by remember { mutableStateOf("") }
-    var temp by remember { mutableStateOf<String?>(null) }
-    BackHandler(onBack = done)
-    SectionList(PaddingValues(16.dp)) {
-        item { TextButton(done) { Text("‹ المستخدمون") } }
-        item { TempPassword(temp) { temp = null; done() } }
-        item {
-            Field("الاسم", name, { name = it }); Field("اسم المستخدم (لاتيني)", username, { username = it }); Field("الهاتف", phone, { phone = it }, phone = true)
-            Text("الأدوار", style = MaterialTheme.typography.titleSmall)
-        }
-        items(roles, key = { it.s("id") }) { r ->
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { if (r.s("id") in sel) sel.remove(r.s("id")) else sel.add(r.s("id")) }) {
-                Checkbox(r.s("id") in sel, { v -> if (v) sel.add(r.s("id")) else sel.remove(r.s("id")) }); Text(r.s("label"))
-            }
-        }
-        item {
-            val body = buildJsonObject {
-                put("displayName", name); put("username", username); if (phone.isNotBlank()) put("phone", phone) else put("phone", kotlinx.serialization.json.JsonNull)
-                putJsonArray("roles") { sel.forEach { add(JsonPrimitive(it)) } }
-                if (u == null) { putJsonArray("grant") {}; putJsonArray("deny") {}; putJsonArray("shopIds") {} }
-            }
-            if (u == null) PrimaryButton("إنشاء الحساب", { vm.act("أُنشئ الحساب", "POST", "/admin/users", body, idem = true, reload = listOf(listPath)) { r -> temp = r.s("tempPassword").ifBlank { null } } }, enabled = !st.busy && sel.isNotEmpty())
-            else {
-                val uid = u.s("uid")
-                PrimaryButton("حفظ التعديلات", { vm.act("حُفظ", "PATCH", "/admin/users/$uid", body, reload = listOf(listPath)) }, enabled = !st.busy)
-                OutlinedButton({ vm.act("أعيد تعيين كلمة المرور", "POST", "/admin/users/$uid/reset-password") { r -> temp = r.s("tempPassword") } }, Modifier.fillMaxWidth()) { Text("إعادة تعيين كلمة المرور") }
-                OutlinedButton({ vm.act("أُنهيت كل الجلسات", "POST", "/admin/users/$uid/revoke-sessions") }, Modifier.fillMaxWidth()) { Text("إنهاء الجلسات") }
-                Field("السبب", reason, { reason = it })
-                val active = u.s("status") == "active"
-                OutlinedButton({ vm.act(if (active) "أُوقف الحساب" else "فُعّل الحساب", "POST", "/admin/users/$uid/status", buildJsonObject { put("status", if (active) "suspended" else "active"); put("reason", reason) }, reload = listOf(listPath)) },
-                    Modifier.fillMaxWidth(), enabled = reason.trim().length >= 3) { Text(if (active) "إيقاف الحساب" else "تفعيل الحساب", color = if (active) Mawred.colors.danger else Mawred.colors.primary) }
-            }
         }
     }
 }
@@ -574,36 +499,87 @@ private fun SettingsSection(vm: AdminVm, pad: PaddingValues) {
     val s0 = st.data["/settings"].o("settings")
     if (s0 == null) { SectionList(pad) { item { Skeleton() } }; return }
     val days = remember(s0) { mutableStateListOf<Int>().apply { addAll((s0["workDays"] as? JsonArray)?.mapNotNull { it.jsonPrimitive.intOrNull }.orEmpty()) } }
-    val fields = remember(s0) { mutableStateListOf(s0.s("orderIntakeStart"), s0.s("orderIntakeEnd"), s0.s("deliveryStart"), s0.s("deliveryEnd"), s0.l("slaWorkingHours").toString(), s0.l("defaultPrepMinutes").toString(), s0.l("creditWarnPercent").toString(), s0.l("backupRetentionDays").toString(), s0.s("platformName")) }
-    val labels = listOf("بداية استقبال الطلبات (HH:MM)", "نهاية الاستقبال", "بداية التوصيل", "نهاية التوصيل", "مدة التوصيل المستهدفة (ساعات عمل)", "مدة التجهيز الافتراضية (دقيقة)", "تنبيه الائتمان عند (%)", "الاحتفاظ بالنسخ (يوم)", "اسم المنصة")
+    val num = { k: String -> (s0[k] as? JsonPrimitive)?.contentOrNull.orEmpty() }
+    val f = remember(s0) { androidx.compose.runtime.mutableStateMapOf(
+        "platformName" to s0.s("platformName"), "orderIntakeStart" to s0.s("orderIntakeStart"), "orderIntakeEnd" to s0.s("orderIntakeEnd"), "deliveryStart" to s0.s("deliveryStart"), "deliveryEnd" to s0.s("deliveryEnd"),
+        "slaWorkingHours" to num("slaWorkingHours"), "defaultPrepMinutes" to num("defaultPrepMinutes"), "creditWarnPercent" to num("creditWarnPercent"), "backupRetentionDays" to num("backupRetentionDays"),
+        "sup.name" to s0.o("supplier").s("name"), "sup.phone" to s0.o("supplier").s("phone"), "sup.address" to s0.o("supplier").s("address"), "sup.taxId" to s0.o("supplier").s("taxId"),
+    ) }
+    val flags = remember(s0) { androidx.compose.runtime.mutableStateMapOf("newOrderSound" to (s0["newOrderSound"] as? JsonPrimitive)?.booleanOrNull.let { it != false }, "creditBlocksDeferredOrders" to (s0["creditBlocksDeferredOrders"] as? JsonPrimitive)?.booleanOrNull.let { it != false }, "mfaFeature" to s0.b("mfaFeature")) }
     val holidays = remember(s0) { mutableStateListOf<String>().apply { addAll(s0.strs("holidays")) } }
     val methods = remember(s0) { mutableStateListOf<JsonObject>().apply { addAll(s0.a("paymentMethods")) } }
     var holiday by remember { mutableStateOf("") }
+    @Composable fun F(label: String, k: String, number: Boolean = false) = Field(label, f[k].orEmpty(), { f[k] = it }, number = number)
+    @Composable fun Toggle(title: String, hint: String?, k: String) = SwitchRow(title, hint, flags[k] == true) { flags[k] = it }
     SectionList(pad) {
+        item { SettingsCard("المنصة والمورد", Icons.home) { F("اسم المنصة", "platformName"); F("اسم المورد على الفواتير", "sup.name"); Field("هاتف المورد", f["sup.phone"].orEmpty(), { f["sup.phone"] = it }, phone = true); F("العنوان", "sup.address"); F("الرقم الضريبي (اختياري)", "sup.taxId") } }
         item {
-            Text("أيام العمل (غير المحدد = عطلة أسبوعية)", style = MaterialTheme.typography.titleSmall)
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) { items(7) { i -> FilterChip(i in days, { if (i in days) days.remove(i) else days.add(i) }, { Text(DAYS[i]) }) } }
-        }
-        items(labels.size) { i -> Field(labels[i], fields[i], { fields[i] = it }, number = i in 4..7) }
-        item {
-            Text("العطلات الرسمية", style = MaterialTheme.typography.titleSmall)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(holiday, { holiday = it }, Modifier.weight(1f), label = { Text("YYYY-MM-DD") }, singleLine = true)
-                TextButton({ if (Regex("""^\d{4}-\d{2}-\d{2}$""").matches(holiday) && holiday !in holidays) { holidays.add(holiday); holidays.sort(); holiday = "" } }) { Text("إضافة") }
+            SettingsCard("أيام وأوقات العمل", Icons.clock) {
+                Text("الأيام غير المختارة عطلة أسبوعية", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) { items(7) { i -> FilterChip(i in days, { if (i in days) days.remove(i) else days.add(i) }, { Text(DAYS[i]) }) } }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { Column(Modifier.weight(1f)) { F("بداية الاستقبال", "orderIntakeStart") }; Column(Modifier.weight(1f)) { F("نهايته", "orderIntakeEnd") } }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { Column(Modifier.weight(1f)) { F("بداية التوصيل", "deliveryStart") }; Column(Modifier.weight(1f)) { F("نهايته", "deliveryEnd") } }
+                Text("العطلات الرسمية", style = MaterialTheme.typography.titleSmall, color = Mawred.colors.ink)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(holiday, { holiday = it }, Modifier.weight(1f), label = { Text("YYYY-MM-DD") }, singleLine = true)
+                    TextButton({ if (Regex("""^\d{4}-\d{2}-\d{2}$""").matches(holiday) && holiday !in holidays) { holidays.add(holiday); holidays.sort(); holiday = "" } }) { Text("إضافة") }
+                }
+                if (holidays.isEmpty()) Text("لا عطلات مسجلة", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)
+                holidays.toList().forEach { h -> Row(verticalAlignment = Alignment.CenterVertically) { Text(Money.ltr(h), Modifier.weight(1f), style = Tabular); TextButton({ holidays.remove(h) }) { Text("إزالة", color = Mawred.colors.danger) } } }
             }
-            holidays.toList().forEach { h -> Row(verticalAlignment = Alignment.CenterVertically) { Text(Money.ltr(h), Modifier.weight(1f)); TextButton({ holidays.remove(h) }) { Text("إزالة", color = Mawred.colors.danger) } } }
-            Text("طرق الدفع", style = MaterialTheme.typography.titleSmall)
-            methods.toList().forEachIndexed { i, m -> Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(m.b("enabled"), { v -> methods[i] = JsonObject(m + ("enabled" to JsonPrimitive(v))) }); Text(m.s("label")) } }
-            PrimaryButton("حفظ الإعدادات", {
+        }
+        item { SettingsCard("الطلبات والتوصيل", Icons.truck) { F("مدة التوصيل المستهدفة (ساعات عمل)", "slaWorkingHours", true); F("مدة التجهيز الافتراضية (دقيقة)", "defaultPrepMinutes", true); Toggle("صوت عند وصول طلب جديد", "تنبيه مسموع لموظفي الطلبات", "newOrderSound") } }
+        item {
+            SettingsCard("المالية والدفع", Icons.wallet) {
+                Text("طرق الدفع المتاحة للمحلات", style = MaterialTheme.typography.titleSmall, color = Mawred.colors.ink)
+                methods.toList().forEachIndexed { i, m -> SwitchRow(m.s("label"), if (m.s("id") == "cash") "النقدي يبقى مفعّلاً دائماً" else null, m.b("enabled"), enabled = m.s("id") != "cash") { v -> methods[i] = JsonObject(m + ("enabled" to JsonPrimitive(v))) } }
+                F("تنبيه الائتمان عند استهلاك (%)", "creditWarnPercent", true)
+                Toggle("منع الطلب الآجل عند تجاوز حد الائتمان", "المحل يطلب نقداً فقط حتى يسدد", "creditBlocksDeferredOrders")
+            }
+        }
+        item {
+            SettingsCard("الأمان والنسخ", Icons.shield) {
+                Toggle("التحقق بخطوتين", "عند التشغيل يستطيع كل مستخدم تفعيله لحسابه من «أمان حسابي». الإيقاف يلغي طلب الرمز للجميع فوراً.", "mfaFeature")
+                F("الاحتفاظ بالنسخ الاحتياطية (يوم)", "backupRetentionDays", true)
+            }
+        }
+        item {
+            PrimaryButton(if (st.busy) "جارٍ الحفظ…" else "حفظ الإعدادات", {
                 vm.act("حُفظت الإعدادات", "PATCH", "/admin/settings", buildJsonObject {
+                    put("platformName", f["platformName"].orEmpty().trim())
                     putJsonArray("workDays") { days.sorted().forEach { add(JsonPrimitive(it)) } }
-                    put("orderIntakeStart", fields[0]); put("orderIntakeEnd", fields[1]); put("deliveryStart", fields[2]); put("deliveryEnd", fields[3])
-                    put("slaWorkingHours", fields[4].toLongOrNull() ?: 0); put("defaultPrepMinutes", fields[5].toLongOrNull() ?: 0); put("creditWarnPercent", fields[6].toLongOrNull() ?: 0); put("backupRetentionDays", fields[7].toLongOrNull() ?: 0)
-                    put("platformName", fields[8]); putJsonArray("holidays") { holidays.forEach { add(JsonPrimitive(it)) } }
+                    listOf("orderIntakeStart", "orderIntakeEnd", "deliveryStart", "deliveryEnd").forEach { put(it, f[it].orEmpty().trim()) }
+                    f["slaWorkingHours"]?.toDoubleOrNull()?.let { put("slaWorkingHours", it) }
+                    listOf("defaultPrepMinutes", "creditWarnPercent", "backupRetentionDays").forEach { k -> f[k]?.toLongOrNull()?.let { put(k, it) } }
+                    putJsonArray("holidays") { holidays.forEach { add(JsonPrimitive(it)) } }
                     put("paymentMethods", JsonArray(methods.toList()))
+                    put("supplier", buildJsonObject { put("name", f["sup.name"].orEmpty()); put("phone", f["sup.phone"].orEmpty()); put("address", f["sup.address"].orEmpty()); put("taxId", f["sup.taxId"].orEmpty()) })
+                    flags.forEach { (k, v) -> put(k, v) }
                 }, reload = listOf("/settings"))
             }, enabled = !st.busy)
+            st.error?.let { Text(it, color = Mawred.colors.danger, style = MaterialTheme.typography.bodySmall) }
         }
+    }
+}
+
+@Composable
+private fun SettingsCard(title: String, icon: androidx.compose.ui.graphics.vector.ImageVector, content: @Composable ColumnScope.() -> Unit) {
+    Card {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) { Icon(icon, null, tint = Mawred.colors.primary); Text(title, style = MaterialTheme.typography.titleMedium, color = Mawred.colors.ink) }
+            content()
+        }
+    }
+}
+
+@Composable
+private fun SwitchRow(title: String, hint: String?, on: Boolean, enabled: Boolean = true, set: (Boolean) -> Unit) {
+    Row(Modifier.fillMaxWidth().clickable(enabled = enabled, role = androidx.compose.ui.semantics.Role.Switch) { set(!on) }.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = Mawred.colors.ink)
+            hint?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute) }
+        }
+        Switch(on, null, enabled = enabled)
     }
 }
 

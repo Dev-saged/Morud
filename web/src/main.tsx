@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { autoCardTables } from './lib/tables';
 import { firebaseBackend } from './lib/firebase';
 import { SessionProvider } from './lib/session';
 import { UpdateToast } from './ui/UpdateToast';
@@ -16,4 +17,4 @@ createRoot(document.getElementById('root')!).render(
     </SessionProvider>
   </StrictMode>,
 );
-
+autoCardTables();

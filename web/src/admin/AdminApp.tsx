@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { formatDate, formatMoney, formatQty, STATUS } from '../lib/format';
 import { useSession } from '../lib/session';
 import { Bell } from '../ui/Bell';
-import { SecurityCard } from '../ui/Security';
+import { AccountSecurity } from '../ui/Security';
 import { openPrintable } from '../lib/print';
 import { Icon, LogoMark, type IconName } from '../ui/Icons';
 import { Finance } from './Finance';
@@ -53,7 +53,7 @@ export function AdminApp() {
         }} /><button className="icon-btn" aria-label="تسجيل الخروج" onClick={() => void logout()}><Icon name="logout" /></button></div>
       </aside>
       <main className="admin-main">
-        {sec === 'security' && <section><h1>أمان حسابي</h1><SecurityCard /></section>}
+        {sec === 'security' && <section><h1>أمان حسابي</h1><AccountSecurity /></section>}
         {sec === 'dashboard' && <Dashboard go={go} can={(s) => allowed.some(([id]) => id === s)} />}
         {sec === 'orders' && <Orders key={JSON.stringify(focus)} focus={focus} />}
         {sec === 'delivery' && <Delivery />}
@@ -194,7 +194,7 @@ function Delivery() {
     <section>
       <h1>التوصيل <span className="chip danger">{d.overdue} متأخر</span></h1>
       <div className="two">
-        <div className="card"><h3>المندوبون</h3><ul className="plain">{d.agents.map((a: any) => <li key={a.uid}>{a.displayName} <span className="mute num">{a.phone}</span> <span className="chip">{a.activeTasks} مهمة</span></li>)}</ul></div>
+        <div className="card"><h3>المندوبون</h3>{d.agents.length === 0 ? <p className="mute">لا يوجد مندوبون نشطون. أضف مستخدماً بدور «مندوب توصيل» من قسم المستخدمين.</p> : <ul className="people">{d.agents.map((a: any) => <li key={a.uid} className="person"><span className="avatar" aria-hidden="true">{String(a.displayName).trim().slice(0, 1)}</span><span className="person-main"><b>{a.displayName}</b><small className="mute num" dir="ltr">{a.phone}</small></span><span className={`chip ${a.activeTasks ? 'tone-info' : ''}`}>{a.activeTasks} مهمة</span></li>)}</ul>}</div>
         {Object.entries(d.regions).map(([region, list]: [string, any]) => <div key={region} className="card"><h3><Icon name="pin" /> {region}</h3><ul className="plain">{list.map((o: any) => <li key={o.id} className={o.overdue ? 'danger-text' : ''}><span className="num">{o.number}</span> {o.shopName} <span className={`chip tone-${STATUS[o.status]?.tone}`}>{STATUS[o.status]?.label}</span></li>)}</ul></div>)}
       </div>
     </section>

@@ -5,3 +5,4 @@ src/tokens.css
 test-results/
 playwright-report/
 !.env.production
+shots/
