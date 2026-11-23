@@ -315,3 +315,19 @@
 ### أخطاء محلولة
 - اختبار الفتح الفوري كان يعتمد على التوقيت (300ms) فيفشل في CI؛ صار بخادم لا يرد أبداً.
 - ألوان Material الافتراضية (بنفسجي) ظهرت في SegmentedButton وFilterChip.
+
+## v1.0.0 — المساعدة والدعم، التسليم النهائي
+- **الدليل داخل التطبيق:** `spec/guide.json` مصدر واحد (محل/إدارة/مندوب؛ `perms` لموضوعات الإدارة = يكفي واحدة). ويب: `web/src/ui/Help.tsx` (`HelpCenter`, `guideTopics`) — المحل: حسابي ← «المساعدة والدعم»، الإدارة: قسم `help`، المندوب: زر الحساب في الرأس. أندرويد: `ui/common/HelpScreen.kt` (`Guide.parse/topics/search`, `HelpViewModel`, `HelpEntry`) — تبويب `help` للمحل، `agentAccount` للمندوب، قسم `help` في المزيد. يُنسخ إلى assets عبر `copySpec`.
+- **تذاكر الدعم للمحل والمندوب:** الخادم كان جاهزاً (`api/support.ts`) بلا واجهة؛ الآن `MyTickets` (ويب) وتبويب «تواصل مع الدعم» (أندرويد) بمفتاح تكرار، والرد يظهر تحت التذكرة.
+- **البحث:** `domain/search.ts` `matches` يخزّن تطبيع كل منتج في WeakMap والاستعلام الأخير: 32ms ← 1.8ms على 5000 منتج.
+- **استعادة الإنتاج:** `worker/scripts/restore.ts` (تجربة افتراضياً، `RESTORE_CONFIRM=نعم` للتنفيذ، نسخة أمان أولاً، `BACKUP=` لنسخة محددة). `dumpAll` صار مُصدَّراً.
+- **الوثائق:** `docs/api.md` (92 مساراً)، `docs/operations.md`، `docs/test-report.md`، `docs/security-report.md`؛ جدول العناصر الثلاثين في `requirements-checklist.md`.
+- **اختبارات:** `worker/test/srs-permissions.test.ts` (19.2 بأسمائها)، `srs-performance.test.ts` (19.4). المجموع 411.
+
+### قرارات
+- D32: دليل المستخدم داخل التطبيق لا ملفات منفصلة (تفضيل ساجد)؛ موضوعات الإدارة حسب الصلاحية.
+- D33: زر تسجيل خروج المندوب على الويب انتقل من الرأس إلى شاشة «حسابي والمساعدة».
+
+### أخطاء محلولة
+- مبلغ التحصيل في واجهة المندوب (ويب) كان `Math.round(Number*100)` — float في مسار مالي؛ صار `toAgorot` مع رفض غير الصالح.
+- `spec/guide.json` ذكر صلاحيات غير موجودة (`products.edit`) — `GuideTest.everyGuidePermissionExists` يمنع تكرارها.
