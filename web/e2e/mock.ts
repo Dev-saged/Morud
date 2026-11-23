@@ -19,7 +19,7 @@ export const catalog = {
   at: 1,
 };
 
-export const shopUser = { uid: 'so1', displayName: 'أبو أحمد', roles: ['shop_owner'], home: 'shop.home', contexts: ['shop.home'], permissions: ['shop.orders.submit', 'shop.statement.view'], shopIds: ['s1'], mustChangePassword: false };
+export const shopUser = { uid: 'so1', displayName: 'أبو أحمد', roles: ['shop_owner'], home: 'shop.home', contexts: ['shop.home'], permissions: ['shop.orders.submit', 'shop.statement.view', 'support.create'], shopIds: ['s1'], mustChangePassword: false };
 export const adminUser = { uid: 'own', displayName: 'مدير مورد', roles: ['super_admin'], home: 'admin.dashboard', contexts: ['admin.dashboard'], permissions: ['orders.view', 'reports.view', 'delivery.view', 'shops.view'], shopIds: [], mustChangePassword: false };
 
 type Handler = (body: any, url: URL) => { status?: number; json: unknown };

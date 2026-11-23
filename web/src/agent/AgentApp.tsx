@@ -4,6 +4,9 @@ import { useSession } from '../lib/session';
 import { Icon, LogoMark } from '../ui/Icons';
 import { Hero, Tile } from '../ui/Desk';
 import { Bell } from '../ui/Bell';
+import { HelpCenter } from '../ui/Help';
+import { AccountSecurity } from '../ui/Security';
+import { toAgorot } from '../admin/kit';
 
 /** واجهة المندوب: مهامه بالترتيب، الملاحة، والتسليم بإثبات والمبلغ المطلوب فقط. */
 export function AgentApp() {
@@ -14,6 +17,7 @@ export function AgentApp() {
   const [collected, setCollected] = useState('');
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
+  const [view, setView] = useState<'tasks' | 'account'>('tasks');
   const load = () => Promise.all([api.get('/agent/tasks').then((r) => setTasks(r.tasks)), api.get('/me/summary').then(setM).catch(() => undefined)]);
   useEffect(() => { void load(); }, [api]);
   const move = async (id: string, to: string, extra: object = {}) => {
@@ -23,7 +27,8 @@ export function AgentApp() {
   const t = tasks?.[0];
   return (
     <div className="shop">
-      <header className="shop-head"><LogoMark size={30} light /><b>مهام التوصيل</b><Bell light onOpen={() => void load()} /><button className="icon-btn" aria-label="تسجيل الخروج" onClick={() => void logout()}><Icon name="logout" /></button></header>
+      <header className="shop-head"><LogoMark size={30} light /><b>مهام التوصيل</b><Bell light onOpen={(r) => { if (r.kind === 'ticket') setView('account'); else { setView('tasks'); void load(); } }} /><button className="icon-btn" aria-label={view === 'account' ? 'المهام' : 'حسابي والمساعدة'} aria-pressed={view === 'account'} onClick={() => setView(view === 'account' ? 'tasks' : 'account')}><Icon name={view === 'account' ? 'list' : 'user'} /></button></header>
+      {view === 'account' ? <main className="shop-main"><section><h2>حسابي والمساعدة</h2><HelpCenter role="agent" /><h3>أمان حسابي</h3><AccountSecurity /><button className="btn danger block" onClick={() => void logout()}><Icon name="logout" /> تسجيل الخروج</button></section></main> :
       <main className="shop-main">
         <Hero name={user!.displayName} title={tasks ? (tasks.length ? `أمامك ${tasks.length} مهمة` : 'لا مهام الآن، يوم موفق') : undefined}>
           {m && <div className="hero-stats"><div><small>سُلّم اليوم</small><b className="num">{m.deliveredToday}</b></div><div><small>حُصّل اليوم</small><b className="num">{formatMoney(m.collectedToday)}</b></div></div>}
@@ -45,7 +50,12 @@ export function AgentApp() {
             {t.toCollect > 0 && <p className="total"><span>المطلوب تحصيله نقداً</span><b className="num">{formatMoney(t.toCollect)}</b></p>}
             {t.status === 'out_for_delivery' && <button className="btn primary block" onClick={() => void move(t.id, 'on_the_way')}>بدء الطريق</button>}
             {(t.status === 'on_the_way' || t.status === 'out_for_delivery') && (
-              <form className="proof" onSubmit={(e) => { e.preventDefault(); void move(t.id, 'delivered', { proof: { receiverName: receiver, collectedAmount: Math.round(Number(collected || 0) * 100) } }); }}>
+              <form className="proof" onSubmit={(e) => {
+                e.preventDefault();
+                const amount = collected.trim() ? toAgorot(collected) : 0;
+                if (Number.isNaN(amount)) { setError('المبلغ المحصّل غير صالح'); return; }
+                void move(t.id, 'delivered', { proof: { receiverName: receiver, collectedAmount: amount } });
+              }}>
                 <label>اسم المستلم<input value={receiver} onChange={(e) => setReceiver(e.target.value)} required minLength={2} /></label>
                 <label>المبلغ المحصّل (₪)<input inputMode="decimal" value={collected} onChange={(e) => setCollected(e.target.value)} /></label>
                 <button className="btn primary block">تأكيد التسليم</button>
@@ -59,7 +69,7 @@ export function AgentApp() {
           </section>
         )}
         {tasks && tasks.length > 1 && <p className="mute">بعدها {tasks.length - 1} مهمة أخرى.</p>}
-      </main>
+      </main>}
     </div>
   );
 }

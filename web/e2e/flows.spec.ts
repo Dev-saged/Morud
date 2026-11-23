@@ -58,7 +58,7 @@ test('المدير: لوحة المعلومات ثم الطلبات والتقا
   await page.waitForTimeout(900);
   await page.screenshot({ path: 'test-results/admin-desk.png', fullPage: true });
   const nav = page.getByRole('navigation', { name: 'أقسام الإدارة' });
-  await expect(nav.getByRole('button')).toHaveText(['لوحة المعلومات', 'الطلبات', 'المحلات', 'التوصيل', 'التقارير', 'أمان حسابي']);
+  await expect(nav.getByRole('button')).toHaveText(['لوحة المعلومات', 'الطلبات', 'المحلات', 'التوصيل', 'التقارير', 'أمان حسابي', 'المساعدة']);
   await nav.getByRole('button', { name: 'الطلبات' }).click();
   await expect(page.getByRole('cell', { name: 'بقالة النور' })).toBeVisible();
   await nav.getByRole('button', { name: 'التقارير' }).click();

@@ -78,7 +78,7 @@ android {
 
 // نسخ ملفات spec المطلوبة إلى assets
 val copySpec by tasks.registering(Copy::class) {
-    from(specDir) { include("order-states.json", "roles.json", "permissions.json") }
+    from(specDir) { include("order-states.json", "roles.json", "permissions.json", "guide.json") }
     into(layout.buildDirectory.dir("generated/specAssets/spec"))
 }
 

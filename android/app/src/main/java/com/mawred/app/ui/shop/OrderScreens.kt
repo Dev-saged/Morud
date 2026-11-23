@@ -163,7 +163,7 @@ private fun OrderDetailView(vm: OrdersViewModel, padding: PaddingValues) {
 private val LEDGER_LABEL = mapOf("opening" to "رصيد افتتاحي", "invoice" to "فاتورة", "payment" to "دفعة", "adjustment" to "تسوية", "credit_note" to "إشعار دائن", "refund" to "استرداد", "reversal" to "عكس")
 
 @Composable
-fun AccountScreen(vm: OrdersViewModel, padding: PaddingValues) {
+fun AccountScreen(vm: OrdersViewModel, padding: PaddingValues, openHelp: () -> Unit) {
     val ui by vm.ui.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { vm.loadStatement() }
     val st = ui.statement
@@ -188,6 +188,7 @@ fun AccountScreen(vm: OrdersViewModel, padding: PaddingValues) {
                 }
             }
         }
+        item { com.mawred.app.ui.common.HelpEntry(openHelp) }
         item { com.mawred.app.ui.common.AccountSecurity(androidx.hilt.navigation.compose.hiltViewModel()) }
         item { val up = com.mawred.app.ui.update.LocalOpenUpdates.current; val ph by androidx.hilt.navigation.compose.hiltViewModel<com.mawred.app.ui.update.UpdateViewModel>().phase.collectAsStateWithLifecycle(); com.mawred.app.ui.update.UpdateEntry(ph, com.mawred.app.BuildConfig.VERSION_NAME, up) }
     }

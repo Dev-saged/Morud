@@ -14,6 +14,7 @@ import { Icon, LogoMark } from '../ui/Icons';
 import { Hero, Ring, Tile } from '../ui/Desk';
 import { Bell } from '../ui/Bell';
 import { AccountSecurity } from '../ui/Security';
+import { HelpCenter } from '../ui/Help';
 import { useCatalog, type Catalog } from './useCatalog';
 
 type Tab = 'home' | 'cart' | 'orders' | 'account';
@@ -24,6 +25,7 @@ export function ShopApp() {
   const { cat, offline } = useCatalog(api);
   const [cart, dispatch] = useReducer(cartReducer, undefined, loadCart);
   const [tab, setTab] = useState<Tab>('home');
+  const [help, setHelp] = useState<false | 'guide' | 'support'>(false);
   const [openOrder, setOpenOrder] = useState<string | null>(null);
   const [toast, setToast] = useState('');
   const badge = useRef<HTMLSpanElement>(null);
@@ -56,7 +58,7 @@ export function ShopApp() {
       <header className="shop-head">
         <LogoMark size={30} light />
         <div><b>مورد</b>{offline && <span className="chip warn">بلا اتصال — آخر نسخة محفوظة</span>}</div>
-        <Bell light onOpen={(r) => { if (r.kind === 'order') { setTab('orders'); setOpenOrder(r.id); } else if (r.kind === 'shop' || r.kind === 'ticket') setTab('account'); else setTab('home'); }} />
+        <Bell light onOpen={(r) => { if (r.kind === 'order') { setTab('orders'); setOpenOrder(r.id); } else if (r.kind === 'ticket') { setHelp('support'); setTab('account'); } else if (r.kind === 'shop') setTab('account'); else setTab('home'); }} />
       </header>
       <main className="shop-main">
         {cat && <div hidden={tab !== 'home'}><ShopDesk cat={cat} shopId={shopId} pending={queue.length} openOrders={() => { setTab('orders'); setOpenOrder(null); }} openOrder={(id) => { setTab('orders'); setOpenOrder(id); }} openAccount={() => setTab('account')}
@@ -66,13 +68,13 @@ export function ShopApp() {
         {tab === 'orders' && (openOrder ? <OrderDetail id={openOrder} back={() => setOpenOrder(null)} /> : <>
           {queue.length > 0 && <Outbox queue={queue} uid={user!.uid} flush={flush} restore={(q) => { for (const l of q.body.items as Array<{ productId: string; unitId: string; qtyMilli: number }>) dispatch({ type: 'add', ...l }); dropQueued(user!.uid, q.key); setTab('cart'); }} />}
           <OrderList key={queue.length} shopId={shopId} open={setOpenOrder} /></>)}
-        {tab === 'account' && <Account shopId={shopId} onLogout={logout} />}
+        {tab === 'account' && (help ? <section><button className="link" onClick={() => setHelp(false)}><Icon name="chevron" flip /> حسابي</button><h2>المساعدة والدعم</h2><HelpCenter key={help} role="shop" focusTicket={help === 'support'} /></section> : <Account shopId={shopId} onLogout={logout} openHelp={() => setHelp('guide')} />)}
         {!cat && tab !== 'account' && <div className="skeleton-grid" aria-busy="true">{Array.from({ length: 6 }, (_, i) => <div key={i} className="skeleton" />)}</div>}
       </main>
       {toast && <div className="toast" role="status" onAnimationEnd={() => setToast('')}>{toast}</div>}
       <nav className="bottom-nav" aria-label="التنقل">
         {([['home', 'home', 'الرئيسية'], ['cart', 'cart', 'السلة'], ['orders', 'orders', 'طلباتي'], ['account', 'user', 'حسابي']] as const).map(([t, icon, label]) => (
-          <button key={t} className={tab === t ? 'on' : ''} onClick={() => { setTab(t); setOpenOrder(null); }} aria-current={tab === t ? 'page' : undefined}>
+          <button key={t} className={tab === t ? 'on' : ''} onClick={() => { setTab(t); setOpenOrder(null); setHelp(false); }} aria-current={tab === t ? 'page' : undefined}>
             <span className="ico"><Icon name={icon} />{t === 'orders' && queue.length > 0 && <span className="dot-badge wait">{queue.length}</span>}{t === 'cart' && cartCount(cart) > 0 && <span ref={badge} className="dot-badge">{cartCount(cart)}</span>}{t === 'cart' && cartCount(cart) === 0 && <span ref={badge} />}</span>
             {label}
           </button>
@@ -421,7 +423,7 @@ function OrderDetail({ id, back }: { id: string; back: () => void }) {
   );
 }
 
-function Account({ shopId, onLogout }: { shopId: string; onLogout: () => Promise<void> }) {
+function Account({ shopId, onLogout, openHelp }: { shopId: string; onLogout: () => Promise<void>; openHelp: () => void }) {
   const { api, user, can } = useSession();
   const [st, setSt] = useState<any>(null);
   useEffect(() => { if (can('shop.statement.view')) void api.get(`/shops/${shopId}/statement`).then(setSt).catch(() => setSt(null)); }, [api, shopId]);
@@ -436,6 +438,7 @@ function Account({ shopId, onLogout }: { shopId: string; onLogout: () => Promise
           <button className="btn ghost" onClick={() => void openPrintable(api, `/shops/${shopId}/statement/print`)}><Icon name="print" /> كشف الحساب</button>
         </div>
       )}
+      <button className="help-entry" onClick={openHelp}><span className="guide-ico"><Icon name="chat" size={20} /></span><span><b>المساعدة والدعم</b><small className="mute">دليل الاستخدام، وراسل الإدارة بأي استفسار أو مشكلة</small></span><Icon name="chevron" size={18} /></button>
       <AccountSecurity />
       <button className="btn danger block" onClick={() => void onLogout()}><Icon name="logout" /> تسجيل الخروج</button>
     </section>

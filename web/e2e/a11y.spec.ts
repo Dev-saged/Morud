@@ -37,6 +37,7 @@ test('الوصولية: واجهة المحل', async ({ page }) => {
     'GET /me/summary': () => ({ json: { area: 'shop', shopName: 'بقالة النور', open: 1, ordersMonth: 3, spendMonth: 45000, spendLast7Days: [0, 0, 9000, 0, 0, 0, 0], due: 0, creditAvailable: 100000, last: null, reorder: [] } }),
     'GET /notifications': () => ({ json: { notifications: [], unread: 0 } }),
     'GET /shops/s1/orders': () => ({ json: { orders: [] } }),
+    'GET /support': () => ({ json: { tickets: [{ id: 't1', type: 'complaint', subject: 'نقص في الطلب', body: 'وصلت كرتونتان بدل ثلاث', status: 'resolved', createdAt: Date.now(), replies: [{ text: 'تم التعويض', at: Date.now() }] }] } }),
   });
   await page.goto('/');
   await login(page);
@@ -47,6 +48,11 @@ test('الوصولية: واجهة المحل', async ({ page }) => {
   await audit(page, 'cart');
   await page.getByRole('navigation', { name: 'التنقل' }).getByRole('button', { name: /حسابي/ }).click();
   await audit(page, 'account');
+  await page.getByRole('button', { name: /المساعدة والدعم/ }).click();
+  await audit(page, 'help-guide');
+  await page.getByRole('tab', { name: /تواصل مع الدعم/ }).click();
+  await page.getByText('تم التعويض').waitFor();
+  await audit(page, 'help-support');
 });
 
 test('الوصولية: الإدارة', async ({ page }) => {

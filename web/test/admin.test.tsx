@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { fromAgorot, toAgorot } from '../src/admin/kit';
 import { hasTransparentEdges, removeBackground } from '../src/lib/cutout';
-import { adminUser, catalog, json, mount } from './helpers';
+import { adminUser, catalog, json, mount, shopUser } from './helpers';
 
 const owner = { ...adminUser, permissions: ['orders.view', 'products.view', 'products.create', 'products.update', 'products.availability.update', 'categories.manage', 'units.manage', 'shops.view', 'shops.create', 'shops.update', 'shops.suspend', 'shops.credit.manage', 'invoices.view', 'payments.create', 'payments.reverse', 'accounts.view', 'accounts.adjust', 'promotions.manage', 'users.manage', 'roles.manage', 'support.manage', 'settings.manage', 'backups.manage', 'reports.view'] };
 const summary = { ordersToday: 0, new: 0, review: 0, preparing: 0, overdue: 0, delivering: 0, completed: 0, salesToday: 0, collectedToday: 0, totalDue: 0, activeShops: 0, availableProducts: 0, unavailableProducts: 0, topProducts: [], ordersLast7Days: [0, 0, 0, 0, 0, 0, 0], recent: [] };
@@ -38,7 +38,7 @@ describe('لوحة الإدارة الشاملة', () => {
   it('الأقسام تظهر حسب الصلاحيات فقط', async () => {
     mount({ 'GET /auth/me': () => json({ user: { ...adminUser, permissions: ['orders.view'] } }), 'GET /dashboard/summary': () => json(summary) }, true);
     const nav = await screen.findByRole('navigation', { name: 'أقسام الإدارة' });
-    expect(within(nav).getAllByRole('button').map((b) => b.textContent)).toEqual(['لوحة المعلومات', 'الطلبات', 'أمان حسابي']);
+    expect(within(nav).getAllByRole('button').map((b) => b.textContent)).toEqual(['لوحة المعلومات', 'الطلبات', 'أمان حسابي', 'المساعدة']);
   });
   it('الواجهة الافتراضية حسب الدور: موظف المنتجات يبدأ بالمنتجات ويغيّر التوفر', async () => {
     const { calls } = mount({
@@ -188,5 +188,39 @@ describe('المستخدمون والأدوار', () => {
     await u.click(screen.getByRole('button', { name: 'حفظ الدور' }));
     await waitFor(() => expect(calls.some(([p]) => p === '/admin/roles/orders_employee')).toBe(true));
     expect(body(calls.find(([p]) => p === '/admin/roles/orders_employee')![1]).permissions.sort()).toEqual(['orders.cancel', 'orders.view']);
+  });
+});
+
+describe('المساعدة والدعم', () => {
+  it('الدليل يعرض موضوعات الإدارة حسب الصلاحيات فقط، والبحث يصفّيها', async () => {
+    mount({ 'GET /auth/me': () => json({ user: { ...adminUser, home: 'admin.help', permissions: ['orders.view'] } }), 'GET /dashboard/summary': () => json(summary) }, true);
+    expect(await screen.findByRole('heading', { name: 'المساعدة' })).toBeTruthy();
+    const titles = () => screen.getAllByRole('group').map((d) => d.querySelector('summary b')!.textContent);
+    expect(titles()).toEqual(['لوحة المعلومات', 'استقبال الطلبات ومراحلها']);
+    expect(screen.queryByRole('tab', { name: /تواصل مع الدعم/ })).toBeNull();
+    const u = userEvent.setup();
+    await u.type(screen.getByLabelText('ابحث في الدليل'), 'الفاتوره');
+    await waitFor(() => expect(titles()).toEqual(['استقبال الطلبات ومراحلها']));
+  });
+  it('المحل يراسل الدعم: نوع وعنوان وتفاصيل بمفتاح منع تكرار، ويرى رد الإدارة', async () => {
+    let tickets: any[] = [];
+    const { calls } = mount({
+      'GET /auth/me': () => json({ user: { ...shopUser, permissions: [...shopUser.permissions, 'support.create'] } }),
+      'GET /catalog': () => json(catalog),
+      'GET /support': () => json({ tickets }),
+      'POST /support': (i) => { tickets = [{ id: 't1', ...body(i), status: 'in_progress', createdAt: 1, replies: [{ text: 'سنعوضك بالطلب القادم', at: 2 }] }]; return json({ id: 't1' }, 201); },
+    }, true);
+    const u = userEvent.setup();
+    await u.click(await screen.findByRole('button', { name: 'حسابي' }));
+    await u.click(await screen.findByRole('button', { name: /المساعدة والدعم/ }));
+    await u.click(screen.getByRole('tab', { name: /تواصل مع الدعم/ }));
+    await u.click(screen.getByRole('radio', { name: 'شكوى' }));
+    await u.type(screen.getByLabelText('العنوان'), 'نقص في الطلب');
+    await u.type(screen.getByLabelText('التفاصيل'), 'وصلت كرتونتان بدل ثلاث');
+    await u.click(screen.getByRole('button', { name: 'إرسال' }));
+    expect(await screen.findByText('سنعوضك بالطلب القادم')).toBeTruthy();
+    const [, init] = calls.find(([p, i]) => p === '/support' && i?.method === 'POST')!;
+    expect(body(init)).toEqual({ type: 'complaint', subject: 'نقص في الطلب', body: 'وصلت كرتونتان بدل ثلاث' });
+    expect(headers(init)['idempotency-key']).toMatch(/^[a-f0-9]{32}$/);
   });
 });

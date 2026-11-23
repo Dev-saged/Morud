@@ -9,6 +9,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Badge
@@ -87,7 +88,7 @@ private fun AreaShell(user: SessionUser, offline: Boolean, phase: com.mawred.app
             Tab("adminProducts", "المنتجات", Icons.box).takeIf { user.can("products.availability.update") || user.can("products.update") },
             Tab("adminMore", "المزيد", Icons.gear).takeIf { com.mawred.app.ui.admin.hasMoreSections(user) },
         )
-        "agent" -> listOf(Tab("tasks", "المهام", Icons.truck))
+        "agent" -> listOf(Tab("tasks", "المهام", Icons.truck), Tab("agentAccount", "حسابي", Icons.user))
         else -> emptyList()
     }
     var tab by rememberSaveable { mutableStateOf(tabs.firstOrNull()?.id.orEmpty()) }
@@ -102,10 +103,11 @@ private fun AreaShell(user: SessionUser, offline: Boolean, phase: com.mawred.app
     val inboxVm: com.mawred.app.ui.inbox.InboxViewModel = hiltViewModel()
     val inbox by inboxVm.page.collectAsStateWithLifecycle()
     var showInbox by rememberSaveable { mutableStateOf(false) }
+    var helpSupport by rememberSaveable { mutableStateOf(false) }
     /** كل إشعار يفتح مرجعه حسب دور المستخدم. */
     val openNotice: (com.mawred.app.data.NoticeRef) -> Unit = { r ->
         when (user.area) {
-            "shop" -> when (r.kind) { "order" -> { openOrder = r.id; tab = "orders" }; "shop", "ticket" -> tab = "account"; else -> tab = "catalog" }
+            "shop" -> when (r.kind) { "order" -> { openOrder = r.id; tab = "orders" }; "ticket" -> { helpSupport = true; tab = "help" }; "shop" -> tab = "account"; else -> tab = "catalog" }
             "admin" -> when (r.kind) {
                 "order" -> go("adminOrders", com.mawred.app.ui.admin.Focus("all", r.id))
                 "shop" -> go("adminMore", com.mawred.app.ui.admin.Focus(id = "shops"))
@@ -113,6 +115,7 @@ private fun AreaShell(user: SessionUser, offline: Boolean, phase: com.mawred.app
                 "backup" -> go("adminMore", com.mawred.app.ui.admin.Focus(id = "backups"))
                 else -> {}
             }
+            "agent" -> tab = if (r.kind == "ticket") "agentAccount" else "tasks"
             else -> tab = tabs.firstOrNull()?.id.orEmpty()
         }
     }
@@ -135,7 +138,7 @@ private fun AreaShell(user: SessionUser, offline: Boolean, phase: com.mawred.app
         bottomBar = {
             if (tabs.size > 1) NavigationBar(containerColor = Mawred.colors.raised) {
                 tabs.forEach { t ->
-                    NavigationBarItem(tab == t.id, { tab = t.id }, icon = {
+                    NavigationBarItem(tab == t.id || (t.id == "account" && tab == "help"), { tab = t.id }, icon = {
                         if (t.id == "cart" && cartCount > 0) BadgedBox(badge = { Badge(containerColor = Mawred.colors.accent, contentColor = androidx.compose.ui.graphics.Color(com.mawred.app.BrandConfig.ON_ACCENT_HEX)) { Text("$cartCount") } }) { Icon(t.icon, null) } else Icon(t.icon, null)
                     }, label = { Text(t.label) })
                 }
@@ -159,7 +162,20 @@ private fun AreaShell(user: SessionUser, offline: Boolean, phase: com.mawred.app
                     }
                     "cart" -> shopVm?.let { CartScreen(it.cartRows.collectAsStateWithLifecycle().value, it.checkout.collectAsStateWithLifecycle().value, it, pad) }
                     "orders" -> com.mawred.app.ui.shop.OrdersScreen(hiltViewModel(), pad, openOrder) { openOrder = null }
-                    "account" -> com.mawred.app.ui.shop.AccountScreen(hiltViewModel(), pad)
+                    "account" -> com.mawred.app.ui.shop.AccountScreen(hiltViewModel(), pad) { helpSupport = false; tab = "help" }
+                    "help" -> {
+                        androidx.activity.compose.BackHandler { tab = "account" }
+                        com.mawred.app.ui.common.HelpScreen(user, "shop", PaddingValues(16.dp, 8.dp, 16.dp, pad.calculateBottomPadding() + 16.dp), helpSupport) {
+                            androidx.compose.material3.TextButton({ tab = "account" }) { Text("‹ حسابي") }
+                            Text("المساعدة والدعم", style = MaterialTheme.typography.headlineMedium)
+                        }
+                    }
+                    "agentAccount" -> com.mawred.app.ui.common.HelpScreen(user, "agent", PaddingValues(16.dp, 16.dp, 16.dp, pad.calculateBottomPadding() + 16.dp)) {
+                        Text("حسابي والمساعدة", style = MaterialTheme.typography.headlineMedium)
+                        Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
+                            com.mawred.app.ui.common.AccountSecurity(hiltViewModel())
+                        }
+                    }
                     "dashboard" -> DashboardScreen(hiltViewModel(), pad, canOpen, go, user.displayName)
                     "tasks" -> TasksScreen(hiltViewModel(), pad, user.displayName)
                     "adminOrders" -> com.mawred.app.ui.admin.AdminOrdersScreen(hiltViewModel(), pad, focus) { focus = null }

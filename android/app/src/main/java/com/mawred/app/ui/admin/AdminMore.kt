@@ -96,6 +96,7 @@ private val SECTIONS = listOf(
     Section("backups", "النسخ الاحتياطي", Icons.shield, listOf("backups.manage")),
     Section("audit", "سجل العمليات", Icons.list, listOf("audit.view")),
     Section("security", "أمان حسابي", Icons.lock, emptyList()),
+    Section("help", "المساعدة", Icons.chat, emptyList()),
 )
 /** قسم بلا صلاحيات = متاح لكل موظف (أمان حسابه الشخصي). */
 private fun Section.allowed(user: SessionUser) = perms.isEmpty() || perms.any(user::can)
@@ -126,6 +127,7 @@ fun AdminMoreScreen(user: SessionUser, padding: PaddingValues, focus: Focus? = n
                 "settings" -> SettingsSection(vm, pad)
                 "backups" -> BackupsSection(vm, pad)
                 "audit" -> AuditSection(vm, pad)
+                "help" -> com.mawred.app.ui.common.HelpScreen(user, "admin", pad)
                 "security" -> Column(Modifier.padding(pad).padding(16.dp).verticalScroll(androidx.compose.foundation.rememberScrollState())) { com.mawred.app.ui.common.AccountSecurity(hiltViewModel()) }
             }
         }

@@ -3,6 +3,7 @@ import { formatDate, formatMoney, formatQty, STATUS } from '../lib/format';
 import { useSession } from '../lib/session';
 import { Bell } from '../ui/Bell';
 import { AccountSecurity } from '../ui/Security';
+import { HelpCenter } from '../ui/Help';
 import { openPrintable } from '../lib/print';
 import { Icon, LogoMark, type IconName } from '../ui/Icons';
 import { Finance } from './Finance';
@@ -13,7 +14,7 @@ import { Users } from './Users';
 import { useLoad } from './kit';
 import { Audit } from './Audit';
 
-type Section = 'dashboard' | 'orders' | 'products' | 'shops' | 'delivery' | 'finance' | 'promotions' | 'reports' | 'users' | 'support' | 'settings' | 'backups' | 'audit' | 'security';
+type Section = 'dashboard' | 'orders' | 'products' | 'shops' | 'delivery' | 'finance' | 'promotions' | 'reports' | 'users' | 'support' | 'settings' | 'backups' | 'audit' | 'security' | 'help';
 const SECTIONS: Array<[Section, IconName, string, string[]]> = [
   ['dashboard', 'chart', 'لوحة المعلومات', ['orders.view']],
   ['orders', 'orders', 'الطلبات', ['orders.view']],
@@ -29,6 +30,7 @@ const SECTIONS: Array<[Section, IconName, string, string[]]> = [
   ['backups', 'shield', 'النسخ الاحتياطي', ['backups.manage']],
   ['audit', 'list', 'سجل العمليات', ['audit.view']],
   ['security', 'lock', 'أمان حسابي', []],
+  ['help', 'chat', 'المساعدة', []],
 ];
 
 export function AdminApp() {
@@ -54,6 +56,7 @@ export function AdminApp() {
       </aside>
       <main className="admin-main">
         {sec === 'security' && <section><h1>أمان حسابي</h1><AccountSecurity /></section>}
+        {sec === 'help' && <section><h1>المساعدة</h1><HelpCenter role="admin" /></section>}
         {sec === 'dashboard' && <Dashboard go={go} can={(s) => allowed.some(([id]) => id === s)} />}
         {sec === 'orders' && <Orders key={JSON.stringify(focus)} focus={focus} />}
         {sec === 'delivery' && <Delivery />}
