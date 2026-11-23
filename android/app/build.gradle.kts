@@ -71,7 +71,7 @@ android {
     buildFeatures { compose = true; buildConfig = true }
     sourceSets["main"].assets.srcDir(layout.buildDirectory.dir("generated/specAssets"))
     sourceSets["main"].java.srcDir(layout.buildDirectory.dir("generated/tokens/kotlin"))
-    testOptions { unitTests.isReturnDefaultValues = true }
+    testOptions { unitTests.isReturnDefaultValues = true; unitTests.isIncludeAndroidResources = true }
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
     androidResources { localeFilters += "ar" }
 }
@@ -118,4 +118,33 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.okhttp.mockwebserver)
+    // لقطات الشاشات على الجهاز المحلي/CI بلا محاكي (مراجعة بصرية)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(platform(libs.compose.bom))
+    testImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
+}
+
+// لقطات المراجعة: تمرير الخيارات (والوكيل إن وُجد لتنزيل Robolectric) من سطر الأوامر إلى JVM الاختبارات
+tasks.withType<Test>().configureEach {
+    listOf("shots", "roborazzi.test.record", "https.proxyHost", "https.proxyPort", "robolectric.dependency.proxy.host", "robolectric.dependency.proxy.port").forEach { k -> System.getProperty(k)?.let { systemProperty(k, it) } }
+}
+
+// Robolectric بلا تنزيل وقت التشغيل: Gradle يجلب صورة أندرويد مرة ويُخزّنها، والاختبارات تعمل offline
+val robolectricRuntime: Configuration by configurations.creating
+dependencies { robolectricRuntime("org.robolectric:android-all-instrumented:15-robolectric-12650502-i7") }
+val robolectricJars = tasks.register<Copy>("robolectricJars") {
+    from(robolectricRuntime)
+    into(layout.buildDirectory.dir("robolectric-jars"))
+}
+tasks.withType<Test>().configureEach {
+    // اللقطات لا تعمل إلا عند الطلب، فلا تحتاج CI صورة أندرويد الكبيرة
+    if (System.getProperty("shots") != "1") filter { excludeTestsMatching("com.mawred.app.shots.*") }
+    if (System.getProperty("shots") == "1") {
+        dependsOn(robolectricJars)
+        systemProperty("robolectric.offline", "true")
+        systemProperty("robolectric.dependency.dir", layout.buildDirectory.dir("robolectric-jars").get().asFile.absolutePath)
+    }
 }

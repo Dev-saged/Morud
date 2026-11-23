@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -38,8 +39,16 @@ object Mawred {
 @Composable
 fun MawredTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val c = mawredColors(dark)
-    val scheme = if (dark) darkColorScheme(primary = c.primary, onPrimary = c.onPrimary, background = c.surface, surface = c.raised, onSurface = c.ink, onBackground = c.ink, outline = c.line, secondary = c.accent, error = c.danger)
-    else lightColorScheme(primary = c.primary, onPrimary = c.onPrimary, background = c.surface, surface = c.raised, onSurface = c.ink, onBackground = c.ink, outline = c.line, secondary = c.accent, error = c.danger)
+    // كل أدوار ألوان Material مشتقة من ألوان مورد: لا بنفسجي افتراضي في الأزرار المجزأة والرقائق والقوائم
+    val tint = c.primary.copy(alpha = if (dark) .26f else .13f).compositeOver(c.raised)
+    val scheme = (if (dark) darkColorScheme() else lightColorScheme()).copy(
+        primary = c.primary, onPrimary = c.onPrimary, primaryContainer = tint, onPrimaryContainer = c.ink,
+        secondary = c.primary, onSecondary = c.onPrimary, secondaryContainer = tint, onSecondaryContainer = c.ink,
+        tertiary = c.accent, tertiaryContainer = c.accent.copy(alpha = .18f).compositeOver(c.raised), onTertiaryContainer = c.ink,
+        background = c.surface, onBackground = c.ink, surface = c.raised, onSurface = c.ink, onSurfaceVariant = c.mute,
+        surfaceVariant = c.surface, surfaceContainer = c.raised, surfaceContainerLow = c.raised, surfaceContainerHigh = c.raised, surfaceContainerHighest = c.surface, surfaceContainerLowest = c.raised,
+        surfaceTint = c.primary, outline = c.line, outlineVariant = c.line, error = c.danger, inversePrimary = c.primary,
+    )
     CompositionLocalProvider(LocalMawred provides c, LocalLayoutDirection provides LayoutDirection.Rtl) {
         MaterialTheme(colorScheme = scheme, typography = MawredType, shapes = Shapes(small = RoundedCornerShape(10.dp), medium = RoundedCornerShape(16.dp), large = RoundedCornerShape(24.dp)), content = content)
     }

@@ -103,7 +103,7 @@ function ShopDesk({ cat, shopId, pending, openOrders, openOrder, openAccount, re
       {m && <div className="tiles">
         <Tile icon="orders" label="طلبات مفتوحة" value={m.open} hint={pending ? `+${pending} بانتظار النت` : 'اضغط للمتابعة'} tone={pending ? 'accent' : 'primary'} onClick={openOrders} />
         <Tile icon="chart" label="مصروف 30 يوماً" value={formatMoney(m.spendMonth)} hint={`${m.ordersMonth} طلب`} spark={m.spendLast7Days} onClick={m.due !== undefined ? openAccount : undefined} />
-        {m.last && <button className="tile tap" onClick={() => openOrder(m.last!.id)} aria-label={`آخر طلب ${m.last.number}`}>
+        {m.last && <button className="tile tap" onClick={() => openOrder(m.last!.id)}>
           <span className="tile-ico t-ok"><Icon name="truck" size={20} /></span>
           <span className="tile-text"><small>آخر طلب · <span className="num">{m.last.number}</span></small><b>{STATUS[m.last.status]?.label ?? m.last.status}</b>
             {stage >= 0 && <span className="progress-line" aria-hidden="true">{STAGES.map((_, i) => <i key={i} className={i <= stage ? 'on' : ''} />)}</span>}</span>
@@ -183,7 +183,7 @@ function Home({ cat, onAdd, onAddMany }: { cat: Catalog; onAdd: (p: string, u: s
     <>
       <QuickOrder cat={cat} onAddMany={onAddMany} />
       <div className="search"><Icon name="search" /><input type="search" placeholder="ابحث باسم المنتج أو العلامة أو الرمز" value={q} onChange={(e) => setQ(e.target.value)} aria-label="بحث" /></div>
-      <div className="chips" role="tablist">
+      <div className="chips" role="group" aria-label="التصنيفات">
         <button className={!category ? 'chip on' : 'chip'} onClick={() => setCategory(null)}>الكل</button>
         {cat.categories.map((c) => <button key={c.id} className={category === c.id ? 'chip on' : 'chip'} onClick={() => setCategory(c.id)}>{c.name}</button>)}
         <label className="chip"><input type="checkbox" checked={onlyAvailable} onChange={(e) => setOnlyAvailable(e.target.checked)} /> المتوفر فقط</label>

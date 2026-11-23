@@ -493,7 +493,7 @@ private fun SupportSection(vm: AdminVm, pad: PaddingValues) {
 private val DAYS = listOf("الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت")
 
 @Composable
-private fun SettingsSection(vm: AdminVm, pad: PaddingValues) {
+internal fun SettingsSection(vm: AdminVm, pad: PaddingValues) {
     val st by vm.s.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { vm.load("/settings", true) }
     val s0 = st.data["/settings"].o("settings")

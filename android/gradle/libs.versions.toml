@@ -17,6 +17,8 @@ coreKtx = "1.16.0"
 junit = "4.13.2"
 work = "2.10.2"
 segmentation = "16.0.0-beta1"
+robolectric = "4.15.1"
+roborazzi = "1.46.1"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -48,6 +50,11 @@ datastore-preferences = { module = "androidx.datastore:datastore-preferences", v
 work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 mlkit-segmentation = { module = "com.google.android.gms:play-services-mlkit-subject-segmentation", version.ref = "segmentation" }
 junit = { module = "junit:junit", version.ref = "junit" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+roborazzi = { module = "io.github.takahirom.roborazzi:roborazzi", version.ref = "roborazzi" }
+roborazzi-compose = { module = "io.github.takahirom.roborazzi:roborazzi-compose", version.ref = "roborazzi" }
+compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

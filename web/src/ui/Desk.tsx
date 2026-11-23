@@ -32,7 +32,8 @@ export function Tile({ icon, label, value, hint, tone = 'primary', spark, onClic
     {onClick && <Icon name="chevron" size={14} flip className="tile-go" />}
   </>;
   const cls = `tile${wide ? ' wide' : ''}${alert ? ' alert' : ''}${onClick ? ' tap' : ''}`;
-  return onClick ? <button className={cls} onClick={onClick} aria-label={`${label}: ${typeof value === 'string' || typeof value === 'number' ? value : ''} — التفاصيل`}>{body}</button> : <div className={cls}>{body}</div>;
+  // الاسم المسموع هو النص الظاهر نفسه (قارئ الشاشة والأوامر الصوتية يطابقان ما يراه المستخدم)
+  return onClick ? <button className={cls} onClick={onClick}>{body}</button> : <div className={cls}>{body}</div>;
 }
 
 /** خط اتجاه بمساحة متدرجة. */

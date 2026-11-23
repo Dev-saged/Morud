@@ -47,6 +47,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -234,7 +235,7 @@ private fun rolesList(scope: androidx.compose.foundation.lazy.LazyListScope, rol
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(r.s("label"), Modifier.weight(1f), style = MaterialTheme.typography.titleSmall, color = Mawred.colors.ink)
-                        if (locked) Icon(Icons.lock, "محمي", Modifier.size(18.dp), tint = Mawred.colors.mute) else Icon(Icons.chevron, null, Modifier.size(18.dp), tint = Mawred.colors.mute)
+                        if (locked) Icon(Icons.lock, "محمي", Modifier.size(18.dp), tint = Mawred.colors.mute) else Icon(Icons.chevron, null, Modifier.size(18.dp).graphicsLayer { scaleX = -1f }, tint = Mawred.colors.mute)
                     }
                     LinearProgressIndicator({ if (all) 1f else n.toFloat() / total }, Modifier.fillMaxWidth().height(6.dp), color = Mawred.colors.primary, trackColor = Mawred.colors.line, drawStopIndicator = {})
                     Text((if (all) "كل الصلاحيات" else "$n صلاحية") + if (k != "shop") " · ${users.count { r.s("id") in it.strs("roles") }} مستخدم" else "", style = MaterialTheme.typography.bodySmall, color = Mawred.colors.mute)

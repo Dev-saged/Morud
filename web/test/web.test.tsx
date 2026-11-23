@@ -270,7 +270,7 @@ describe('لوحة صاحب المحل', () => {
     const u = userEvent.setup();
     await u.click(within(screen.getByText('اطلب مجدداً').closest('.panel') as HTMLElement).getByRole('button', { name: /جبنة فيتا/ }));
     expect(loadCart().lines).toEqual([{ productId: 'feta', unitId: 'carton', qtyMilli: 1000 }]);
-    await u.click(screen.getByRole('button', { name: 'آخر طلب MW-7' }));
+    await u.click(screen.getByRole('button', { name: /آخر طلب · MW-7/ }));
     expect(await screen.findByRole('heading', { name: 'MW-7' })).toBeTruthy();
   });
 });
