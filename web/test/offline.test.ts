@@ -90,9 +90,9 @@ describe('الفتح الفوري', () => {
     cacheUser(shopUser);
     cachePut(shopUser.uid, '/catalog', catalog);
     localStorage.setItem('mawred.login.v1', JSON.stringify({ identifier: 'abu', remember: true }));
-    mount({ 'GET /auth/me': () => json({ user: shopUser }), 'GET /catalog': () => json(catalog) }, true);
-    // قبل أي رد: الكتالوج المحفوظ ظاهر
-    expect(await screen.findByRole('button', { name: 'تفاصيل جبنة فيتا' }, { timeout: 300 })).toBeTruthy();
+    // الخادم لا يرد أبداً: الواجهة يجب أن تظهر من المحفوظ وحده
+    mount({ 'GET /auth/me': () => new Promise<Response>(() => undefined), 'GET /catalog': () => new Promise<Response>(() => undefined) }, true);
+    expect(await screen.findByRole('button', { name: 'تفاصيل جبنة فيتا' }, { timeout: 3000 })).toBeTruthy();
     cleanupAll();
     // جلسة منتهية عند مزود الهوية: يرجع لشاشة الدخول ويمسح المحفوظ
     cacheUser(shopUser);

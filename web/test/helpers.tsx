@@ -30,7 +30,7 @@ export function backend(signedIn = false): AuthBackend & { tokens: string[] } {
   return b;
 }
 
-export function mount(routes: Record<string, (init?: RequestInit) => Response>, signedIn = false) {
+export function mount(routes: Record<string, (init?: RequestInit) => Response | Promise<Response>>, signedIn = false) {
   const calls: Array<[string, RequestInit | undefined]> = [];
   const f = vi.fn(async (url: string, init?: RequestInit) => {
     const path = url.replace('https://api.test', '');
