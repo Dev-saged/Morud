@@ -283,3 +283,24 @@
 
 ### مفتوح
 - اختبار أندرويد `NetworkTest.refreshNearExpiryAndSignOutWhenRevoked` فشل مرة في CI بـ`UncaughtExceptionsBeforeTest` ونجح بإعادة التشغيل وعلى الجهاز المحلي؛ يُراقب.
+
+
+## v0.7.0 — المستخدمون والأدوار، تثبيت آيفون، التحقق بخطوتين كمفتاح
+- الويب `admin/Users.tsx`: `Users` (تبويبان seg-tabs)، `UserList` (بطاقات people + تصفية بالدور/الموقوف)، `UserForm` (أقسام + `PermState` ثلاثي)، `RoleEditor` (بطاقات بأقسام النوع + محرر بمجموعات `groupPerms`/`PERM_GROUPS`).
+- أندرويد `ui/admin/TeamSection.kt`: `TeamSection` (SegmentedButton)، `PersonCard`، `UserForm`، `RoleForm`، `groupPerms` (نفس مجموعات الويب). يستبدل UsersSection القديم.
+- التحقق بخطوتين: `settings.mfaFeature` (افتراضي false في seed)، `mfa.ts` (`mfaFeature`، `mfaEnabled` يشترط تشغيل الميزة، setup/enable ترفض عند الإيقاف)، `/auth/me` يرجع `mfaAvailable`.
+- أمان الحساب: الويب `ui/Security.tsx` (`AccountSecurity` = `PasswordCard` + `SecurityCard` المشروط + `InstallButton`)، أندرويد `AccountSecurity`/`PasswordPanel` في `SecurityScreen.kt`، `AuthRepository.changePassword(new, current)` و`logoutAll()`؛ الخادم `auth.ts changePassword` يتطلب `currentPassword` إلا في التغيير الإجباري.
+- التثبيت: `ui/InstallPrompt.tsx` (`iosBrowser`، `useInstall`، `IosSteps`، `InstallPrompt` من شاشة الدخول بعد 4 ث وتأجيل 3 أيام، `InstallButton` دائم).
+- الإعدادات: الويب `Settings` + `Toggle` في `More.tsx` (ترسل ما تغيّر فقط)، أندرويد `SettingsSection` + `SettingsCard` + `SwitchRow`.
+- الجداول على الجوال: `lib/tables.ts` (`autoCardTables` يضع data-label لكل جدول ≥5 أعمدة) + `.table.cards` في styles.css.
+- لقطات المراجعة: `web/e2e/screens.spec.ts` (SHOTS=1) و`sweep.spec.ts` (FX=ملف بيانات ملتقط محلياً، لا يُرفع).
+
+### قرارات
+- D29: التحقق بخطوتين ميزة نظام تُشغَّل من الإعدادات (موقوفة افتراضياً بطلب ساجد)؛ مطلوب في SRS 16.1 فبقي متاحاً.
+- D30: تغيير كلمة المرور الاختياري يتطلب الحالية.
+- D31: نافذة تثبيت آيفون تظهر قبل الدخول ولكل متصفحات iOS.
+
+### أخطاء محلولة
+- `SCOPES` في محرر الأدوار لم يتضمن `any` فاختفت صلاحيات عامة مثل عرض المنتجات.
+- AdminVmTest ترك تحميلاً معلّقاً يعود لـDispatchers.Main بعد resetMain فيُسقط اختباراً لاحقاً (سبب فشل CI المتقطع).
+- `signInWithPassword` يعيد `{ok:false}` ولا يرمي — يجب فحص `ok`.
