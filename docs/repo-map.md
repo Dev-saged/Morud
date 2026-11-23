@@ -304,3 +304,14 @@
 - `SCOPES` في محرر الأدوار لم يتضمن `any` فاختفت صلاحيات عامة مثل عرض المنتجات.
 - AdminVmTest ترك تحميلاً معلّقاً يعود لـDispatchers.Main بعد resetMain فيُسقط اختباراً لاحقاً (سبب فشل CI المتقطع).
 - `signInWithPassword` يعيد `{ok:false}` ولا يرمي — يجب فحص `ok`.
+
+
+## v0.7.1 — الوصولية واللقطات
+- `web/e2e/a11y.spec.ts`: axe-core WCAG 2.1 AA (يفشل على serious/critical؛ `A11Y_ALL=1` يطبع كل المستويات) للدخول والمحل والسلة والحساب واللوحة والطلبات والمستخدمين والإعدادات والأمان وصفحة المستخدم + الوضع الليلي.
+- لقطات أندرويد: `app/src/test/java/com/mawred/app/shots/ScreensShot.kt` (Robolectric NATIVE + Roborazzi). تشغيل: `./gradlew testDebugUnitTest --tests '*ScreensShot*' -Dshots=1 -Droborazzi.test.record=true` ← `app/build/shots/*.png`. صورة أندرويد من مرآة Google في `settings.gradle.kts` (Maven Central يرد 429)، و`robolectricJars` + `robolectric.offline`. بلا `-Dshots=1` تُستبعد من الاختبارات.
+- `ui/theme/Theme.kt`: كل أدوار ColorScheme مشتقة من ألوان مورد (secondaryContainer وغيرها).
+- أداة `worker/scripts/health.ts`: صحة الإنتاج (cron، النسخ، الإشعارات العالقة، الأعداد).
+
+### أخطاء محلولة
+- اختبار الفتح الفوري كان يعتمد على التوقيت (300ms) فيفشل في CI؛ صار بخادم لا يرد أبداً.
+- ألوان Material الافتراضية (بنفسجي) ظهرت في SegmentedButton وFilterChip.
