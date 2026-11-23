@@ -13,6 +13,8 @@ async function audit(page: Page, name: string) {
 }
 
 // نافذة تثبيت آيفون (مشروع WebKit يحاكي آيفون) تُؤجَّل حتى لا تغطي الأزرار أثناء الفحص
+// axe على WebKit أبطأ بكثير تحت التشغيل المتوازي
+test.describe.configure({ timeout: 90_000 });
 test.beforeEach(async ({ page }) => { await page.addInitScript(() => localStorage.setItem('mawred.install.snooze', String(Date.now()))); });
 
 const login = async (page: Page) => {
