@@ -50,7 +50,7 @@ export async function decodeBackup(bytes: Uint8Array, keyB64: string): Promise<A
   return text.split('\n').filter(Boolean).map((l) => JSON.parse(l, reviver) as { path: string; data: Data });
 }
 
-async function dumpAll(db: Db): Promise<{ lines: string; count: number }> {
+export async function dumpAll(db: Db): Promise<{ lines: string; count: number }> {
   const parts: string[] = [];
   let count = 0;
   for (const c of COLLECTIONS) {

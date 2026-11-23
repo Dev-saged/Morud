@@ -38,12 +38,29 @@ export function searchKeys(p: Searchable, maxKeys = 200): string[] {
   return [...keys].slice(0, maxKeys);
 }
 
+// المنتج يُطبَّع مرة واحدة (كائنات الكتالوج ثابتة حتى التحديث) والاستعلام يُطبَّع مرة لكل كتابة لا لكل منتج
+const prepared = new WeakMap<Searchable, { hay: string[]; codes: string[] }>();
+let lastQuery = '';
+let lastTerms: string[] = [];
+
+function prep(p: Searchable) {
+  let r = prepared.get(p);
+  if (!r) {
+    r = {
+      hay: [p.name, ...p.altNames, p.brand ?? ''].flatMap((s) => normalizeArabic(s).split(' ')).filter(Boolean),
+      codes: [p.sku, ...p.barcodes].map((c) => normalizeArabic(c).replace(/ /g, '')).filter(Boolean),
+    };
+    prepared.set(p, r);
+  }
+  return r;
+}
+
 /** مطابقة محلية (أندرويد/ويب offline): كل كلمات الاستعلام يجب أن تبدأ بها كلمة من المنتج أو تطابق الرمز. */
 export function matches(query: string, p: Searchable): boolean {
-  const q = normalizeArabic(query).split(' ').filter(Boolean);
+  if (query !== lastQuery) { lastQuery = query; lastTerms = normalizeArabic(query).split(' ').filter(Boolean); }
+  const q = lastTerms;
   if (q.length === 0) return true;
-  const hay = [p.name, ...p.altNames, p.brand ?? ''].flatMap((s) => normalizeArabic(s).split(' '));
-  const codes = [p.sku, ...p.barcodes].map((c) => normalizeArabic(c).replace(/ /g, ''));
+  const { hay, codes } = prep(p);
   const whole = q.join('');
   if (codes.some((c) => c.startsWith(whole))) return true;
   return q.every((t) => hay.some((w) => w.startsWith(t)) || codes.some((c) => c === t || c.startsWith(t)));

@@ -107,6 +107,41 @@
 - [x] R18.1 نسخ يومي مضغوط مشفر AES-256-GCM إلى R2 منفصل + سجل + تنبيه الفشل + حذف حسب الاحتفاظ + استعادة مختبرة تطابق كل الوثائق — M8 (اختبار staging الحقيقي قبل الإطلاق M14)
 
 ## 19–21. الجودة والتسليم والقبول
-- [ ] R19.1 اختبارات الوظائف والصلاحيات والسيناريوهات المالية الخمسة والأداء والمنصات — M1–M14
-- [ ] R20.1 عناصر التسليم الثلاثون — M14
-- [ ] R21.1 معايير القبول العشرون + الدورة الكاملة من إنشاء محل حتى ظهور الدفعة في الكشف — M14
+- [x] R19.1 اختبارات الوظائف والصلاحيات والسيناريوهات المالية الخمسة والأداء والمنصات — `docs/test-report.md` (19.1–19.5 بند ببند) · `srs-permissions.test.ts` · `srs-performance.test.ts`
+- [x] R20.1 عناصر التسليم الثلاثون — الجدول أدناه
+- [x] R21.1 معايير القبول العشرون + الدورة الكاملة من إنشاء محل حتى ظهور الدفعة في الكشف — `docs/test-report.md` §21 · `full-cycle.test.ts`
+
+### عناصر التسليم الثلاثون (SRS 20)
+
+| # | العنصر | أين |
+|---|---|---|
+| 1 | مشروع Android | `android/` — Kotlin + Compose (انحراف معتمد عن Java: `docs/architecture.md`) |
+| 2 | مشروع Backend | `worker/` — Cloudflare Worker (انحراف معتمد عن Spring Boot) |
+| 3 | مشروع Web | `web/` — React + TypeScript + Vite |
+| 4 | إعداد PWA | `web/public/site.webmanifest`، `sw.js`، نافذة تثبيت آيفون |
+| 5 | قاعدة البيانات ومخططاتها | Firestore — `docs/data-model.md` |
+| 6 | ترحيلات قاعدة البيانات | Firestore بلا مخطط ثابت: سياسة الإضافة فقط + `firebase/firestore.indexes.json` · أندرويد Room: `android/app/schemas/` |
+| 7 | بيانات أولية للتصنيفات والوحدات | `spec/seed.json` |
+| 8 | حساب المالك الأولي الآمن | `worker/src/admin/bootstrap.ts` — مرة واحدة، كلمة من سرّ النشر |
+| 9–11 | واجهات الإدارة والمحلات والمندوبين | `web/src/{admin,shop,agent}` · `android/.../ui/{admin,shop,agent}` |
+| 12 | نظام الصلاحيات | `spec/permissions.json`، `spec/roles.json`، `worker/src/domain/permissions.ts` |
+| 13 | نظام الإشعارات | `worker/src/api/notify.ts` + FCM + صندوق داخل التطبيق |
+| 14 | الفواتير والحسابات | `worker/src/api/finance.ts`، `domain/ledger.ts` |
+| 15 | التوصيل | `worker/src/api/delivery.ts` |
+| 16 | ملفات إعدادات نموذجية | `worker/wrangler.toml`، `web/.env.production` (عام)، `spec/seed.json` |
+| 17 | توثيق API | `docs/api.md` |
+| 18 | توثيق قاعدة البيانات | `docs/data-model.md` |
+| 19 | دليل تشغيل الخادم | `docs/operations.md` §2 |
+| 20 | دليل نشر الويب | `docs/operations.md` §3 |
+| 21 | دليل إعداد Android | `docs/operations.md` §4 |
+| 22 | دليل إنشاء الحسابات | `docs/operations.md` §5 |
+| 23 | دليل النسخ والاستعادة | `docs/operations.md` §6 + `worker/scripts/restore.ts` |
+| 24 | اختبارات آلية | 411 اختباراً عبر spec/الخادم/القواعد/الويب/المتصفحات/أندرويد |
+| 25 | تقرير الاختبارات | `docs/test-report.md` |
+| 26 | تقرير أمني | `docs/security-report.md` |
+| 27 | APK Release موقّع | GitHub Releases (يبنيه CI مع كل push) |
+| 28 | ويب منشور | Cloudflare Pages |
+| 29 | PWA قابلة للتثبيت | Android وiPhone |
+| 30 | تعليمات التحديث المستقبلي | `docs/operations.md` §7 |
+| — | دليل المستخدم | داخل التطبيق: «المساعدة والدعم» لكل دور (`spec/guide.json`) |
+
