@@ -41,10 +41,11 @@ const line = (prefix: string, unitIdx: number, qty: number) => {
 };
 
 const SHOP = { ...shopUser, displayName: 'أبو أحمد', permissions: [...shopUser.permissions, 'shop.invoices.view', 'shop.orders.cancel'] };
-const items = [line('b837a8', 0, 3), line('5236e4', 1, 2), line('cfad34', 0, 5), line('11eb0f', 0, 4)];
+// بلا ملف الكتالوج (CI) تُتخطى اللقطات ولا يُبنى أي سطر
+const items = src.products.length ? [line('b837a8', 0, 3), line('5236e4', 1, 2), line('cfad34', 0, 5), line('11eb0f', 0, 4)] : [];
 const subtotal = items.reduce((a, l) => a + l.total, 0);
 const orderDetail = {
-  order: { id: 'o1', number: 'MW-O-2026-000418', shopId: 's1', shopName: 'بقالة النور', status: 'on_the_way', items, totals: { subtotal, discount: Math.round(items[0]!.total * 0.1), total: subtotal - Math.round(items[0]!.total * 0.1) }, paymentMethod: 'cash', invoiceId: 'inv1', createdAt: now - 4 * 3600_000,
+  order: { id: 'o1', number: 'MW-O-2026-000418', shopId: 's1', shopName: 'بقالة النور', status: 'on_the_way', items, totals: { subtotal, discount: Math.round((items[0]?.total ?? 0) * 0.1), total: subtotal - Math.round((items[0]?.total ?? 0) * 0.1) }, paymentMethod: 'cash', invoiceId: 'inv1', createdAt: now - 4 * 3600_000,
     sla: { submittedAt: now - 4 * 3600_000, clockStartAt: now - 4 * 3600_000, dueAt: now + 2 * 3600_000, estimated: false } },
   history: [['new', 4], ['under_review', 3.8], ['confirmed', 3.5], ['preparing', 3], ['ready_for_pickup', 1.4], ['out_for_delivery', 0.9], ['on_the_way', 0.6]].map(([to, h]) => ({ to, at: now - (h as number) * 3600_000 })),
   changes: [], internal: [], actions: [],
