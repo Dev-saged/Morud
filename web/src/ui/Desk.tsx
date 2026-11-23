@@ -14,7 +14,7 @@ export function Hero({ name, title, place, children, tone = 'primary' }: { name:
     <header className={`hero hero-${tone}`}>
       <div className="hero-glow" aria-hidden="true" />
       <p className="hero-date">{place ? <><b>{place}</b> · </> : null}{DATE.format(new Date())}</p>
-      <h1>{greeting()}، {name.split(' ')[0]}</h1>
+      <h1>{greeting()}، {shortName(name)}</h1>
       {title && <p className="hero-sub">{title}</p>}
       {children}
     </header>
@@ -96,4 +96,10 @@ export function Row({ title, sub, chip, amount, onClick, initial }: { title: Rea
 export function dayLabels(n = 7) {
   const f = new Intl.DateTimeFormat('ar-PS', { weekday: 'narrow' });
   return Array.from({ length: n }, (_, i) => f.format(new Date(Date.now() - (n - 1 - i) * 86_400_000)));
+}
+
+/** الاسم المختصر للتحية: الكنية تبقى كاملة («أبو أحمد»، «أم محمد»، «عبد الله»). */
+export function shortName(full: string): string {
+  const w = full.trim().split(/\s+/);
+  return w.length > 1 && /^(أبو|ابو|أم|ام|عبد|بن|بنت)$/.test(w[0]!) ? `${w[0]} ${w[1]}` : (w[0] ?? '');
 }

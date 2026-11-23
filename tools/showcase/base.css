@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0}
+body{font-family:'IBM Plex Sans Arabic',sans-serif;direction:rtl;-webkit-font-smoothing:antialiased}
+.canvas{position:relative;overflow:hidden}
+.navy{background:radial-gradient(120% 90% at 85% 0%,#1d4ed8 0%,#122a7a 38%,#0b1533 75%);color:#fff}
+.paper{background:#F7F5F0;color:#0B1533}
+.dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.09) 1.6px,transparent 1.6px);background-size:28px 28px;mask-image:linear-gradient(180deg,#000,transparent 85%)}
+.paper .dots{background-image:radial-gradient(rgba(11,21,51,.07) 1.6px,transparent 1.6px)}
+.glow{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(240,138,36,.35),transparent 65%);filter:blur(10px)}
+.phone{position:relative;border-radius:54px;padding:12px;background:linear-gradient(145deg,#2a3352,#0b1020);box-shadow:0 40px 80px -30px rgba(0,0,0,.55),0 0 0 1.5px rgba(255,255,255,.08) inset}
+.phone img{display:block;width:100%;border-radius:43px}
+.phone::before{content:'';position:absolute;top:24px;left:50%;transform:translateX(-50%);width:96px;height:26px;border-radius:20px;background:#05070d;z-index:2}
+.droid{border-radius:40px;padding:10px}
+.droid img{border-radius:31px}
+.droid::before{width:16px;height:16px;top:20px;border-radius:50%}
+.desk{border-radius:18px;background:#0b1020;padding:34px 12px 12px;box-shadow:0 50px 90px -35px rgba(0,0,0,.6);position:relative}
+.desk::before{content:'';position:absolute;top:13px;right:18px;width:46px;height:10px;background:radial-gradient(circle at 5px 5px,#f26a5f 4.5px,transparent 5px),radial-gradient(circle at 21px 5px,#f0b43c 4.5px,transparent 5px),radial-gradient(circle at 37px 5px,#47c46a 4.5px,transparent 5px)}
+.desk img{display:block;width:100%;border-radius:8px}
+h1,h2,.display{font-family:'Alexandria',sans-serif}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:99px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);font-weight:500;font-size:20px}
+.paper .eyebrow{background:rgba(29,78,216,.08);border-color:rgba(29,78,216,.18);color:#1d4ed8}
+.dot{width:10px;height:10px;border-radius:50%;background:#F08A24}
+.cap{margin-top:18px;text-align:center;font-weight:600;font-size:22px;opacity:.9}
+.droid .scr{background:#F7F5F0;padding-top:40px;border-radius:31px;overflow:hidden}
+.droid .scr img{border-radius:0}

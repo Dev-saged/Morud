@@ -37,3 +37,13 @@ class GuideTest {
         assertTrue(Guide.search(shop, "كلمةلاتوجد").isEmpty())
     }
 }
+
+class ShortNameTest {
+    @Test fun kunyaStaysWhole() {
+        assertEquals("أبو أحمد", com.mawred.app.ui.common.shortName("أبو أحمد الشوا"))
+        assertEquals("أم محمد", com.mawred.app.ui.common.shortName("أم محمد"))
+        assertEquals("عبد الله", com.mawred.app.ui.common.shortName("عبد الله النجار"))
+        assertEquals("سماح", com.mawred.app.ui.common.shortName("سماح الشوا"))
+        assertEquals("خالد", com.mawred.app.ui.common.shortName("  خالد  "))
+    }
+}

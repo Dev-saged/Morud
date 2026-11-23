@@ -331,3 +331,7 @@
 ### أخطاء محلولة
 - مبلغ التحصيل في واجهة المندوب (ويب) كان `Math.round(Number*100)` — float في مسار مالي؛ صار `toAgorot` مع رفض غير الصالح.
 - `spec/guide.json` ذكر صلاحيات غير موجودة (`products.edit`) — `GuideTest.everyGuidePermissionExists` يمنع تكرارها.
+
+### README العرض (v1.0.0)
+- `web/e2e/showcase.spec.ts` (`SHOWCASE_CATALOG` ملف كتالوج خارج المستودع + `SHOWCASE_IMAGES` مخزن الصور): بناء الإنتاج ببيانات عرض مخترعة ← لقطات. أندرويد: `ScreensShot.kt` (dashboard, help, users, roles, settings). التركيب: `tools/showcase/render.mjs` ← `docs/screenshots/*.webp`.
+- أخطاء كشفتها اللقطات وأُصلحت: قص الكنية في التحية (`shortName` ويب + أندرويد)، سلة الويب بلا تعديل كمية (أُضيف stepper)، فيض المبالغ في بطاقات اللوحة (container query `cqi`)، أسهم الدليل في أندرويد.

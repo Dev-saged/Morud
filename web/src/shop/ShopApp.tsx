@@ -277,10 +277,16 @@ function CartView({ cat, cart, dispatch, shopId, onDone, onQueued }: { cat: Cata
       <ul className="lines">{cart.lines.map((l) => {
         const p = products.get(l.productId);
         const line = preview.ok ? preview.value.lines.find((x) => x.productId === l.productId && x.unitId === l.unitId) : undefined;
+        const su = p?.units.find((u) => u.unitId === l.unitId);
         return (
           <li key={`${l.productId}|${l.unitId}`}>
-            <div><b>{p?.name ?? 'منتج غير متاح'}</b><span className="mute"> {line?.unitName} × {formatQty(l.qtyMilli)}</span></div>
-            <div className="row"><span className="num">{line ? formatMoney(line.total) : '—'}</span>
+            <div className="cart-line"><b>{p?.name ?? 'منتج غير متاح'}</b><small className="mute">{line?.unitName ?? ''} · <span className="num">{line ? formatMoney(line.total) : '—'}</span></small></div>
+            <div className="row">
+              {su && <div className="stepper" role="group" aria-label={`كمية ${p?.name ?? ''}`}>
+                <button aria-label="إنقاص" disabled={l.qtyMilli - su.stepMilli < su.minQtyMilli} onClick={() => dispatch({ type: 'set', productId: l.productId, unitId: l.unitId, qtyMilli: l.qtyMilli - su.stepMilli })}><Icon name="minus" /></button>
+                <output className="num">{formatQty(l.qtyMilli)}</output>
+                <button aria-label="زيادة" onClick={() => dispatch({ type: 'set', productId: l.productId, unitId: l.unitId, qtyMilli: l.qtyMilli + su.stepMilli })}><Icon name="plus" /></button>
+              </div>}
               <button className="icon-btn" aria-label="حذف" onClick={() => dispatch({ type: 'remove', productId: l.productId, unitId: l.unitId })}><Icon name="trash" /></button></div>
           </li>
         );

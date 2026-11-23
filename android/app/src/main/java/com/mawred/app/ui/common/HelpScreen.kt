@@ -176,7 +176,7 @@ fun HelpScreen(user: SessionUser, role: String, pad: PaddingValues, startOnSuppo
                     ) {
                         Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(c.primary.copy(alpha = .12f)), contentAlignment = Alignment.Center) { Icon(guideIcon(t.icon), null, tint = c.primary) }
                         Text(t.title, Modifier.weight(1f).semantics { heading() }, style = MaterialTheme.typography.titleMedium.copy(fontFamily = Display), color = c.ink)
-                        Icon(Icons.chevron, null, Modifier.rotate(if (open) 90f else -90f), tint = c.mute)
+                        Icon(Icons.chevron, null, Modifier.rotate(if (open) -90f else 90f), tint = c.mute)
                     }
                     if (open) Column(Modifier.padding(start = 64.dp, end = 16.dp, bottom = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         t.steps.forEachIndexed { i, s ->
@@ -185,7 +185,11 @@ fun HelpScreen(user: SessionUser, role: String, pad: PaddingValues, startOnSuppo
                                 Text(s, style = MaterialTheme.typography.bodyMedium, color = c.ink)
                             }
                         }
-                        t.tip?.let { Notice(it) }
+                        t.tip?.let { tip ->
+                            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(c.accent.copy(alpha = .14f)).padding(10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Icon(Icons.sparkle, null, Modifier.size(18.dp), tint = c.ink); Text(tip, style = MaterialTheme.typography.bodySmall, color = c.ink)
+                            }
+                        }
                     }
                 }
             }

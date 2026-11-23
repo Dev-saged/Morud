@@ -327,3 +327,10 @@ dialog.sheet{border:0;padding:0;margin:auto auto 0;width:min(560px,100%);max-hei
 .chip.ok{color:var(--ok);border-color:color-mix(in oklch,var(--ok) 45%,transparent)}.chip.mute{color:var(--mute)}
 .ticket-reply{display:flex;gap:var(--s2);align-items:flex-start;padding:var(--s2) var(--s3);border-radius:var(--r-sm);background:color-mix(in oklch,var(--primary) 9%,var(--surface))}.ticket-reply svg{flex:none;margin-top:4px;color:var(--primary)}
 @media (prefers-reduced-motion:reduce){.guide-topic summary>svg:last-child,.help-entry{transition:none}}
+.cart-line{display:grid;gap:2px;min-width:0}.cart-line b{overflow-wrap:anywhere}
+.lines .row{display:flex;align-items:center;gap:var(--s2);flex:none}
+.stepper button:disabled{opacity:.4;cursor:default}
+/* الرقم يتقلص مع عرض البطاقة فلا يُقص المبلغ الكبير */
+.dash .kpi{container-type:inline-size;min-width:0}
+.dash .kpi b{font-size:clamp(1.05rem,14cqi,2rem);overflow:hidden;text-overflow:ellipsis}
+.kpi{min-width:0}.kpi b{overflow-wrap:anywhere}

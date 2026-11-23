@@ -224,3 +224,26 @@ describe('المساعدة والدعم', () => {
     expect(headers(init)['idempotency-key']).toMatch(/^[a-f0-9]{32}$/);
   });
 });
+
+describe('التحية والسلة', () => {
+  it('الكنية تبقى كاملة في التحية', async () => {
+    const { shortName } = await import('../src/ui/Desk');
+    expect(shortName('أبو أحمد الشوا')).toBe('أبو أحمد');
+    expect(shortName('أم محمد')).toBe('أم محمد');
+    expect(shortName('عبد الله النجار')).toBe('عبد الله');
+    expect(shortName('سماح الشوا')).toBe('سماح');
+  });
+  it('السلة: زيادة وإنقاص بخطوة الوحدة، ولا نزول تحت الحد الأدنى', async () => {
+    mount({ 'GET /auth/me': () => json({ user: shopUser }), 'GET /catalog': () => json(catalog) }, true);
+    const u = userEvent.setup();
+    await u.click(await screen.findByRole('button', { name: 'أضف جبنة فيتا إلى السلة' }));
+    await u.click(screen.getAllByRole('button', { name: /السلة/ }).at(-1)!);
+    const g = await screen.findByRole('group', { name: 'كمية جبنة فيتا' });
+    expect(within(g).getByRole('button', { name: 'إنقاص' })).toHaveProperty('disabled', true);
+    await u.click(within(g).getByRole('button', { name: 'زيادة' }));
+    expect(within(g).getByText('2')).toBeTruthy();
+    await waitFor(() => expect(document.querySelector('.total b')!.textContent).toBe('16.00 ₪'));
+    await u.click(within(g).getByRole('button', { name: 'إنقاص' }));
+    expect(within(g).getByText('1')).toBeTruthy();
+  });
+});

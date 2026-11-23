@@ -78,7 +78,7 @@ fun DeskHero(name: String, subtitle: String?, place: String? = null, content: @C
         }
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text((place?.takeIf { it.isNotBlank() }?.let { "$it · " }.orEmpty()) + SimpleDateFormat("EEEE، d MMMM", Locale("ar")).format(Date()), style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = .75f))
-            Text("${greeting()}، ${name.substringBefore(' ')}", style = MaterialTheme.typography.headlineSmall.copy(fontFamily = Display, fontWeight = FontWeight.Bold), color = Color.White)
+            Text("${greeting()}، ${shortName(name)}", style = MaterialTheme.typography.headlineSmall.copy(fontFamily = Display, fontWeight = FontWeight.Bold), color = Color.White)
             subtitle?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = .85f)) }
             content()
         }
@@ -207,4 +207,10 @@ fun RichRow(initial: String, title: String, sub: String? = null, amount: String?
         chip?.invoke()
         amount?.let { Text(it, style = MaterialTheme.typography.titleSmall.merge(Tabular), color = c.ink) }
     }
+}
+
+/** الاسم المختصر للتحية: الكنية تبقى كاملة («أبو أحمد»، «أم محمد»، «عبد الله»). */
+fun shortName(full: String): String {
+    val w = full.trim().split(Regex("\\s+"))
+    return if (w.size > 1 && w[0] in setOf("أبو", "ابو", "أم", "ام", "عبد", "بن", "بنت")) "${w[0]} ${w[1]}" else w.firstOrNull().orEmpty()
 }
