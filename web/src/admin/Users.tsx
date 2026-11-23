@@ -77,7 +77,7 @@ function UserList({ roles, perms, all, error, reload }: { roles: Role[]; perms: 
     {!all ? <Loading error={error} /> : list.length === 0 ? <p className="empty">لا يوجد مستخدمون مطابقون.</p> : (
       <ul className="people">{list.map((u) => (
         <li key={u.uid}>
-          <button className={`person tap${u.status !== 'active' ? ' off' : ''}`} onClick={() => setOpen(u)} aria-label={`${u.displayName}، ${u.roles.map((r) => label.get(r) ?? r).join(' و')}`}>
+          <button className={`person tap${u.status !== 'active' ? ' off' : ''}`} onClick={() => setOpen(u)}>
             <span className="avatar" aria-hidden="true">{initials(u.displayName)}</span>
             <span className="person-main">
               <b>{u.displayName}</b>
@@ -214,8 +214,8 @@ function RoleEditor({ roles, perms, users, reload }: { roles: Role[]; perms: Per
       <section key={k} className="role-section">
         <h2 className="rail-title">{k === 'staff' ? 'أدوار الإدارة' : k === 'agent' ? 'التوصيل' : 'المحلات'}</h2>
         <div className="role-cards">{roles.filter((r) => r.kind === k).map((r) => (
-          <button key={r.id} className="role-card tap" onClick={() => setSel({ ...r })} disabled={r.protected} aria-label={`${r.label}${r.protected ? '، محمي' : ''}`}>
-            <span className="role-card-top"><b>{r.label}</b>{r.protected && <Icon name="lock" size={16} />}</span>
+          <button key={r.id} className="role-card tap" onClick={() => setSel({ ...r })} disabled={r.protected}>
+            <span className="role-card-top"><b>{r.label}</b>{r.protected && <><Icon name="lock" size={16} /><span className="sr-only">محمي</span></>}</span>
             <span className="role-meter" aria-hidden="true"><i style={{ width: `${r.permissions.includes('*') ? 100 : Math.round((r.permissions.length / Math.max(1, perms.filter((p) => (SCOPES[k] ?? []).includes(p.scope)).length)) * 100)}%` }} /></span>
             <small className="mute">{r.permissions.includes('*') ? 'كل الصلاحيات' : `${r.permissions.length} صلاحية`}{k !== 'shop' && ` · ${count(r.id)} مستخدم`}</small>
           </button>

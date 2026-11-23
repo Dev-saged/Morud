@@ -12,6 +12,9 @@ async function audit(page: Page, name: string) {
   expect(bad.map((v) => v.id), name).toEqual([]);
 }
 
+// نافذة تثبيت آيفون (مشروع WebKit يحاكي آيفون) تُؤجَّل حتى لا تغطي الأزرار أثناء الفحص
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => localStorage.setItem('mawred.install.snooze', String(Date.now()))); });
+
 const login = async (page: Page) => {
   await page.getByLabel('المعرّف').fill('x');
   await page.getByLabel('كلمة المرور', { exact: true }).fill('Secret123');
